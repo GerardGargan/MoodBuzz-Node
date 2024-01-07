@@ -6,6 +6,11 @@ const PORT = process.env.PORT || 3000;
 //create an express application
 const app = express();
 
+//set the view engine to ejs
+app.set('view engine','ejs');
+app.use(express.static(__dirname+"/public"));
+app.use(express.urlencoded({extended: true}));
+
 //listen on the specified port
 app.listen(PORT, (err) => {
     if(err) {
