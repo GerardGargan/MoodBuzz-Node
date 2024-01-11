@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 //create an express application
 const app = express();
 
-//set the view engine to ejs
+//set up middleware and view engine
 app.set('view engine','ejs');
 app.use(express.static(__dirname+"/public"));
 app.use(express.urlencoded({extended: true}));
