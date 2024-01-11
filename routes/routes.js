@@ -28,6 +28,10 @@ router.get('/query', async(req, res) => {
 
 });
 
+router.get('*', (req,res) => {
+    res.status(404).send('<h1>404: Page Not Found</h1>');
+})
+
 function executeQuery(query) {
     return new Promise((resolve, reject) => {
         db.query(query, (err, rows) => {
