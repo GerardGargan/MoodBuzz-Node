@@ -4,7 +4,12 @@ const db = require('../util/dbconn');
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname,'..','html','index.html'));    
+});
+
+router.get('/query', async(req, res) => {
+
     try {
         const query1 = 'SELECT * FROM emotion';
         const query2 = 'SELECT * FROM triggers';
@@ -20,7 +25,7 @@ router.get('/', async (req, res) => {
         console.log(error);
     }
 
-    
+
 });
 
 function executeQuery(query) {
