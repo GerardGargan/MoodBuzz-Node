@@ -8,6 +8,26 @@ router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname,'..','html','index.html'));    
 });
 
+router.get('/login', (req,res) => {
+    res.send('<h1>Login page</h1>');
+});
+
+router.get('/register', (req,res) => {
+    res.send('<h1>Register page</h1>');
+});
+
+router.get('/user/snapshot', (req,res) => {
+    res.send('<h1>Snapshot page</h1>');
+});
+
+router.get('/user/home', (req, res) => {
+    res.send('<h1>User home page</h1>')
+});
+
+router.get('/user/analytics', (req,res) => {
+    res.send('<h1>Analytics page</h1>');
+});
+
 router.get('/query', async(req, res) => {
 
     try {
