@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link href="style.css" rel="stylesheet">
+    <title>MoodBuzz Login</title>
+</head>
+
+<body>
+    <!-- Navigation menu -->
+    <nav class="navbar navbar-expand-lg bg-dark navbar-dark fixed-top py-3">
+        <div class="container">
+            <a href="./" class="navbar-brand">MoodBuzz</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navmenu">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="/#process" class="nav-link">The Process</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./#questions" class="nav-link">Questions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./register.html" class="nav-link">Create Account</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Section-->
+    <section class="window">
+        <div class="window-container">
+            <h2 class="text-center mb-4">Login</h2>
+            <form>
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control mb-3" id="email" placeholder="Enter your email">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group mb-1">
+                    <input type="password" class="form-control" id="password" placeholder="Enter your password">
+                    <button class="btn btn-outline-secondary" type="button" id="visibility">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <div class="mb-3 mt-2">
+                    <a href="./register.html" class="mb-2">Register here</a>
+                </div>
+                <button type="submit" class="btn btn-success btn-block">Login</button>
+                
+            </form>
+        </div>
+    </section>
+
+    <script>
+        const passwordInput = document.getElementById('password');
+        const visibilityButton = document.getElementById('visibility');
+
+        //Logic for switching password between visible and invisible
+        visibilityButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            if (passwordInput.type == 'password') {
+                passwordInput.type = 'text';
+                visibilityButton.innerHTML = "<i class=\"bi bi-eye-slash\"></i>";
+            } else {
+                passwordInput.type = 'password';
+                visibilityButton.innerHTML = "<i class=\"bi bi-eye\"></i>";
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+</body>
+
+
+
+</html>
