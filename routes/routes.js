@@ -9,11 +9,11 @@ router.get('/', (req, res) => {
 });
 
 router.get('/login', (req,res) => {
-    res.send('<h1>Login page</h1>');
+    res.sendFile(path.join(__dirname,'..','html','login.html'));
 });
 
 router.get('/register', (req,res) => {
-    res.send('<h1>Register page</h1>');
+    res.sendFile(path.join(__dirname,'..','html','register.html'));
 });
 
 router.get('/user/snapshot', (req,res) => {
