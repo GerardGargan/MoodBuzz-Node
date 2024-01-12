@@ -17,7 +17,7 @@ router.get('/register', (req,res) => {
 });
 
 router.get('/user/snapshot', (req,res) => {
-    res.send('<h1>Snapshot page</h1>');
+    res.render('snapshot');
 });
 
 router.get('/user/home', (req, res) => {
