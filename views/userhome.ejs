@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link href="/style.css" rel="stylesheet">
+    <title>User Home</title>
+</head>
+
+<body>
+    <!-- Navigation menu -->
+    <nav class="navbar navbar-expand-lg bg-dark navbar-dark fixed-top py-3">
+        <div class="container">
+            <a href="./" class="navbar-brand">MoodBuzz</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <!-- My Home, Record (+), View Records, Dashboard -->
+            <div class="collapse navbar-collapse" id="navmenu">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active">My Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">View Records</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./record.html" class="nav-link">New Record (+)</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!--Main section-->
+    <section class="pt-5 px-3 px-sm-5">
+        <h3 class="pb-2">Welcome Gerard</h1>
+            <!--Header cards-->
+
+            <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+                <div class="col">
+                  <div class="card bg-light d-flex flex-column h-100">
+                    <div class="card-header bg-success text-light">
+                        This Week
+                    </div>
+                    <div class="card-body">
+                      <h5 class="card-title">Have you recorded a snapshot today?</h5>
+                      <p class="card-text">You have not recorded a snapshot yet today.</p>
+                      <a href="#" class="btn btn-success">Record a snapshot</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-none d-md-block col">
+                  <div class="card bg-light d-flex flex-column h-100">
+                    <div class="card-header bg-success text-light">
+                        Analytics
+                    </div>
+                    <div class="card-body">
+                      <h5 class="card-title">Total snapshots</h5>
+                      <p class="card-text">You have recorded a total of # snapshots.</p>
+                      <a href="#" class="btn btn-success">View Graphs</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+
+            <!--Table view-->
+            <h4 class="pb-2">Your Snapshots:
+        </h4>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Time</th>
+                        <th scope="col" class="d-none d-md-table-cell">Enjoyment</th>
+                        <th scope="col" class="d-none d-md-table-cell">Sadness</th>
+                        <th scope="col" class="d-none d-md-table-cell">Anger</th>
+                        <th scope="col" class="d-none d-md-table-cell">Contempt</th>
+                        <th scope="col" class="d-none d-md-table-cell">Disgust</th>
+                        <th scope="col" class="d-none d-md-table-cell">Fear</th>
+                        <th scope="col" class="d-none d-md-table-cell">Surprise</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>06/01/2024</td>
+                        <td>17:58:09</td>
+                        <td class="d-none d-md-table-cell">7</td>
+                        <td class="d-none d-md-table-cell">3</td>
+                        <td class="d-none d-md-table-cell">2</td>
+                        <td class="d-none d-md-table-cell">6</td>
+                        <td class="d-none d-md-table-cell">1</td>
+                        <td class="d-none d-md-table-cell">8</td>
+                        <td class="d-none d-md-table-cell">3</td>
+                        <td>
+                            <i class="btn bi bi-journal-text p-0"></i>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">2</th>
+                        <td>09/01/2024</td>
+                        <td>14:53:12</td>
+                        <td class="d-none d-md-table-cell">3</td>
+                        <td class="d-none d-md-table-cell">3</td>
+                        <td class="d-none d-md-table-cell">4</td>
+                        <td class="d-none d-md-table-cell">6</td>
+                        <td class="d-none d-md-table-cell">1</td>
+                        <td class="d-none d-md-table-cell">8</td>
+                        <td class="d-none d-md-table-cell">3</td>
+                        <td>
+                            <i class="btn bi bi-journal-text p-0"></i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</body>
+
+</html>
