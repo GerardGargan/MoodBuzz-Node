@@ -11,32 +11,7 @@
 </head>
 <body>
     <!-- Navigation menu -->
-    <nav class="navbar navbar-expand-lg bg-dark navbar-dark fixed-top py-3">
-        <div class="container">
-            <a href="./" class="navbar-brand">MoodBuzz</a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navmenu">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a href="./#process" class="nav-link">The Process</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="./#questions" class="nav-link">Questions</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link active">Create Account</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="./login.html" class="nav-link">Login</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <%- include('navbar_home'); %>
 
     <section class="window">
         <div class="window-container">
@@ -82,6 +57,9 @@
                 </form>
         </div>
     </section>
+
+    <!-- Footer -->
+    <%- include('footer'); %>
 
     <script>
         const passwordInput = document.getElementById('password');

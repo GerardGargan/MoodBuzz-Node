@@ -5,27 +5,27 @@ const db = require('../util/dbconn');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname,'..','html','index.html'));    
+    res.render('index', { currentPage: 'home' });    
 });
 
 router.get('/login', (req,res) => {
-    res.sendFile(path.join(__dirname,'..','html','login.html'));
+    res.render('login', {currentPage: 'login' });
 });
 
 router.get('/register', (req,res) => {
-    res.sendFile(path.join(__dirname,'..','html','register.html'));
+    res.render('register', { currentPage: 'register' });
 });
 
 router.get('/user/snapshot', (req,res) => {
-    res.render('snapshot');
+    res.render('snapshot', { currentPage: 'snapshot' });
 });
 
 router.get('/user/home', (req, res) => {
-    res.send('<h1>User home page</h1>')
+    res.render('userhome', { currentPage: 'userhome' })
 });
 
 router.get('/user/analytics', (req,res) => {
-    res.send('<h1>Analytics page</h1>');
+    res.send('Placeholder for Analytics')
 });
 
 router.get('/query', async(req, res) => {

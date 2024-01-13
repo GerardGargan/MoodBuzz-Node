@@ -13,35 +13,7 @@
 
 <body>
     <!-- Navigation menu -->
-    <nav class="navbar navbar-expand-lg bg-dark navbar-dark fixed-top py-3">
-        <div class="container">
-            <a href="./" class="navbar-brand">MoodBuzz</a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <!-- My Home, Record (+), View Records, Dashboard -->
-            <div class="collapse navbar-collapse" id="navmenu">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link active">My Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">View Records</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="./record.html" class="nav-link">New Record (+)</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <%- include('user_nav'); %>
 
     <!--Main section-->
     <section class="pt-5 px-3 px-sm-5">
@@ -57,7 +29,7 @@
                     <div class="card-body">
                       <h5 class="card-title">Have you recorded a snapshot today?</h5>
                       <p class="card-text">You have not recorded a snapshot yet today.</p>
-                      <a href="#" class="btn btn-success">Record a snapshot</a>
+                      <a href="/user/snapshot" class="btn btn-success">Record a snapshot</a>
                     </div>
                   </div>
                 </div>
@@ -69,7 +41,7 @@
                     <div class="card-body">
                       <h5 class="card-title">Total snapshots</h5>
                       <p class="card-text">You have recorded a total of # snapshots.</p>
-                      <a href="#" class="btn btn-success">View Graphs</a>
+                      <a href="/user/analytics" class="btn btn-success">View Graphs</a>
                     </div>
                   </div>
                 </div>
