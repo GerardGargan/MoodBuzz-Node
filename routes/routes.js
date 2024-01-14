@@ -13,6 +13,19 @@ router.get('/login', (req,res) => {
     res.render('login', {currentPage: 'login' });
 });
 
+router.post('/login', (req, res) => {
+    const {email} = req.body;
+    const checkEmailQuery = 'SELECT user_id FROM user WHERE email_address = (?)';
+    db.query(checkEmailQuery, email, (err, rows) => {
+        console.log(rows);
+        console.log(rows.length);
+    });
+    //TODO
+    //salt and hash password
+    //check if email and password exists
+    //redirect/store cookie?
+});
+
 router.get('/register', (req,res) => {
     res.render('register', { currentPage: 'register' });
 });
