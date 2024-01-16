@@ -29,10 +29,18 @@ router.get('/register', (req,res) => {
 
 router.post('/register', (req, res) => {
     const { firstname, surname, email, password } = req.body;
-    console.log(firstname);
-    console.log(surname);
-    console.log(email);
     console.log(password);
+    console.log(validatePassword(password));
+    // check that fields are not blank
+    // check that email contains necessary data - @, etc..
+    // check the password meets min requirements
+    // salt and hash password
+    // check that the email doesnt already exist
+    // sanitise for sql injection attack
+    // if all tests pass, write user to database
+
+    //how?
+    //use a promise function? Check each one then use .then to chain to next one?
 });
 
 router.get('/user/home', (req, res) => {
@@ -110,6 +118,15 @@ function executeQuery(query) {
             }
         });
     });
+}
+
+function validatePassword(password){
+    const capitalRegex = /[A-Z]/;
+    if(password.length >= 8 && capitalRegex.test(password)){
+        return true;
+    } 
+    
+    return false;
 }
 
 module.exports = router;
