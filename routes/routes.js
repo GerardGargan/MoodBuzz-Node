@@ -14,20 +14,25 @@ router.get('/login', (req,res) => {
 });
 
 router.post('/login', (req, res) => {
-    const {email} = req.body;
-    const checkEmailQuery = 'SELECT user_id FROM user WHERE email_address = (?)';
-    db.query(checkEmailQuery, email, (err, rows) => {
-        console.log(rows);
-        console.log(rows.length);
-    });
+    const { email, password } = req.body;
+    console.log(email);
+    console.log(password);
     //TODO
     //salt and hash password
-    //check if email and password exists
+    //check if email and password exists in user table, if so can log in, if not display error message
     //redirect/store cookie?
 });
 
 router.get('/register', (req,res) => {
     res.render('register', { currentPage: 'register' });
+});
+
+router.post('/register', (req, res) => {
+    const { firstname, surname, email, password } = req.body;
+    console.log(firstname);
+    console.log(surname);
+    console.log(email);
+    console.log(password);
 });
 
 router.get('/user/home', (req, res) => {
