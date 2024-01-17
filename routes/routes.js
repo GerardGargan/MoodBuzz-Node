@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const db = require('../util/dbconn');
-const util = require('util');
+const bcrypt = require('bcrypt');
 
 const router = express.Router();
 
@@ -27,21 +27,53 @@ router.get('/register', (req,res) => {
     res.render('register', { currentPage: 'register' });
 });
 
-router.post('/register', (req, res) => {
+router.post('/register', async (req, res) => {
     let { firstname, surname, email, password } = req.body;
     console.log(`${firstname} ${surname} ${email} ${password}`);
-    const s = "string";
     
     //sanitise user input
     firstname = firstname.trim();
     surname = surname.trim();
     email = email.trim();
 
-    //validate user input
+    //log out for testing
     console.log(validatePassword(password));
     console.log(validateEmail(email));
     console.log(validateName(firstname));
     console.log(validateName(surname));
+
+    //perform validation checks on data
+    if(validateName(firstname) && validateName(surname) && validateEmail(email) && validatePassword(password)){
+
+        //check if user exists
+        const vals = [ email ];
+            const selectSQL = `SELECT user_id FROM user WHERE email_address = ?`;
+
+            try {
+                const [userDetails, fielddata] = await db.query(selectSQL, vals);
+                if(userDetails.length>=1) {
+                    console.log('User exists, cant complete registration');
+                    //TODO stop registration and inform the user
+                } else {
+                    console.log('User does not exist');
+                    //continue registration - we have validated the data and checked the email doesnt already exist
+
+                    //salt and hash password
+
+                    //insert user to database
+                    //const insertSQL = `INSERT INTO user (first_name, last_name, email_address, password) VALUES (?, ?, ?, ?)`;
+                }
+            } catch(err) {
+                if(err) console.log(err);
+            }
+
+        
+    }
+
+    
+    
+
+    
 
     // check that fields are not blank
     //trim any whitespace from the name, email
