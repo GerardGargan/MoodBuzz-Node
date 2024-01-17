@@ -28,11 +28,23 @@ router.get('/register', (req,res) => {
 });
 
 router.post('/register', (req, res) => {
-    const { firstname, surname, email, password } = req.body;
+    let { firstname, surname, email, password } = req.body;
     console.log(`${firstname} ${surname} ${email} ${password}`);
-    //validate password
+    const s = "string";
+    
+    //sanitise user input
+    firstname = firstname.trim();
+    surname = surname.trim();
+    email = email.trim();
+
+    //validate user input
     console.log(validatePassword(password));
+    console.log(validateEmail(email));
+    console.log(validateName(firstname));
+    console.log(validateName(surname));
+
     // check that fields are not blank
+    //trim any whitespace from the name, email
     // check that email contains necessary data - @, etc..
     // check the password meets min requirements
     // salt and hash password
@@ -58,41 +70,9 @@ router.get('/user/analytics', (req,res) => {
     res.send('Placeholder for Analytics')
 });
 
-router.get('/query', async(req, res) => {
-
-    try {
-        const query1 = 'SELECT * FROM emotion';
-        const query2 = 'SELECT * FROM triggers';
-
-        const result1 = await executeQuery(query1);
-        const result2 = await executeQuery(query2);
-
-        const combinedResults = {result1, result2};
-
-        res.send(combinedResults);
-
-    } catch(error) {
-        console.log(error);
-    }
-
-
-});
-
 router.get('*', (req,res) => {
     res.status(404).send('<h1>404: Page Not Found</h1>');
 })
-
-function executeQuery(query) {
-    return new Promise((resolve, reject) => {
-        db.query(query, (err, rows) => {
-            if(err) {
-                reject(err);
-            } else {
-                resolve(rows);
-            }
-        });
-    });
-}
 
 function validatePassword(password){
     const capitalRegex = /[A-Z]/;
@@ -101,6 +81,33 @@ function validatePassword(password){
     } 
     
     return false;
+}
+
+function validateEmail(email) {
+    //must start with one or more characters that are not whitespace or @
+    //then must contain @ symbol
+    //Followed by one or more characters that are not whitespace or @
+    //must contain a . for domain seperator
+    //must end with one or more characters that are not whitespace or @ 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(emailRegex.test(email)){
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function validateName(name) {
+    const minLength = 2;
+    const maxLength = 50;
+    const nameRegex = /^[A-Za-z\s-]+$/;
+    //check if name is within the allowed range and doesnt contain any special characters or numbers
+
+    if(name.length>=minLength && name.length <= maxLength && nameRegex.test(name)){
+        return true;
+    } else {
+        return false;
+    }
 }
 
 module.exports = router;
