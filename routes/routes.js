@@ -13,10 +13,33 @@ router.get('/login', (req, res) => {
     res.render('login', { currentPage: 'login' });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    console.log(email);
-    console.log(password);
+    
+    const vals = [email, password];
+    const selectSQL = `SELECT * FROM user WHERE email_address = ?`;
+
+    try {
+        const [userData, fieldData] = await db.query(selectSQL, vals);
+        if(userData.length>=1){
+            console.log('user exists');
+            console.log(userData[0].email_address);
+
+            //get the stored hashed password
+            const hashedPassword = userData[0].password.toString();
+
+            //check if the plain text password matches the hashed password
+            const passwordMatch = await comparePassword(password, hashedPassword);
+            if(passwordMatch) {
+                //email and password match
+                //TODO - log session and redirect to user home
+            }
+        } else {
+            console.log('user does not exist');
+        }
+    } catch(err) {
+        throw err;
+    }
     //TODO
     //salt and hash password
     //check if email and password exists in user table, if so can log in, if not display error message
@@ -69,6 +92,7 @@ router.post('/register', async (req, res) => {
                 const [rows, fielddata] = await db.query(insertSQL, valsToInsert);
                 console.log('success');
 
+                //TODO
                 //insert session
                 //redirect to user home?
 
@@ -142,6 +166,15 @@ async function hashPassword(password) {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         return hashedPassword;
     } catch (err) {
+        throw err;
+    }
+}
+
+async function comparePassword(password, hashedPassword) {
+    try {
+        const match = await bcrypt.compare(password, hashedPassword);
+        return match;
+    } catch(err){
         throw err;
     }
 }
