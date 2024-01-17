@@ -6,11 +6,11 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.render('index', { currentPage: 'home' });    
+    res.render('index', { currentPage: 'home' });
 });
 
-router.get('/login', (req,res) => {
-    res.render('login', {currentPage: 'login' });
+router.get('/login', (req, res) => {
+    res.render('login', { currentPage: 'login' });
 });
 
 router.post('/login', (req, res) => {
@@ -23,14 +23,14 @@ router.post('/login', (req, res) => {
     //redirect/store cookie?
 });
 
-router.get('/register', (req,res) => {
+router.get('/register', (req, res) => {
     res.render('register', { currentPage: 'register' });
 });
 
 router.post('/register', async (req, res) => {
     let { firstname, surname, email, password } = req.body;
     console.log(`${firstname} ${surname} ${email} ${password}`);
-    
+
     //sanitise user input
     firstname = firstname.trim();
     surname = surname.trim();
@@ -43,75 +43,69 @@ router.post('/register', async (req, res) => {
     console.log(validateName(surname));
 
     //perform validation checks on data
-    if(validateName(firstname) && validateName(surname) && validateEmail(email) && validatePassword(password)){
+    if (validateName(firstname) && validateName(surname) && validateEmail(email) && validatePassword(password)) {
 
-        //check if user exists
-        const vals = [ email ];
-            const selectSQL = `SELECT user_id FROM user WHERE email_address = ?`;
+        //check if user already exists
+        const vals = [email];
+        const selectSQL = `SELECT user_id FROM user WHERE email_address = ?`;
 
-            try {
-                const [userDetails, fielddata] = await db.query(selectSQL, vals);
-                if(userDetails.length>=1) {
-                    console.log('User exists, cant complete registration');
-                    //TODO stop registration and inform the user
-                } else {
-                    console.log('User does not exist');
-                    //continue registration - we have validated the data and checked the email doesnt already exist
+        try {
+            const [userDetails, fielddata] = await db.query(selectSQL, vals);
+            if (userDetails.length >= 1) {
+                console.log('User exists, cant complete registration');
+                //TODO stop registration and inform the user
+            } else {
+                console.log('User does not exist');
+                //continue registration - we have validated the data and checked the email doesnt already exist
 
-                    //salt and hash password
+                //salt and hash password
+                const hashed = await hashPassword(password);
+                console.log(`hashed password ${hashed}`);
 
-                    //insert user to database
-                    //const insertSQL = `INSERT INTO user (first_name, last_name, email_address, password) VALUES (?, ?, ?, ?)`;
-                }
-            } catch(err) {
-                if(err) console.log(err);
+                const valsToInsert = [firstname, surname, email, hashed];
+                const insertSQL = `INSERT INTO user (first_name, last_name, email_address, password) VALUES (?, ?, ?, ?)`;
+
+                //insert user to database
+                const [rows, fielddata] = await db.query(insertSQL, valsToInsert);
+                console.log('success');
+
+                //insert session
+                //redirect to user home?
+
             }
-
-        
+        } catch (err) {
+            if (err) console.log(err);
+        }
+    } else {
+        //invalid data - did not pass validation functions
+        console.log('invalid data entered!!');
     }
-
-    
-    
-
-    
-
-    // check that fields are not blank
-    //trim any whitespace from the name, email
-    // check that email contains necessary data - @, etc..
-    // check the password meets min requirements
-    // salt and hash password
-    // check that the email doesnt already exist
-    // sanitise for sql injection attack
-    // if all tests pass, write user to database
-
-    //how?
-    //use a promise function? Check each one then use .then to chain to next one?
 });
 
 router.get('/user/home', (req, res) => {
-        
+
     res.render('userhome', { currentPage: 'userhome' });
-    
+
 });
 
-router.get('/user/snapshot', (req,res) => {
+router.get('/user/snapshot', (req, res) => {
     res.render('snapshot', { currentPage: 'snapshot' });
 });
 
-router.get('/user/analytics', (req,res) => {
+router.get('/user/analytics', (req, res) => {
     res.send('Placeholder for Analytics')
 });
 
-router.get('*', (req,res) => {
+router.get('*', (req, res) => {
     res.status(404).send('<h1>404: Page Not Found</h1>');
 })
 
-function validatePassword(password){
+function validatePassword(password) {
     const capitalRegex = /[A-Z]/;
-    if(password.length >= 8 && capitalRegex.test(password)){
+    if (password.length >= 8 && capitalRegex.test(password)) {
         return true;
-    } 
-    
+    }
+
     return false;
 }
 
@@ -122,7 +116,7 @@ function validateEmail(email) {
     //must contain a . for domain seperator
     //must end with one or more characters that are not whitespace or @ 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if(emailRegex.test(email)){
+    if (emailRegex.test(email)) {
         return true;
     } else {
         return false;
@@ -135,10 +129,20 @@ function validateName(name) {
     const nameRegex = /^[A-Za-z\s-]+$/;
     //check if name is within the allowed range and doesnt contain any special characters or numbers
 
-    if(name.length>=minLength && name.length <= maxLength && nameRegex.test(name)){
+    if (name.length >= minLength && name.length <= maxLength && nameRegex.test(name)) {
         return true;
     } else {
         return false;
+    }
+}
+
+async function hashPassword(password) {
+    try {
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        return hashedPassword;
+    } catch (err) {
+        throw err;
     }
 }
 
