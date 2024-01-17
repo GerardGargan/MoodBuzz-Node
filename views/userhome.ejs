@@ -103,65 +103,7 @@
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
-
-                    <!--Test render-->
-
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead class="table-light">
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Date</th>
-                                    <th scope="col">Time</th>
-                                    <th scope="col" class="d-none d-md-table-cell">Enjoyment</th>
-                                    <th scope="col" class="d-none d-md-table-cell">Sadness</th>
-                                    <th scope="col" class="d-none d-md-table-cell">Anger</th>
-                                    <th scope="col" class="d-none d-md-table-cell">Contempt</th>
-                                    <th scope="col" class="d-none d-md-table-cell">Disgust</th>
-                                    <th scope="col" class="d-none d-md-table-cell">Fear</th>
-                                    <th scope="col" class="d-none d-md-table-cell">Surprise</th>
-                                    <th scope="col"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% Object.keys(data).forEach(snapshotId => { %>
-                                <tr>
-                                    <th scope="row"><%= snapshotId %></th>
-                                    <td>06/01/2024</td>
-                                    <td>17:58:09</td>
-                                    
-                                    <% data[snapshotId].emotions.forEach(emotionObj => { %>
-                                    <% const emotion = Object.keys(emotionObj)[0]; %>
-                                    <% const rating = emotionObj[emotion]; %>
-                                    <td><%= rating %></td>
-                                    <% }); %>
-                                    
-                                    
-                                    <td>
-                                        <i class="btn bi bi-journal-text p-0"></i>
-                                    </td>
-                                </tr>
-                                <% }); %>
-
-                                <tr>
-                                    <th scope="row">2</th>
-                                    <td>09/01/2024</td>
-                                    <td>14:53:12</td>
-                                    <td class="d-none d-md-table-cell">3</td>
-                                    <td class="d-none d-md-table-cell">3</td>
-                                    <td class="d-none d-md-table-cell">4</td>
-                                    <td class="d-none d-md-table-cell">6</td>
-                                    <td class="d-none d-md-table-cell">1</td>
-                                    <td class="d-none d-md-table-cell">8</td>
-                                    <td class="d-none d-md-table-cell">3</td>
-                                    <td>
-                                        <i class="btn bi bi-journal-text p-0"></i>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>                      
+                    </div>    
             </div>
         </section>
         <%- include('footer') %>

@@ -29,7 +29,8 @@ router.get('/register', (req,res) => {
 
 router.post('/register', (req, res) => {
     const { firstname, surname, email, password } = req.body;
-    console.log(password);
+    console.log(`${firstname} ${surname} ${email} ${password}`);
+    //validate password
     console.log(validatePassword(password));
     // check that fields are not blank
     // check that email contains necessary data - @, etc..
@@ -44,35 +45,8 @@ router.post('/register', (req, res) => {
 });
 
 router.get('/user/home', (req, res) => {
-
-    const querySnapshots = 'SELECT snapshot.snapshot_id, date_time, emotion, rating FROM snapshot INNER JOIN snapshot_emotion ON snapshot.snapshot_id = snapshot_emotion.snapshot_id INNER JOIN emotion ON snapshot_emotion.emotion_id = emotion.emotion_id';
-
-    db.query(querySnapshots, (err, rows) => {
         
-        const groupedData = [];
-
-    rows.forEach(row => {
-        const { snapshot_id, date_time, emotion, rating } = row;
-
-        // If there is no object for the current snapshot_id, create an object with an array
-        if (!groupedData[snapshot_id]) {
-            groupedData[snapshot_id] = {
-            snapshot_id,
-            date_time,
-            emotions: [],
-            };
-        }
-
-        // Push the current emotion into the array for its snapshot_id
-        groupedData[snapshot_id].emotions.push({ [emotion]: rating });
-        });
-
-       // console.log(groupedData);
-        console.log(util.inspect(groupedData, { showHidden: false, depth: null, colors: true }));
-
-        res.render('userhome', { currentPage: 'userhome', data: groupedData });
-    });
-
+    res.render('userhome', { currentPage: 'userhome' });
     
 });
 
