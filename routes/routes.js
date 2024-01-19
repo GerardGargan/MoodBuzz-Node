@@ -143,6 +143,7 @@ router.get('/test', async (req, res) => {
         });
 
         console.log(JSON.stringify(groupedData));
+        res.render('test', {groupedData});
     } catch(err) {
         throw err;
     }
