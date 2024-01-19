@@ -19,7 +19,7 @@
             <div class="window-container-large px-sm-5 mx-sm-5">
                 <h2 class="mb-5">Record a new snapshot</h2>
                 <h4>1. Record your current level of emotion for each of the seven universal emotions.</h4>
-                <form method="get" action="/processsnap">
+                <form method="get" action="/newsnap">
                     <div class="row g-4 mt-3" id="insertEmotionRanges">
                         <!-- place data here -->
                         <% groupedData.forEach(emotion => { %>
@@ -29,12 +29,12 @@
                                             <label for="<%= emotion.emotion %>" class="form-label">
                                                 <h4>Level of <%= emotion.emotion %></h4>
                                             </label>
-                                            <div id="${emotion}-val-display">
+                                            <div id="<%= emotion.emotion %>-val-display">
                                                 <h3 class="bg-dark text-light p-3 rounded">5</h3>
                                             </div>
                                         </div>
 
-                                        <input type="range" name="<%= emotion.emotion_id %>" id="<%= emotion.emotion %>" class="form-range" min="1"
+                                        <input type="range" name="emo<%= emotion.emotion_id %>" id="<%= emotion.emotion %>" class="form-range" min="1"
                                             max="10" value="5">
                                         <div class="graduated-scale">
                                             <% emotion.rating.forEach(rating => { %>
@@ -47,9 +47,12 @@
                     </div>
                     <h4 class="mt-4">2. Select any contextual triggers</h3>
                         <div class="row mt-4">
-
                             <div class="d-flex gap-3 flex-wrap" id="triggers">
                                 <!-- Insert triggers here -->
+                                <% triggerData.forEach(trigger => { %>
+                                    <input type="checkbox" class="btn-check" name="trig<%= trigger.trigger_id %>" id="<%= trigger.trigger_name %>" autocomplete="off" unchecked>
+                                    <label class="btn btn-outline-primary" for="<%= trigger.trigger_name %>"><%= trigger.trigger_name %> <i class="bi <%= trigger.icon %>"></i></label>
+                                <% }); %>
                             </div>
                             <!-- Display an icon (loaded from database), icon is accompanied by a description, once clicked it adds the id to an array - but how do we send in the form data? -->
                         </div>
@@ -67,85 +70,42 @@
         <%- include('footer'); %>
 
             <script>
-                const emotionDiv = document.getElementById('insertEmotionRanges');
-                const emotions = ['Enjoyment', 'Sadness', 'Anger', 'Contempt', 'Disgust', 'Fear', 'Surprise'];
-                /*
-                emotions.forEach((emotion) => {
-                    emotionDiv.innerHTML += `<div class="col-xl-6 col-xxl-4 py-3 m-0">
-                        <div class="box-shadow bg-dark-subtle py-3 px-4 rounded">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <label for="${emotion}" class="form-label">
-                                    <h4>Level of ${emotion}</h4>
-                                </label>
-                                <div id="${emotion}-val-display">
-                                    <h3 class="bg-dark text-light p-3 rounded">5</h3>
-                                </div>
-                             </div>
-                        
-                                    <input type="range" name="${emotion}" id="${emotion}" class="form-range" min="1" max="10" value="5">
-                                <div class="graduated-scale">
-                                    <span>1</span>
-                                    <span>2</span>
-                                    <span>3</span>
-                                    <span>4</span>
-                                    <span>5</span>
-                                    <span>6</span>
-                                    <span>7</span>
-                                    <span>8</span>
-                                    <span>9</span>
-                                    <span>10</span>
-                                </div>
-                                </div>
-                            </div>`;
-                })
-                */
-
+                //obtain grouped data object from the backend
+                const emotionsData = decodeURIComponent('<%- groupedData %>');
+                //get all range elements on the page
                 const rangeItems2 = document.querySelectorAll('input[type="range"]');
+                //loop through each range element, add an input event listener so that when the slider is moved, we update the div showing the current number selected
                 rangeItems2.forEach((range) => {
                     range.addEventListener('input', (event) => {
                         let displayVal = document.getElementById(`${range.id}-val-display`);
                         displayVal.innerHTML = `<h3 class="bg-dark text-light p-3 rounded">${range.value}</h3>`;
                     })
                 })
-
-                const triggerDiv = document.getElementById('triggers');
-                //const triggers = ['Social interaction', 'Physical activity', 'Family', 'Work', 'Sleep', 'Weather','Alcohol','Coffee','Food','Travel','Dating'];
-                const triggers = [
-                    { name: 'Social interaction', icon: '<i class="bi bi-people"></i>' },
-                    { name: 'Physical activity', icon: '<i class="bi bi-bicycle"></i>' },
-                    { name: 'Family', icon: '<i class="bi bi-people"></i>' },
-                    { name: 'Work', icon: '<i class="bi bi-laptop"></i>' },
-                    { name: 'Sleep', icon: '<i class="bi bi-cloud"></i>' },
-                    { name: 'Weather', icon: '<i class="bi bi-brightness-alt-high"></i>' },
-                    { name: 'Alcohol', icon: '<i class="bi bi-cup-straw"></i>' },
-                    { name: 'Coffee', icon: '<i class="bi bi-cup"></i>' },
-                    { name: 'Food', icon: '<i class="bi bi-egg"></i>' },
-                    { name: 'Travel', icon: '<i class="bi bi-emoji-sunglasses"></i>' },
-                    { name: 'Dating', icon: '<i class="bi bi-emoji-heart-eyes"></i>' }
-                ];
-                triggers.forEach((trigger) => {
-                    triggerDiv.innerHTML += `<input type="checkbox" class="btn-check" name="${trigger.name}" id="${trigger.name}" autocomplete="off" unchecked>
-                            <label class="btn btn-outline-primary" for="${trigger.name}">${trigger.name} ${trigger.icon}</label>`;
-                });
-
+                
+                //obtain the reset button, range sliders, checkboxes and notes input elements
                 const resetButton = document.getElementById('resetbutton');
                 const rangeItems = document.querySelectorAll('input[type="range"]');
                 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
                 const notes = document.getElementById('notes');
 
+                //add an event listener to the reset button for a click event
                 resetButton.addEventListener('click', (event) => {
+                    //prevent the default behaviour of a button to submit the form
                     event.preventDefault();
+                    //loop through all range sliders and reset to the default of 5
                     rangeItems.forEach((rangeItem) => {
                         const valueDiv = document.getElementById(`${rangeItem.id}-val-display`);
                         rangeItem.value = 5;
                         valueDiv.innerHTML = `<h3 class="bg-dark text-light p-3 rounded">5</h3>`;
-                        notes.value = '';
-
                     });
 
+                    //reset all checkboxes to unchecked
                     checkboxes.forEach((checkbox) => {
                         checkbox.checked = false;
                     });
+                    
+                    //set notes to be empty
+                    notes.value = '';
                 });
 
             </script>
