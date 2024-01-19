@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const db = require('../util/dbconn');
 const bcrypt = require('bcrypt');
+const util = require('util');
 
 const router = express.Router();
 
@@ -14,8 +15,10 @@ router.get('/login', (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
+    //destructure the values into variables
     const { email, password } = req.body;
     
+    //set up in an array for the query function
     const vals = [email, password];
     const selectSQL = `SELECT * FROM user WHERE email_address = ?`;
 
@@ -23,6 +26,7 @@ router.post('/login', async (req, res) => {
         const [userData, fieldData] = await db.query(selectSQL, vals);
         if(userData.length>=1){
             console.log('user exists');
+            //access the first element of the array to get the user details (we should only ever return one element)
             console.log(userData[0].email_address);
 
             //get the stored hashed password
@@ -31,8 +35,8 @@ router.post('/login', async (req, res) => {
             //check if the plain text password matches the hashed password
             const passwordMatch = await comparePassword(password, hashedPassword);
             if(passwordMatch) {
-                //email and password match
-                //TODO - log session and redirect to user home
+                //email and password matches - successful log in
+                //TODO - store session and redirect to user home page
             }
         } else {
             console.log('user does not exist');
@@ -40,10 +44,6 @@ router.post('/login', async (req, res) => {
     } catch(err) {
         throw err;
     }
-    //TODO
-    //salt and hash password
-    //check if email and password exists in user table, if so can log in, if not display error message
-    //redirect/store cookie?
 });
 
 router.get('/register', (req, res) => {
@@ -59,11 +59,12 @@ router.post('/register', async (req, res) => {
     surname = surname.trim();
     email = email.trim();
 
-    //log out for testing
+    /* log out for testing
     console.log(validatePassword(password));
     console.log(validateEmail(email));
     console.log(validateName(firstname));
     console.log(validateName(surname));
+    */
 
     //perform validation checks on data
     if (validateName(firstname) && validateName(surname) && validateEmail(email) && validatePassword(password)) {
@@ -120,6 +121,33 @@ router.get('/user/analytics', (req, res) => {
     res.send('Placeholder for Analytics')
 });
 
+router.get('/test', async (req, res) => {
+
+    const selectRatings = `SELECT emotion.emotion_id, emotion, rating, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id`;
+    try {
+        const [data2, fielddata2] = await db.query(selectRatings);
+        console.log(data2)
+        const groupedData = [];
+
+        data2.forEach(row => {
+            const {emotion_id, emotion, rating, short_desc, long_desc} = row;
+            if(!groupedData[emotion_id]) {
+                groupedData[emotion_id] = {
+                    emotion_id,
+                    emotion,
+                    rating: []
+                }
+            }
+
+            groupedData[emotion_id].rating.push({rating: rating, shortdesc: short_desc, longdesc: long_desc});
+        });
+
+        console.log(JSON.stringify(groupedData));
+    } catch(err) {
+        throw err;
+    }
+});
+
 router.get('*', (req, res) => {
     res.status(404).send('<h1>404: Page Not Found</h1>');
 })
@@ -128,9 +156,11 @@ function validatePassword(password) {
     const capitalRegex = /[A-Z]/;
     if (password.length >= 8 && capitalRegex.test(password)) {
         return true;
+    } else {
+        return false;
     }
 
-    return false;
+    
 }
 
 function validateEmail(email) {
