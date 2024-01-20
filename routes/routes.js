@@ -17,14 +17,14 @@ router.get('/login', (req, res) => {
 router.post('/login', async (req, res) => {
     //destructure the values into variables
     const { email, password } = req.body;
-    
+
     //set up in an array for the query function
     const vals = [email, password];
     const selectSQL = `SELECT * FROM user WHERE email_address = ?`;
 
     try {
         const [userData, fieldData] = await db.query(selectSQL, vals);
-        if(userData.length>=1){
+        if (userData.length >= 1) {
             console.log('user exists');
             //access the first element of the array to get the user details (we should only ever return one element)
             console.log(userData[0].email_address);
@@ -34,14 +34,14 @@ router.post('/login', async (req, res) => {
 
             //check if the plain text password matches the hashed password
             const passwordMatch = await comparePassword(password, hashedPassword);
-            if(passwordMatch) {
+            if (passwordMatch) {
                 //email and password matches - successful log in
                 //TODO - store session and redirect to user home page
             }
         } else {
             console.log('user does not exist');
         }
-    } catch(err) {
+    } catch (err) {
         throw err;
     }
 });
@@ -133,8 +133,8 @@ router.get('/test', async (req, res) => {
         //parse data into an appropriate structure to pass to the template
         data.forEach(row => {
             //if it doesnt already exist, create the emotion object
-            const {emotion_id, emotion, rating, short_desc, long_desc} = row;
-            if(!groupedData[emotion_id]) {
+            const { emotion_id, emotion, rating, short_desc, long_desc } = row;
+            if (!groupedData[emotion_id]) {
                 groupedData[emotion_id] = {
                     emotion_id,
                     emotion,
@@ -142,7 +142,7 @@ router.get('/test', async (req, res) => {
                 }
             }
             //push each rating data into the rating array in the emotion object
-            groupedData[emotion_id].rating.push({rating: rating, shortdesc: short_desc, longdesc: long_desc});
+            groupedData[emotion_id].rating.push({ rating: rating, shortdesc: short_desc, longdesc: long_desc });
         });
 
         //run the query to get the triggers
@@ -150,25 +150,77 @@ router.get('/test', async (req, res) => {
 
         //console.log(JSON.stringify(groupedData));
         console.log(triggerData);
-        res.render('test', {groupedData, triggerData});
-    } catch(err) {
+        res.render('test', { groupedData, triggerData });
+    } catch (err) {
         throw err;
     }
 });
 
+router.get('/newsnap', async (req, res) => {
+
+    // Step 1: Extract data from the URL (assuming they are in the query parameters)
+    const formData = req.query;
+    const { notes } = req.query;
+    const user_id = 4; //hardcode for now
+
+    // Step 2: Process the form data and prepare it for database insertion
+    const recordsToInsert = [];
+
+    for (const id in formData) {
+        if (Object.hasOwnProperty.call(formData, id) && id != 'notes') {
+            const value = formData[id];
+            // Assuming "id" is the column name for the emotion ID in the database
+            // Assuming "value" is the column name for the emotion value in the database
+            recordsToInsert.push({ id, value });
+        }
+    }
+
+
+    try {
+        //insert snapshot record first
+        const snapshotInsert = `INSERT INTO snapshot (user_id, date, time, note) VALUES (?, ?, ?, ?)`;
+        const date = getCurrentDate();
+        const time = getCurrentTime();
+        const snapshotVals = [user_id, date, time, notes];
+        const [snapInsert, fieldData] = await db.query(snapshotInsert, snapshotVals);
+        //store the id of the snapshot - needs to be inserted on each many to many record we insert on the many to many table
+        const snapshotId = snapInsert.insertId;
+        console.log(getCurrentDate());
+
+    } catch (err) {
+        throw err;
+    }
+
+    // Step 3: Insert records into the database
+    if (recordsToInsert.length > 0) {
+        //need to do a transaction - insert snapshot record first, retain the snapshot_id for reuse in the snapshot_emotion table rows/records
+        /*
+        START TRANSACTION;
+        INSERT INTO snapshot (user_id, date_time, note) VALUES (?, ?, ?);
+        SET @snapshot_id = LAST_INSERT_ID();
+        INSERT INTO snapshot_emotion (snapshot_id, emotion_id, rating) VALUES ?
+        */
+        //const query = 'INSERT INTO snapshot_emotion (id, value) VALUES ?';
+
+        // const[rows,fielddata] = await db.query(query, [recordsToInsert.map(record => [record.id, record.value])]);
+        console.log(recordsToInsert);
+    }
+});
+
 router.get('*', (req, res) => {
+    //render page not found
     res.status(404).send('<h1>404: Page Not Found</h1>');
 })
 
 function validatePassword(password) {
+    //regex to check if a password contains a capital letter
     const capitalRegex = /[A-Z]/;
+    //check the password is at least 8 characters long and has a capital letter
     if (password.length >= 8 && capitalRegex.test(password)) {
         return true;
     } else {
         return false;
     }
-
-    
 }
 
 function validateEmail(email) {
@@ -212,9 +264,32 @@ async function comparePassword(password, hashedPassword) {
     try {
         const match = await bcrypt.compare(password, hashedPassword);
         return match;
-    } catch(err){
+    } catch (err) {
         throw err;
     }
+}
+
+function getCurrentDate() {
+    let currentDate = new Date();
+
+    let year = currentDate.getFullYear();
+    let month = currentDate.getMonth() + 1; //zero indexed
+    let date = currentDate.getDate();
+
+    let formattedDate = `${year}/${month}/${date}`;
+
+    return `${formattedDate}`;
+}
+
+function getCurrentTime() {
+    let currentDate = new Date();
+
+    let hours = currentDate.getHours();
+    let minutes = currentDate.getMinutes();
+    let seconds = currentDate.getSeconds();
+
+    let formattedTime = `${hours}:${minutes}:${seconds}`;
+    return formattedTime;
 }
 
 module.exports = router;
