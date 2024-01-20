@@ -67,8 +67,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% let count = 1; %>
-                                <% groupedData.forEach(snapshot => { %>
+                                <% let count = numberOfSnapshots; %>
+                                <% groupedDataSortedDesc.forEach(snapshot => { %>
                                     <tr>
                                         <th scope="row"><%= count %></th>
                                         <td><%= snapshot.date %></td>
@@ -80,7 +80,7 @@
                                             <a href="/user/snapshot/edit/<%= snapshot.snapshot_id %>" class="btn btn-secondary btn-sm">Edit</a>
                                         </td>
                                     </tr>
-                                    <% count += 1; %>
+                                    <% count -= 1; %>
                                 <% }) %>
                             </tbody>
                         </table>

@@ -121,6 +121,7 @@ router.get('/user/home', async (req, res) => {
         const [emotions, fieldData] = await db.query(selectEmotions);
         const [data, fielddata] = await  db.query(selectSnapshots);
 
+        let numberOfSnapshots = 0;
         //loop through each row, we need to create an array of snapshot objects, that each contain an array of emotions with ratings
         data.forEach(row => {
             //destructure into variables
@@ -134,12 +135,16 @@ router.get('/user/home', async (req, res) => {
                     time,
                     emotions: [],
                 }
+                numberOfSnapshots +=1;
             }
             //add the emotion into the emotions array, along with the id and rating
             groupedData[snapshot_id].emotions.push({emotion_id: emotion_id, emotion: emotion, rating: rating});
         });
+        const groupedDataSortedDesc = groupedData.sort((a,b) => {
+            return b.snapshot_id - a.snapshot_id;
+        });
         //render the page and data
-        res.render('userhome', { currentPage: 'userhome', groupedData, emotions });
+        res.render('userhome', { currentPage: 'userhome', groupedDataSortedDesc, emotions, numberOfSnapshots });
     } catch(err) {
         throw err;
     }
