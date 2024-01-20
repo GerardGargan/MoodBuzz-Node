@@ -158,25 +158,15 @@ router.get('/test', async (req, res) => {
 
 router.get('/newsnap', async (req, res) => {
 
-    // Step 1: Extract data from the URL (assuming they are in the query parameters)
+    //Extract data from the URL (assuming they are in the query parameters)
     const formData = req.query;
     const { notes } = req.query;
     const user_id = 4; //hardcode for now
 
-    // Step 2: Process the form data and prepare it for database insertion
-    const recordsToInsert = [];
+    //Process the form data and prepare it for database insertion
+    const emotionsToInsert = [];
 
-    for (const id in formData) {
-        if (Object.hasOwnProperty.call(formData, id) && id != 'notes') {
-            const value = formData[id];
-            // Assuming "id" is the column name for the emotion ID in the database
-            // Assuming "value" is the column name for the emotion value in the database
-            recordsToInsert.push({ id, value });
-        }
-    }
-
-
-    try {
+       try {
         //insert snapshot record first
         const snapshotInsert = `INSERT INTO snapshot (user_id, date, time, note) VALUES (?, ?, ?, ?)`;
         const date = getCurrentDate();
@@ -185,25 +175,27 @@ router.get('/newsnap', async (req, res) => {
         const [snapInsert, fieldData] = await db.query(snapshotInsert, snapshotVals);
         //store the id of the snapshot - needs to be inserted on each many to many record we insert on the many to many table
         const snapshotId = snapInsert.insertId;
-        console.log(getCurrentDate());
+        console.log(snapshotId);
 
+        //loop through keys in the url query and insert into array
+        for (const id in formData) {
+            if (Object.hasOwnProperty.call(formData, id) && id != 'notes' && !id.includes('trig')) {
+                const value = formData[id];
+                // Assuming "id" is the column name for the emotion ID in the database
+                // Assuming "value" is the column name for the emotion value in the database
+                emotionsToInsert.push({ snapshotId, id, value });
+            }
+        }
+        console.log(emotionsToInsert);
+
+        //now insert each emotion record in the many to many table
+        if (emotionsToInsert.length > 0) {
+            const query = 'INSERT INTO snapshot_emotion (snapshot_id, emotion_id, rating) VALUES ?';
+            console.log([emotionsToInsert.map(record => [record.snapshotId, record.id, record.value])]);
+            const[rows,fielddata] = await db.query(query, [emotionsToInsert.map(record => [record.snapshotId, record.id, record.value])]);
+        }
     } catch (err) {
         throw err;
-    }
-
-    // Step 3: Insert records into the database
-    if (recordsToInsert.length > 0) {
-        //need to do a transaction - insert snapshot record first, retain the snapshot_id for reuse in the snapshot_emotion table rows/records
-        /*
-        START TRANSACTION;
-        INSERT INTO snapshot (user_id, date_time, note) VALUES (?, ?, ?);
-        SET @snapshot_id = LAST_INSERT_ID();
-        INSERT INTO snapshot_emotion (snapshot_id, emotion_id, rating) VALUES ?
-        */
-        //const query = 'INSERT INTO snapshot_emotion (id, value) VALUES ?';
-
-        // const[rows,fielddata] = await db.query(query, [recordsToInsert.map(record => [record.id, record.value])]);
-        console.log(recordsToInsert);
     }
 });
 

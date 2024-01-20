@@ -34,7 +34,7 @@
                                             </div>
                                         </div>
 
-                                        <input type="range" name="emo<%= emotion.emotion_id %>" id="<%= emotion.emotion %>" class="form-range" min="1"
+                                        <input type="range" name="<%= emotion.emotion_id %>" id="<%= emotion.emotion %>" class="form-range" min="1"
                                             max="10" value="5">
                                         <div class="graduated-scale">
                                             <% emotion.rating.forEach(rating => { %>
