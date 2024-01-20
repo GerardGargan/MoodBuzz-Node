@@ -168,7 +168,7 @@ router.get('/newsnap', async (req, res) => {
         const date = getCurrentDate();
         const time = getCurrentTime();
         const snapshotVals = [user_id, date, time, notes];
-        const triggersToInsert = Array.isArray(req.query.trigger) ? req.query.trigger : [req.query.trigger]; //creates an array of trigger ids that were selected
+        const triggersToInsert = Array.isArray(req.query.trigger) ? req.query.trigger : [req.query.trigger]; //Ensures triggers are stored in an array so we can later iterate through - as if only one trigger is submitted it does not create an array, it is stored as a string. We have avoided this behaviour.
 
         const [snapInsert, fieldData] = await db.query(snapshotInsert, snapshotVals);
         //store the id of the snapshot - needs to be inserted on each many to many record we insert on the many to many table

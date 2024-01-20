@@ -12,4 +12,4 @@ The web app has been designed to be easily expanded to add new emotions and cont
 None of these have been hardcoded, all of these form items are rendered from the database.
 
 We have not built out a UI/Form to insert new emotions or triggers as it was not in the scope of the assignment however it would be easy to expand on this.
-Currently to add new emotions or contextual trigger options, you can manually create a record in the database and they will be rendered on the forms and tables.
+Currently to add new emotions or contextual trigger options, you can manually create a record in the database and they will be rendered in the app.
