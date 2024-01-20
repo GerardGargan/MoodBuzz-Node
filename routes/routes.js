@@ -172,28 +172,37 @@ router.get('/newsnap', async (req, res) => {
         const date = getCurrentDate();
         const time = getCurrentTime();
         const snapshotVals = [user_id, date, time, notes];
+        const triggersToInsert = Array.isArray(req.query.trigger) ? req.query.trigger : [req.query.trigger]; //creates an array of trigger ids that were selected
+
         const [snapInsert, fieldData] = await db.query(snapshotInsert, snapshotVals);
         //store the id of the snapshot - needs to be inserted on each many to many record we insert on the many to many table
         const snapshotId = snapInsert.insertId;
-        console.log(snapshotId);
-
-        //loop through keys in the url query and insert into array
+        //loop through emotions and values in the url query and insert into array
         for (const id in formData) {
-            if (Object.hasOwnProperty.call(formData, id) && id != 'notes' && !id.includes('trig')) {
+            if (Object.hasOwnProperty.call(formData, id) && id != 'notes' && id!='trigger') {
                 const value = formData[id];
-                // Assuming "id" is the column name for the emotion ID in the database
-                // Assuming "value" is the column name for the emotion value in the database
+                // push the data into the array as an object with the snapshot id, emotion id and the value submitted
                 emotionsToInsert.push({ snapshotId, id, value });
             }
         }
         console.log(emotionsToInsert);
 
-        //now insert each emotion record in the many to many table
-        if (emotionsToInsert.length > 0) {
-            const query = 'INSERT INTO snapshot_emotion (snapshot_id, emotion_id, rating) VALUES ?';
-            console.log([emotionsToInsert.map(record => [record.snapshotId, record.id, record.value])]);
-            const[rows,fielddata] = await db.query(query, [emotionsToInsert.map(record => [record.snapshotId, record.id, record.value])]);
+        //now insert each emotion record in the many to many table snapshot_emotion
+        if (emotionsToInsert.length > 0) { //check first if we have any records to insert
+            const emotionQuery = 'INSERT INTO snapshot_emotion (snapshot_id, emotion_id, rating) VALUES ?';
+            const[rows,fielddata] = await db.query(emotionQuery, [emotionsToInsert.map(record => [record.snapshotId, record.id, record.value])]);
         }
+
+        //now insert each trigger in the many to many table snapshot_trigger
+        if(triggersToInsert.length > 0) {
+            const triggerQuery = `INSERT INTO snapshot_trigger (snapshot_id, trigger_id) VALUES (?, ?)`;
+            triggersToInsert.forEach(async trig => {
+                const vals = [snapshotId, trig];
+                const [data, fielddata] = await db.query(triggerQuery, vals);
+            });
+        }
+        console.log(util.inspect(typeof(triggersToInsert)));
+        console.log(triggersToInsert);
     } catch (err) {
         throw err;
     }

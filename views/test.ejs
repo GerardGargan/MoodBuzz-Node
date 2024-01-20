@@ -50,7 +50,7 @@
                             <div class="d-flex gap-3 flex-wrap" id="triggers">
                                 <!-- Triggers section -->
                                 <% triggerData.forEach(trigger => { %>
-                                    <input type="checkbox" class="btn-check" name="trig<%= trigger.trigger_id %>" id="<%= trigger.trigger_name %>" autocomplete="off" unchecked>
+                                    <input type="checkbox" class="btn-check" name="trigger" id="<%= trigger.trigger_name %>" value="<%= trigger.trigger_id %>" autocomplete="off" unchecked>
                                     <label class="btn btn-outline-primary" for="<%= trigger.trigger_name %>"><%= trigger.trigger_name %> <i class="bi <%= trigger.icon %>"></i></label>
                                 <% }); %>
                             </div>
