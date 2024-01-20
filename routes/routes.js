@@ -113,22 +113,18 @@ router.get('/user/home', (req, res) => {
 
 });
 
-router.get('/user/snapshot', (req, res) => {
-    res.render('snapshot', { currentPage: 'snapshot' });
-});
-
 router.get('/user/analytics', (req, res) => {
     res.send('Placeholder for Analytics')
 });
 
-router.get('/test', async (req, res) => {
+router.get('/user/snapshot', async (req, res) => {
 
     const selectRatings = `SELECT emotion.emotion_id, emotion, rating, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id`;
     const selectTriggers = `SELECT trigger_id, trigger_name, icon FROM triggers`;
     try {
         //run query to get the emotions and ratings data
         const [data, fielddata2] = await db.query(selectRatings);
-        console.log(data)
+        //console.log(data)
         const groupedData = [];
         //parse data into an appropriate structure to pass to the template
         data.forEach(row => {
@@ -149,8 +145,8 @@ router.get('/test', async (req, res) => {
         const [triggerData, fieldData] = await db.query(selectTriggers);
 
         //console.log(JSON.stringify(groupedData));
-        console.log(triggerData);
-        res.render('test', { groupedData, triggerData });
+        //console.log(triggerData);
+        res.render('snapshot', { groupedData, triggerData, currentPage: 'snapshot' });
     } catch (err) {
         throw err;
     }
@@ -166,7 +162,7 @@ router.get('/newsnap', async (req, res) => {
     //Process the form data and prepare it for database insertion
     const emotionsToInsert = [];
 
-       try {
+    try {
         //insert snapshot record first
         const snapshotInsert = `INSERT INTO snapshot (user_id, date, time, note) VALUES (?, ?, ?, ?)`;
         const date = getCurrentDate();
@@ -179,33 +175,34 @@ router.get('/newsnap', async (req, res) => {
         const snapshotId = snapInsert.insertId;
         //loop through emotions and values in the url query and insert into array
         for (const id in formData) {
-            if (Object.hasOwnProperty.call(formData, id) && id != 'notes' && id!='trigger') {
+            if (Object.hasOwnProperty.call(formData, id) && id != 'notes' && id != 'trigger') {
                 const value = formData[id];
                 // push the data into the array as an object with the snapshot id, emotion id and the value submitted
                 emotionsToInsert.push({ snapshotId, id, value });
             }
         }
-        console.log(emotionsToInsert);
+        //console.log(emotionsToInsert);
 
         //now insert each emotion record in the many to many table snapshot_emotion
         if (emotionsToInsert.length > 0) { //check first if we have any records to insert
             const emotionQuery = 'INSERT INTO snapshot_emotion (snapshot_id, emotion_id, rating) VALUES ?';
-            const[rows,fielddata] = await db.query(emotionQuery, [emotionsToInsert.map(record => [record.snapshotId, record.id, record.value])]);
+            const [rows, fielddata] = await db.query(emotionQuery, [emotionsToInsert.map(record => [record.snapshotId, record.id, record.value])]);
         }
 
         //now insert each trigger in the many to many table snapshot_trigger
-        if(triggersToInsert.length > 0) {
+        if (triggersToInsert.length > 0) {
             const triggerQuery = `INSERT INTO snapshot_trigger (snapshot_id, trigger_id) VALUES (?, ?)`;
             triggersToInsert.forEach(async trig => {
                 const vals = [snapshotId, trig];
                 const [data, fielddata] = await db.query(triggerQuery, vals);
             });
         }
-        console.log(util.inspect(typeof(triggersToInsert)));
-        console.log(triggersToInsert);
+
+        res.redirect('/user/home');
     } catch (err) {
         throw err;
     }
+
 });
 
 router.get('*', (req, res) => {
