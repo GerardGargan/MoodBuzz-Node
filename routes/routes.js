@@ -107,10 +107,42 @@ router.post('/register', async (req, res) => {
     }
 });
 
-router.get('/user/home', (req, res) => {
+router.get('/user/home', async (req, res) => {
+    //this query retrieves the data from snapshots, and the emotions/levels recorded on those snapshots
+    const selectSnapshots = `SELECT snapshot.snapshot_id, date, time, emotion, emotion.emotion_id, rating FROM snapshot INNER JOIN snapshot_emotion ON snapshot.snapshot_id = snapshot_emotion.snapshot_id INNER JOIN emotion ON snapshot_emotion.emotion_id = emotion.emotion_id WHERE user_id = 4`; //user id hardcoded for now
+    //this query selects the emotions for our table headers
+    const selectEmotions = `SELECT emotion FROM emotion`;
 
-    res.render('userhome', { currentPage: 'userhome' });
+    //set up an empty array (for parsing data into an appropriate data structure to pass to the ejs template)
+    const groupedData = [];
 
+    try {
+        //run the queries
+        const [emotions, fieldData] = await db.query(selectEmotions);
+        const [data, fielddata] = await  db.query(selectSnapshots);
+
+        //loop through each row, we need to create an array of snapshot objects, that each contain an array of emotions with ratings
+        data.forEach(row => {
+            //destructure into variables
+            const {snapshot_id, date, time, emotion, emotion_id, rating} = row;
+
+            //check if the snapshot object already exists in the array, if not create the object
+            if(!groupedData[snapshot_id]) {
+                groupedData[snapshot_id] = {
+                    snapshot_id,
+                    date: formatDatabaseDate(date),
+                    time,
+                    emotions: [],
+                }
+            }
+            //add the emotion into the emotions array, along with the id and rating
+            groupedData[snapshot_id].emotions.push({emotion_id: emotion_id, emotion: emotion, rating: rating});
+        });
+        //render the page and data
+        res.render('userhome', { currentPage: 'userhome', groupedData, emotions });
+    } catch(err) {
+        throw err;
+    }
 });
 
 router.get('/user/analytics', (req, res) => {
@@ -222,13 +254,15 @@ function validatePassword(password) {
 }
 
 function validateEmail(email) {
-    //must start with one or more characters that are not whitespace or @
-    //then must contain @ symbol
-    //Followed by one or more characters that are not whitespace or @
-    //must contain a . for domain seperator
-    //must end with one or more characters that are not whitespace or @ 
+    /*must start with one or more characters that are not whitespace or @
+    then must contain @ symbol
+    Followed by one or more characters that are not whitespace or @
+    must contain a . for domain seperator
+    must end with one or more characters that are not whitespace or @ 
+    */
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailRegex.test(email)) {
+        if (emailRegex.test(email)) {
         return true;
     } else {
         return false;
@@ -248,6 +282,7 @@ function validateName(name) {
     }
 }
 
+//takes a plain text password, returns a salted and hashed password using bcrypt
 async function hashPassword(password) {
     try {
         const saltRounds = 10;
@@ -267,6 +302,7 @@ async function comparePassword(password, hashedPassword) {
     }
 }
 
+//Get the current date YY/MM/DD in this format for the mysql database insertion
 function getCurrentDate() {
     let currentDate = new Date();
 
@@ -279,6 +315,7 @@ function getCurrentDate() {
     return `${formattedDate}`;
 }
 
+//Get the current time
 function getCurrentTime() {
     let currentDate = new Date();
 
@@ -288,6 +325,16 @@ function getCurrentTime() {
 
     let formattedTime = `${hours}:${minutes}:${seconds}`;
     return formattedTime;
+}
+
+//parse the long version of the data from the database to the format DD/MM/YYYY
+function formatDatabaseDate(date) {
+    const databaseDate = new Date(date);
+    const year = databaseDate.getFullYear();
+    const month = databaseDate.getMonth() +1; //zero indexed
+    const day = databaseDate.getDate();
+
+    return `${day}/${month}/${year}`;
 }
 
 module.exports = router;
