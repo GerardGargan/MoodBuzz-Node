@@ -113,14 +113,19 @@ router.get('/user/home', async (req, res) => {
     //this query selects the emotions for our table headers
     const selectEmotions = `SELECT emotion FROM emotion`;
 
+    const todaysDate = [getCurrentDate()];
+    const selectTodaysSnapshots = `SELECT COUNT(snapshot_id) AS count FROM snapshot WHERE date = ?`;
+
     //set up an empty array (for parsing data into an appropriate data structure to pass to the ejs template)
     const groupedData = [];
 
     try {
+        
         //run the queries
         const [emotions, fieldData] = await db.query(selectEmotions);
         const [data, fielddata] = await  db.query(selectSnapshots);
-
+        const [todaysSnapshots, fieldData2] = await db.query(selectTodaysSnapshots, todaysDate);
+        
         //initialise counter
         let numberOfSnapshots = 0;
         //loop through each row, we need to create an array of snapshot objects, that each contain an array of emotions with ratings
@@ -147,9 +152,16 @@ router.get('/user/home', async (req, res) => {
         const groupedDataSortedDesc = groupedData.sort((a,b) => {
             return b.snapshot_id - a.snapshot_id;
         });
-        
+
+        let todaysSnapMessage = null;
+        if(todaysSnapshots[0].count>0) {
+            todaysSnapMessage = { message: `You have recorded ${todaysSnapshots[0].count} snapshots today! Well done!`};
+        } else {
+            todaysSnapMessage = { message: `You have not recorded any snapshots yet today`};
+        }
+
         //render the page and data
-        res.render('userhome', { currentPage: 'userhome', groupedDataSortedDesc, emotions, numberOfSnapshots });
+        res.render('userhome', { currentPage: 'userhome', groupedDataSortedDesc, emotions, numberOfSnapshots, todaysSnapMessage });
     } catch(err) {
         throw err;
     }

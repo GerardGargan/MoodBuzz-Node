@@ -29,7 +29,7 @@
                                 </div>
                                 <div class="card-body">
                                     <h5 class="card-title">Have you recorded a snapshot today?</h5>
-                                    <p class="card-text">You have not recorded a snapshot yet today.</p>
+                                    <p class="card-text"><%= todaysSnapMessage.message %></p>
                                     <a href="/user/snapshot" class="btn btn-success">Record a snapshot</a>
                                 </div>
                             </div>
@@ -41,7 +41,7 @@
                                 </div>
                                 <div class="card-body">
                                     <h5 class="card-title">Total snapshots</h5>
-                                    <p class="card-text">You have recorded a total of # snapshots.</p>
+                                    <p class="card-text">You have recorded a total of <%= numberOfSnapshots %> snapshots.</p>
                                     <a href="/user/analytics" class="btn btn-success">View Graphs</a>
                                 </div>
                             </div>
