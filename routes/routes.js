@@ -148,7 +148,7 @@ router.get('/user/home', async (req, res) => {
             groupedData[snapshot_id].emotions.push({emotion_id: emotion_id, emotion: emotion, rating: rating});
         });
 
-        //sort the snapshots based on the id, in descending order - so that the most recent is displayed first
+        //sort the snapshots based on the id, in descending order - so that the most recent is displayed first.
         const groupedDataSortedDesc = groupedData.sort((a,b) => {
             return b.snapshot_id - a.snapshot_id;
         });
