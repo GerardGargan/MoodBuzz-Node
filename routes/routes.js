@@ -37,6 +37,9 @@ router.post('/login', async (req, res) => {
             if (passwordMatch) {
                 //email and password matches - successful log in
                 //TODO - store session and redirect to user home page
+                console.log('Password match');
+            } else {
+                console.log('Password does not match')
             }
         } else {
             console.log('user does not exist');
