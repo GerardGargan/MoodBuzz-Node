@@ -34,8 +34,6 @@ function updateVerification() {
     }
 }
 
-
-
 //Logic for switching password between visible and invisible
 visibilityButton.addEventListener('click', (event) => {
     event.preventDefault();
