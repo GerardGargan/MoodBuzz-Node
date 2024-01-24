@@ -25,7 +25,7 @@
                         <div class="col">
                             <div class="card bg-light d-flex flex-column h-100">
                                 <div class="card-header bg-success text-light">
-                                    This Week
+                                    Todays Summary
                                 </div>
                                 <div class="card-body">
                                     <h5 class="card-title">Have you recorded a snapshot today?</h5>
@@ -43,8 +43,7 @@
                                 </div>
                                 <div class="card-body">
                                     <h5 class="card-title">Total snapshots</h5>
-                                    <p class="card-text">You have recorded a total of <%= numberOfSnapshots %>
-                                            snapshots.</p>
+                                    <p class="card-text">You have recorded a total of <%= numberOfSnapshots %> snapshots.</p>
                                     <a href="/user/analytics" class="btn btn-success">View Graphs</a>
                                 </div>
                             </div>
@@ -90,8 +89,8 @@
                                                 </td>
                                                 <% }) %>
                                                     <td>
-                                                        <a href="/user/snapshot/edit/<%= snapshot.snapshot_id %>"
-                                                            class="btn btn-secondary btn-sm">Edit</a>
+                                                        <a href="/user/snapshot/view/<%= snapshot.snapshot_id %>"
+                                                            class="btn btn-success btn-sm">View</a>
                                                     </td>
                                         </tr>
                                         <% count -=1; %>
