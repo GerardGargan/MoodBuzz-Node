@@ -14,8 +14,6 @@ body {
 
 .window {
     background-color: #f8f9fa;
-    padding-top: 75px;
-    padding-bottom: 75px;  
     min-height: 100vh;
 }
 

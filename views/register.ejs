@@ -13,7 +13,7 @@
     <!-- Navigation menu -->
     <%- include('navbar_home'); %>
 
-    <section class="window">
+    <section class="py-sm-5 window">
         <div class="window-container">
             <h2 class="text-center mb-4">Create an Account</h1>
                 <form method="post" action="/register">
@@ -21,19 +21,19 @@
                     <div class="d-block d-md-flex gap-3">
                         <div>
                             <label for="firstname" class="form-label">First Name</label>
-                            <input type="text" name="firstname" id="firstname" class="form-control mb-3" placeholder="Enter your first name">
+                            <input type="text" name="firstname" id="firstname" class="form-control mb-3" placeholder="Enter your first name" required>
                         </div>
                         <div>
                             <label for="surname" class="form-label">Surname</label>
-                            <input type="text" name="surname" id="surname" class="form-control mb-3" placeholder="Enter your surname">
+                            <input type="text" name="surname" id="surname" class="form-control mb-3" placeholder="Enter your surname" required>
                         </div>
                     </div>
                     <label for="email" class="form-label">Email Address</label>
-                    <input type="email" name="email" id="email" class="form-control mb-3" placeholder="Enter your email address">
+                    <input type="email" name="email" id="email" class="form-control mb-3" placeholder="Enter your email address" required>
 
                     <label for="password" class="form-label">Password</label>
                     <div class="input-group mb-3">
-                        <input type="password" class="form-control" name="password" id="password" placeholder="Enter your password">
+                        <input type="password" class="form-control" name="password" id="password" placeholder="Enter your password" required>
                         <button class="btn btn-outline-secondary" type="button" id="visibility">
                             <i class="bi bi-eye"></i>
                         </button>
@@ -42,7 +42,7 @@
                     
                     <label for="password-verify" class="form-label">Confirm password</label>
                         <div class="input-group mb-3">
-                        <input type="password" class="form-control" name="password-verify" id="password-verify" placeholder="Confirm your password">
+                        <input type="password" class="form-control" name="password-verify" id="password-verify" placeholder="Confirm your password" required>
                         <button class="btn btn-outline-secondary" type="button" id="verify-icon" disabled>
                             <i class="bi bi-dash"></i>
                         </button>

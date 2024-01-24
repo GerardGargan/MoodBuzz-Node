@@ -16,15 +16,15 @@
     <%- include('navbar_home') %>
 
     <!-- Login Section-->
-    <section class="window">
+    <section class="py-sm-5 window">
         <div class="window-container">
             <h2 class="text-center mb-4">Login</h2>
             <form method="post" action="/login">
                 <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control mb-3" id="email" name="email" placeholder="Enter your email">
+                <input type="email" class="form-control mb-3" id="email" name="email" placeholder="Enter your email" required>
                 <label for="password" class="form-label">Password</label>
                 <div class="input-group mb-1">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
                     <button class="btn btn-outline-secondary" type="button" id="visibility">
                         <i class="bi bi-eye"></i>
                     </button>

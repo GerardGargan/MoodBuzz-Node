@@ -14,49 +14,57 @@
 <body>
     <!-- Navigation menu -->
     <%- include('user_nav'); %>
-
-        <div class="window">
-            <div class="window-container-large px-sm-5 mx-sm-5">
+    
+        <div class="py-sm-5 window">
+            <div class="container px-0 px-sm-1">
+            <div class="window-container-large px-sm-5">
                 <h2 class="mb-5">Record a new snapshot</h2>
-                <h4>1. Record your current level of emotion for each of the seven universal emotions.</h4>
+                <h4>Record your current level of emotion for each of the seven universal emotions.</h4>
                 <form method="GET" action="/new/snapshot">
                     <div class="row g-4 mt-3" id="insertEmotionRanges">
                         <!-- Emotion range sliders -->
-                        <% groupedData.forEach(emotion => { %>
-                                <div class="col-xl-6 col-xxl-4 py-3 m-0">
-                                    <div class="box-shadow bg-dark-subtle py-3 px-4 rounded">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <label for="<%= emotion.emotion %>" class="form-label">
-                                                <h4>Level of <%= emotion.emotion %></h4>
-                                            </label>
-                                            <div id="<%= emotion.emotion %>-val-display">
-                                                <h3 class="bg-dark text-light p-3 rounded">5</h3>
-                                            </div>
-                                        </div>
-
-                                        <input type="range" name="<%= emotion.emotion_id %>" id="<%= emotion.emotion %>" class="form-range" min="1"
-                                            max="10" value="5">
-                                        <div class="graduated-scale">
-                                            <% emotion.rating.forEach(rating => { %>
-                                                <span><%= rating.rating %></span>
-                                            <% }) %>
+                        <% groupedData.forEach(emotion=> { %>
+                            <div class="col-xl-6 col-xxl-4 py-3 m-0">
+                                <div class="box-shadow bg-dark-subtle py-3 px-4 rounded">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <label for="<%= emotion.emotion %>" class="form-label">
+                                            <h4>Level of <%= emotion.emotion %>
+                                            </h4>
+                                        </label>
+                                        <div id="<%= emotion.emotion %>-val-display">
+                                            <h3 class="bg-dark text-light p-3 rounded">5</h3>
                                         </div>
                                     </div>
+
+                                    <input type="range" name="<%= emotion.emotion_id %>" id="<%= emotion.emotion %>"
+                                        class="form-range" min="1" max="10" value="5">
+                                    <div class="graduated-scale">
+                                        <% emotion.rating.forEach(rating=> { %>
+                                            <span>
+                                                <%= rating.rating %>
+                                            </span>
+                                            <% }) %>
+                                    </div>
                                 </div>
-                                <% }); %>
+                            </div>
+                            <% }); %>
                     </div>
-                    <h4 class="mt-4">2. Select any contextual triggers</h3>
+                    <h4 class="mt-4">Select any contextual triggers</h3>
                         <div class="row mt-4">
                             <div class="d-flex gap-3 flex-wrap" id="triggers">
                                 <!-- Triggers section -->
-                                <% triggerData.forEach(trigger => { %>
-                                    <input type="checkbox" class="btn-check" name="trigger" id="<%= trigger.trigger_name %>" value="<%= trigger.trigger_id %>" autocomplete="off" unchecked>
-                                    <label class="btn btn-outline-primary" for="<%= trigger.trigger_name %>"><%= trigger.trigger_name %> <i class="bi <%= trigger.icon %>"></i></label>
-                                <% }); %>
+                                <% triggerData.forEach(trigger=> { %>
+                                    <input type="checkbox" class="btn-check" name="trigger"
+                                        id="<%= trigger.trigger_name %>" value="<%= trigger.trigger_id %>"
+                                        autocomplete="off" unchecked>
+                                    <label class="btn btn-outline-primary" for="<%= trigger.trigger_name %>">
+                                        <%= trigger.trigger_name %> <i class="bi <%= trigger.icon %>"></i>
+                                    </label>
+                                    <% }); %>
                             </div>
                             <!-- Notes section -->
                         </div>
-                        <h4 class="mt-4">3. Record any notes</h4>
+                        <h4 class="mt-4">Record any notes</h4>
                         <div class="row mt-4">
                             <textarea name="notes" id="notes" placeholder="Enter notes" rows="5"></textarea>
                         </div>
@@ -64,6 +72,7 @@
                         <button class="btn mt-5 btn-xl btn-primary" id="resetbutton">Reset</button>
                 </form>
             </div>
+        </div>
         </div>
 
         <!-- Footer -->
@@ -81,7 +90,7 @@
                         displayVal.innerHTML = `<h3 class="bg-dark text-light p-3 rounded">${range.value}</h3>`;
                     })
                 })
-                
+
                 //obtain the reset button, range sliders, checkboxes and notes input elements
                 const resetButton = document.getElementById('resetbutton');
                 const rangeItems = document.querySelectorAll('input[type="range"]');
@@ -103,7 +112,7 @@
                     checkboxes.forEach((checkbox) => {
                         checkbox.checked = false;
                     });
-                    
+
                     //set notes to be empty
                     notes.value = '';
                 });
