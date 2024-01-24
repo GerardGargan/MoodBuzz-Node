@@ -166,30 +166,12 @@ exports.getUserHomePage = async (req, res) => {
 };
 
 
+
 exports.getNewSnapshotPage = async (req, res) => {
 
-    const selectRatings = `SELECT emotion.emotion_id, emotion, rating, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id`;
-    const selectTriggers = `SELECT trigger_id, trigger_name, icon FROM triggers`;
-    try {
-        //run query to get the emotions and ratings data
-        const [data, fielddata2] = await db.query(selectRatings);
-        //console.log(data)
-        const groupedData = {};
-        //parse data into an appropriate structure to pass to the template
-        data.forEach(row => {
-            //if it doesnt already exist, create the emotion object
-            const { emotion_id, emotion, rating, short_desc, long_desc } = row;
-            if (!groupedData[emotion_id]) {
-                groupedData[emotion_id] = {
-                    emotion_id,
-                    emotion,
-                    rating: []
-                };
-            }
-            //push each rating data into the rating array in the emotion object
-            groupedData[emotion_id].rating.push({ rating: rating, shortdesc: short_desc, longdesc: long_desc });
-        });
-        console.log(groupedData);
+        const groupedData = await fetchEmotionData();
+
+        const selectTriggers = `SELECT trigger_id, trigger_name, icon FROM triggers`;
 
         //run the query to get the triggers
         const [triggerData, fieldData] = await db.query(selectTriggers);
@@ -197,9 +179,7 @@ exports.getNewSnapshotPage = async (req, res) => {
         //console.log(JSON.stringify(groupedData));
         //console.log(triggerData);
         res.render('snapshot', { groupedData, triggerData, currentPage: 'snapshot' });
-    } catch (err) {
-        throw err;
-    }
+    
 };
 
 exports.processNewSnapshot = async (req, res) => {
@@ -358,3 +338,32 @@ function formatDatabaseDate(date) {
 
     return `${day}/${month}/${year}`;
 }
+
+async function fetchEmotionData() {
+    const selectRatings = `SELECT emotion.emotion_id, emotion, rating, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id`;
+    
+    try {
+        //run query to get the emotions and ratings data
+        const [data, fielddata2] = await db.query(selectRatings);
+        //console.log(data)
+        const groupedData = {};
+        //parse data into an appropriate structure to pass to the template
+        data.forEach(row => {
+            //if it doesnt already exist, create the emotion object
+            const { emotion_id, emotion, rating, short_desc, long_desc } = row;
+            if (!groupedData[emotion_id]) {
+                groupedData[emotion_id] = {
+                    emotion_id,
+                    emotion,
+                    rating: []
+                };
+            }
+            //push each rating data into the rating array in the emotion object
+            groupedData[emotion_id].rating.push({ rating: rating, shortdesc: short_desc, longdesc: long_desc });
+        });
+        //console.log(groupedData);
+        return groupedData;
+    } catch (err) {
+        throw err;
+    }
+};
