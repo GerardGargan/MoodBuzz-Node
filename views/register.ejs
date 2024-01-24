@@ -61,60 +61,7 @@
     <!-- Footer -->
     <%- include('footer'); %>
 
-    <script>
-        const passwordInput = document.getElementById('password');
-        const passwordVerify = document.getElementById('password-verify');
-        const verify_icon = document.getElementById('verify-icon');
-        const submitButton = document.getElementById('submit-button');
-        let verifyActivated = false;
-
-        passwordInput.addEventListener('keyup', (event) => {
-            if(verifyActivated) {
-                updateVerification();
-            }
-        });
-
-        passwordVerify.addEventListener('keyup', (event) => {
-            verifyActivated = true;
-            updateVerification();
-        });
-        
-        function updateVerification(){
-            if(passwordVerify.value=='' && passwordInput.value==''){
-                passwordVerify.classList.remove('bg-danger');
-                passwordVerify.classList.remove('bg-success');
-                verify_icon.innerHTML = '<i class="bi bi-dash"></i>';
-            }else if(passwordVerify.value==passwordInput.value){
-                verify_icon.innerHTML = '<i class="bi bi-hand-thumbs-up"></i>';
-                passwordVerify.classList.remove('bg-danger');
-                passwordVerify.classList.add('bg-success');
-                submitButton.disabled = false;
-            } else {
-                verify_icon.innerHTML = '<i class="bi bi-hand-thumbs-down"></i>';
-                passwordVerify.classList.remove('bg-success');
-                passwordVerify.classList.add('bg-danger');
-                submitButton.disabled = true;
-            }
-        }
-
-    </script>
-
-<script>
-    const passwordInput2 = document.getElementById('password');
-    const visibilityButton = document.getElementById('visibility');
-
-    //Logic for switching password between visible and invisible
-    visibilityButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        if (passwordInput2.type == 'password') {
-            passwordInput2.type = 'text';
-            visibilityButton.innerHTML = "<i class=\"bi bi-eye-slash\"></i>";
-        } else {
-            passwordInput2.type = 'password';
-            visibilityButton.innerHTML = "<i class=\"bi bi-eye\"></i>";
-        }
-    });
-</script>
+<script src="/javascript/register.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
 </body>
