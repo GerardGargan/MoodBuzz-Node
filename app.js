@@ -1,4 +1,5 @@
 const express = require('express');
+const morgan = require('morgan');
 const dotenv = require('dotenv').config({path: 'config.env'});
 const router = require('./routes/routes');
 
@@ -11,6 +12,7 @@ const app = express();
 app.set('view engine','ejs');
 app.use(express.static(__dirname+"/public"));
 app.use(express.urlencoded({extended: true}));
+app.use(morgan('tiny'));
 app.use('/', router);
 
 //listen on the specified port
