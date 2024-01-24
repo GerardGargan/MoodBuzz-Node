@@ -23,7 +23,8 @@
                     <form method="GET" action="/new/snapshot">
                         <div class="row g-4 mt-3" id="insertEmotionRanges">
                             <!-- Emotion range sliders -->
-                            <% groupedData.forEach(emotion=> { %>
+                            <% const valuesArray = Object.values(groupedData); %>
+                            <% valuesArray.forEach(emotion=> { %>
                                 <div class="col-xl-6 col-xxl-4 py-3 m-0">
                                     <div class="box-shadow bg-dark-subtle py-3 px-4 rounded">
                                         <div class="d-flex justify-content-between align-items-center">

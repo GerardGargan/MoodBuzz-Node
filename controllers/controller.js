@@ -174,7 +174,7 @@ exports.getNewSnapshotPage = async (req, res) => {
         //run query to get the emotions and ratings data
         const [data, fielddata2] = await db.query(selectRatings);
         //console.log(data)
-        const groupedData = [];
+        const groupedData = {};
         //parse data into an appropriate structure to pass to the template
         data.forEach(row => {
             //if it doesnt already exist, create the emotion object
@@ -184,11 +184,12 @@ exports.getNewSnapshotPage = async (req, res) => {
                     emotion_id,
                     emotion,
                     rating: []
-                }
+                };
             }
             //push each rating data into the rating array in the emotion object
             groupedData[emotion_id].rating.push({ rating: rating, shortdesc: short_desc, longdesc: long_desc });
         });
+        console.log(groupedData);
 
         //run the query to get the triggers
         const [triggerData, fieldData] = await db.query(selectTriggers);
