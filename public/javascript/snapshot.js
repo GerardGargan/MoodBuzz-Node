@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    //obtain grouped data object from the backend
-    const emotionsData = '<%- JSON.stringify(groupedData) %>';
 
     //get all range elements on the page
     const rangeItems2 = document.querySelectorAll('input[type="range"]');
@@ -8,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     rangeItems2.forEach((range) => {
         range.addEventListener('input', (event) => {
             let displayVal = document.getElementById(`${range.id}-val-display`);
-            displayVal.innerHTML = `<h3 class="bg-dark text-light p-3 rounded">${range.value}</h3>`;
+            displayVal.textContent = `${range.value}`;
         })
     })
 
