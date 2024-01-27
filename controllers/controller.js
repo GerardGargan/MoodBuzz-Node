@@ -6,247 +6,308 @@ exports.getIndex = (req, res) => {
 };
 
 exports.getLogin = (req, res) => {
-    res.render('login', { currentPage: 'login' });
+    const { isLoggedIn } = req.session;
+
+    //check if user is already logged in, if so redirect to user home page
+    if (isLoggedIn) {
+        res.redirect('/user/home');
+    } else {
+        //user is not logged in, render login page
+        res.render('login', { currentPage: 'login' });
+    }
 };
 
 exports.postLogin = async (req, res) => {
-    //destructure the values into variables
-    const { email, password } = req.body;
+    const { isLoggedIn } = req.session;
 
-    //set up in an array for the query function
-    const vals = [email, password];
-    const selectSQL = `SELECT * FROM user WHERE email_address = ?`;
+    //perform check to ensure user isnt already logged in
+    if (isLoggedIn) {
+        //if logged in, redirect - dont allow the registration to contune
+        res.redirect('/user/home');
+    } else {
+        //user isnt logged in
 
-    try {
-        const [userData, fieldData] = await db.query(selectSQL, vals);
-        if (userData.length >= 1) {
-            console.log('user exists');
-            //access the first element of the array to get the user details (we should only ever return one element)
-            console.log(userData[0].email_address);
+        //destructure the values into variables
+        const { email, password } = req.body;
 
-            //get the stored hashed password
-            const hashedPassword = userData[0].password.toString();
+        //set up in an array for the query function
+        const vals = [email, password];
+        const selectSQL = `SELECT * FROM user WHERE email_address = ?`;
 
-            //check if the plain text password matches the hashed password
-            const passwordMatch = await comparePassword(password, hashedPassword);
-            if (passwordMatch) {
-                //email and password matches - successful log in
-                console.log('Email and Password match - ok to log in!');
-                //set up the session
-                const session = req.session;
-                session.isLoggedIn = true;
-                session.userid = userData[0].user_id;
-                session.userName = userData[0].first_name;
-                console.log(session);
-                //redirect to user homepage
-                res.redirect('/user/home');
+        try {
+            const [userData, fieldData] = await db.query(selectSQL, vals);
+            if (userData.length >= 1) {
+                console.log('user exists');
+                //access the first element of the array to get the user details (we should only ever return one element)
+                console.log(userData[0].email_address);
+
+                //get the stored hashed password
+                const hashedPassword = userData[0].password.toString();
+
+                //check if the plain text password matches the hashed password
+                const passwordMatch = await comparePassword(password, hashedPassword);
+                if (passwordMatch) {
+                    //email and password matches - successful log in
+                    console.log('Email and Password match - ok to log in!');
+                    //set up the session
+                    const session = req.session;
+                    session.isLoggedIn = true;
+                    session.userid = userData[0].user_id;
+                    session.userName = userData[0].first_name;
+                    console.log(session);
+                    //redirect to user homepage
+                    res.redirect('/user/home');
+                } else {
+                    console.log('Password does not match')
+                }
             } else {
-                console.log('Password does not match')
+                console.log('user does not exist');
             }
-        } else {
-            console.log('user does not exist');
+        } catch (err) {
+            throw err;
         }
-    } catch (err) {
-        throw err;
     }
 };
 
 exports.getRegister = (req, res) => {
-    res.render('register', { currentPage: 'register' });
+    const { isLoggedIn } = req.session;
+
+    //check if user is already logged in, if so redirect to user home page
+    if (isLoggedIn) {
+        res.redirect('/user/home');
+    } else {
+        //user is not logged in, render register page
+        res.render('register', { currentPage: 'register' });
+    }
 };
 
 exports.postRegister = async (req, res) => {
-    let { firstname, surname, email, password } = req.body;
-    console.log(`${firstname} ${surname} ${email} ${password}`);
+    const { isLoggedIn } = req.session;
 
-    //sanitise user input
-    firstname = firstname.trim();
-    surname = surname.trim();
-    email = email.trim();
-
-    /* log out for testing
-    console.log(validatePassword(password));
-    console.log(validateEmail(email));
-    console.log(validateName(firstname));
-    console.log(validateName(surname));
-    */
-
-    //perform validation checks on data
-    if (validateName(firstname) && validateName(surname) && validateEmail(email) && validatePassword(password)) {
-
-        //check if user already exists
-        const vals = [email];
-        const selectSQL = `SELECT user_id FROM user WHERE email_address = ?`;
-
-        try {
-            const [userDetails, fielddata] = await db.query(selectSQL, vals);
-            if (userDetails.length >= 1) {
-                console.log('User exists, cant complete registration');
-                //TODO stop registration and inform the user
-            } else {
-                console.log('User does not exist');
-                //continue registration - we have validated the data and checked the email doesnt already exist
-
-                //salt and hash password
-                const hashed = await hashPassword(password);
-                console.log(`hashed password ${hashed}`);
-
-                const valsToInsert = [firstname, surname, email, hashed];
-                const insertSQL = `INSERT INTO user (first_name, last_name, email_address, password) VALUES (?, ?, ?, ?)`;
-
-                //insert user to database
-                const [rows, fielddata] = await db.query(insertSQL, valsToInsert);
-                console.log('success');
-
-                //TODO
-                //insert session
-                //redirect to user home?
-
-            }
-        } catch (err) {
-            if (err) console.log(err);
-        }
+    //check if user is already logged in, if so redirect to user home page
+    if (isLoggedIn) {
+        res.redirect('/user/home');
     } else {
-        //invalid data - did not pass validation functions
-        console.log('invalid data entered!!');
+        //user isnt logged in, safe to continue registration
+
+        let { firstname, surname, email, password } = req.body;
+        console.log(`${firstname} ${surname} ${email} ${password}`);
+
+        //sanitise user input
+        firstname = firstname.trim();
+        surname = surname.trim();
+        email = email.trim();
+
+        /* log out for testing
+        console.log(validatePassword(password));
+        console.log(validateEmail(email));
+        console.log(validateName(firstname));
+        console.log(validateName(surname));
+        */
+
+        //perform validation checks on data
+        if (validateName(firstname) && validateName(surname) && validateEmail(email) && validatePassword(password)) {
+
+            //check if user already exists
+            const vals = [email];
+            const selectSQL = `SELECT user_id FROM user WHERE email_address = ?`;
+
+            try {
+                const [userDetails, fielddata] = await db.query(selectSQL, vals);
+                if (userDetails.length >= 1) {
+                    console.log('User exists, cant complete registration');
+                    //TODO stop registration and inform the user
+                } else {
+                    console.log('User does not exist');
+                    //continue registration - we have validated the data and checked the email doesnt already exist
+
+                    //salt and hash password
+                    const hashed = await hashPassword(password);
+                    console.log(`hashed password ${hashed}`);
+
+                    const valsToInsert = [firstname, surname, email, hashed];
+                    const insertSQL = `INSERT INTO user (first_name, last_name, email_address, password) VALUES (?, ?, ?, ?)`;
+
+                    //insert user to database
+                    const [rows, fielddata] = await db.query(insertSQL, valsToInsert);
+                    console.log('success');
+
+                    //TODO
+                    //insert session
+                    //redirect to user home?
+
+                }
+            } catch (err) {
+                if (err) console.log(err);
+            }
+        } else {
+            //invalid data - did not pass validation functions
+            console.log('invalid data entered!!');
+        }
     }
 };
 
 exports.getUserHomePage = async (req, res) => {
-    //this query retrieves the data from snapshots, and the emotions/levels recorded on those snapshots
-    const selectSnapshots = `SELECT snapshot.snapshot_id, date, time, emotion, emotion.emotion_id, rating FROM snapshot INNER JOIN snapshot_emotion ON snapshot.snapshot_id = snapshot_emotion.snapshot_id INNER JOIN emotion ON snapshot_emotion.emotion_id = emotion.emotion_id WHERE user_id = 4`; //user id hardcoded for now
-    //this query selects the emotions for our table headers
-    const selectEmotions = `SELECT emotion FROM emotion`;
+    const { isLoggedIn, userid, userName } = req.session;
 
-    const todaysDate = [getCurrentDate()];
-    const selectTodaysSnapshots = `SELECT COUNT(snapshot_id) AS count FROM snapshot WHERE date = ?`;
+    //check if user is logged in
+    if (isLoggedIn) {
+        //this query retrieves the data from snapshots, and the emotions/levels recorded on those snapshots
+        const selectSnapshots = `SELECT snapshot.snapshot_id, date, time, emotion, emotion.emotion_id, rating FROM snapshot INNER JOIN snapshot_emotion ON snapshot.snapshot_id = snapshot_emotion.snapshot_id INNER JOIN emotion ON snapshot_emotion.emotion_id = emotion.emotion_id WHERE user_id = ?`;
+        //this query selects the emotions for our table headers
+        const selectEmotions = `SELECT emotion FROM emotion`;
 
-    //set up an empty array (for parsing data into an appropriate data structure to pass to the ejs template)
-    const groupedData = {};
+        const vals = [getCurrentDate(), userid];
+        const selectTodaysSnapshots = `SELECT COUNT(snapshot_id) AS count FROM snapshot WHERE date = ? AND user_id = ?`;
 
-    try {
-        
-        //run the queries
-        const [emotions, fieldData] = await db.query(selectEmotions);
-        const [data, fielddata] = await  db.query(selectSnapshots);
-        const [todaysSnapshots, fieldData2] = await db.query(selectTodaysSnapshots, todaysDate);
-        
-        //initialise counter
-        let numberOfSnapshots = 0;
-        //loop through each row, we need to create an array of snapshot objects, that each contain an array of emotions with ratings
-        data.forEach(row => {
-            //destructure into variables
-            const {snapshot_id, date, time, emotion, emotion_id, rating} = row;
+        //set up an empty array (for parsing data into an appropriate data structure to pass to the ejs template)
+        const groupedData = {};
 
-            //check if the snapshot object already exists in the array, if not create the object
-            if(!groupedData[snapshot_id]) {
-                groupedData[snapshot_id] = {
-                    snapshot_id,
-                    date: formatDatabaseDate(date),
-                    time,
-                    emotions: [],
+        try {
+
+            //run the queries
+            const [emotions, fieldData] = await db.query(selectEmotions);
+            const [data, fielddata] = await db.query(selectSnapshots, [userid]);
+            const [todaysSnapshots, fieldData2] = await db.query(selectTodaysSnapshots, vals);
+
+            //initialise counter
+            let numberOfSnapshots = 0;
+            //loop through each row, we need to create an array of snapshot objects, that each contain an array of emotions with ratings
+            data.forEach(row => {
+                //destructure into variables
+                const { snapshot_id, date, time, emotion, emotion_id, rating } = row;
+
+                //check if the snapshot object already exists in the array, if not create the object
+                if (!groupedData[snapshot_id]) {
+                    groupedData[snapshot_id] = {
+                        snapshot_id,
+                        date: formatDatabaseDate(date),
+                        time,
+                        emotions: [],
+                    }
+                    //increase the counter to keep track of how many snapshots there are in the array
+                    numberOfSnapshots += 1;
                 }
-                //increase the counter to keep track of how many snapshots there are in the array
-                numberOfSnapshots +=1;
+                //add the emotion into the emotions array (within the snapshot object), along with the id and rating
+                groupedData[snapshot_id].emotions.push({ emotion_id: emotion_id, emotion: emotion, rating: rating });
+            });
+
+            //transform to an array so we can sort the values
+            var groupedDataArray = Object.values(groupedData);
+
+            //sort the snapshots based on the id, in descending order - so that the most recent is displayed first.
+            const groupedDataSorted = groupedDataArray.sort((a, b) => {
+                return b.snapshot_id - a.snapshot_id;
+            });
+
+            //set up todays message
+            let todaysSnapMessage = null;
+            //check if there have been snapshots today and display an appropriate message
+            if (todaysSnapshots[0].count > 0) {
+                todaysSnapMessage = { message: `You have recorded ${todaysSnapshots[0].count} snapshots today! Well done!` };
+            } else {
+                todaysSnapMessage = { message: `You have not recorded any snapshots yet today` };
             }
-            //add the emotion into the emotions array (within the snapshot object), along with the id and rating
-            groupedData[snapshot_id].emotions.push({emotion_id: emotion_id, emotion: emotion, rating: rating});
-        });
 
-        //transform to an array so we can sort the values
-        var groupedDataArray = Object.values(groupedData);
-
-        //sort the snapshots based on the id, in descending order - so that the most recent is displayed first.
-        const groupedDataSorted = groupedDataArray.sort((a,b) => {
-            return b.snapshot_id - a.snapshot_id;
-        });
-
-        //set up todays message
-        let todaysSnapMessage = null;
-        //check if there have been snapshots today and display an appropriate message
-        if(todaysSnapshots[0].count>0) {
-            todaysSnapMessage = { message: `You have recorded ${todaysSnapshots[0].count} snapshots today! Well done!`};
-        } else {
-            todaysSnapMessage = { message: `You have not recorded any snapshots yet today`};
+            //render the page and data
+            res.render('userhome', { currentPage: 'userhome', groupedDataSorted, emotions, numberOfSnapshots, todaysSnapMessage, userName });
+        } catch (err) {
+            throw err;
         }
-
-        //render the page and data
-        res.render('userhome', { currentPage: 'userhome', groupedDataSorted, emotions, numberOfSnapshots, todaysSnapMessage });
-    } catch(err) {
-        throw err;
+    } else {
+        //user not logged in - redirect to login page
+        res.redirect('/login');
     }
+
 };
 
 
 
 exports.getNewSnapshotPage = async (req, res) => {
 
+    const { isLoggedIn, userName, userid } = req.session;
+
+    //check if user is logged in
+    if (isLoggedIn) {
+
         const groupedData = await fetchEmotionData();
 
         const selectTriggers = `SELECT trigger_id, trigger_name, icon FROM triggers`;
-
         //run the query to get the triggers
         const [triggerData, fieldData] = await db.query(selectTriggers);
 
         //console.log(JSON.stringify(groupedData));
         //console.log(triggerData);
         res.render('snapshot', { groupedData, triggerData, currentPage: 'snapshot' });
-    
+
+    } else {
+        //user isnt logged in - redirect to login page
+        res.redirect('/login');
+    }
 };
 
 exports.processNewSnapshot = async (req, res) => {
 
-    //Extract data from the URL (assuming they are in the query parameters)
-    const formData = req.query;
-    const { notes } = req.query;
-    const user_id = 4; //hardcode for now
+    const { isLoggedIn, userName, userid } = req.session;
 
-    //Process the form data and prepare it for database insertion
-    const emotionsToInsert = [];
+    //check user is logged in
+    if (isLoggedIn) {
+        //Extract data from the URL (assuming they are in the query parameters)
+        const formData = req.query;
+        const { notes } = req.query;
 
-    try {
-        //insert snapshot record first
-        const snapshotInsert = `INSERT INTO snapshot (user_id, date, time, note) VALUES (?, ?, ?, ?)`;
-        const date = getCurrentDate();
-        const time = getCurrentTime();
-        const snapshotVals = [user_id, date, time, notes];
-        const triggersToInsert = Array.isArray(req.query.trigger) ? req.query.trigger : (req.query.trigger ? [req.query.trigger] : []);
-        //Ensures triggers are stored in an array so we can later iterate through - as if only one trigger is submitted it does not create an array, it is stored as a string. We have avoided this behaviour.
-        //We have also done a check to ensure we dont create an array with one object of undefined - if no triggers are selected
-        const [snapInsert, fieldData] = await db.query(snapshotInsert, snapshotVals);
-        //store the id of the snapshot - needs to be inserted on each many to many record we insert on the many to many table
-        const snapshotId = snapInsert.insertId;
-        //loop through emotions and values in the url query and insert into array
-        for (const id in formData) {
-            if (Object.hasOwnProperty.call(formData, id) && id != 'notes' && id != 'trigger') {
-                const value = formData[id];
-                // push the data into the array as an object with the snapshot id, emotion id and the value submitted
-                emotionsToInsert.push({ snapshotId, id, value });
+        //Process the form data and prepare it for database insertion
+        const emotionsToInsert = [];
+
+        try {
+            //insert snapshot record first
+            const snapshotInsert = `INSERT INTO snapshot (user_id, date, time, note) VALUES (?, ?, ?, ?)`;
+            const date = getCurrentDate();
+            const time = getCurrentTime();
+            const snapshotVals = [userid, date, time, notes];
+            const triggersToInsert = Array.isArray(req.query.trigger) ? req.query.trigger : (req.query.trigger ? [req.query.trigger] : []);
+            //Ensures triggers are stored in an array so we can later iterate through - as if only one trigger is submitted it does not create an array, it is stored as a string. We have avoided this behaviour.
+            //We have also done a check to ensure we dont create an array with one object of undefined - if no triggers are selected
+            const [snapInsert, fieldData] = await db.query(snapshotInsert, snapshotVals);
+            //store the id of the snapshot - needs to be inserted on each many to many record we insert on the many to many table
+            const snapshotId = snapInsert.insertId;
+            //loop through emotions and values in the url query and insert into array
+            for (const id in formData) {
+                if (Object.hasOwnProperty.call(formData, id) && id != 'notes' && id != 'trigger') {
+                    const value = formData[id];
+                    // push the data into the array as an object with the snapshot id, emotion id and the value submitted
+                    emotionsToInsert.push({ snapshotId, id, value });
+                }
             }
-        }
-        //console.log(emotionsToInsert);
+            //console.log(emotionsToInsert);
 
-        //now insert each emotion record in the many to many table snapshot_emotion
-        if (emotionsToInsert.length > 0) { //check first if we have any records to insert
-            const emotionQuery = 'INSERT INTO snapshot_emotion (snapshot_id, emotion_id, rating) VALUES ?';
-            const [rows, fielddata] = await db.query(emotionQuery, [emotionsToInsert.map(record => [record.snapshotId, record.id, record.value])]);
-        }
+            //now insert each emotion record in the many to many table snapshot_emotion
+            if (emotionsToInsert.length > 0) { //check first if we have any records to insert
+                const emotionQuery = 'INSERT INTO snapshot_emotion (snapshot_id, emotion_id, rating) VALUES ?';
+                const [rows, fielddata] = await db.query(emotionQuery, [emotionsToInsert.map(record => [record.snapshotId, record.id, record.value])]);
+            }
 
-        //now insert each trigger in the many to many table snapshot_trigger
-        if (triggersToInsert.length > 0) {
-            console.log(triggersToInsert.length);
-            console.log(triggersToInsert);
-            const triggerQuery = `INSERT INTO snapshot_trigger (snapshot_id, trigger_id) VALUES (?, ?)`;
-            triggersToInsert.forEach(async trig => {
-                const vals = [snapshotId, trig];
-                const [data, fielddata] = await db.query(triggerQuery, vals);
-            });
-        }
+            //now insert each trigger in the many to many table snapshot_trigger
+            if (triggersToInsert.length > 0) {
+                console.log(triggersToInsert.length);
+                console.log(triggersToInsert);
+                const triggerQuery = `INSERT INTO snapshot_trigger (snapshot_id, trigger_id) VALUES (?, ?)`;
+                triggersToInsert.forEach(async trig => {
+                    const vals = [snapshotId, trig];
+                    const [data, fielddata] = await db.query(triggerQuery, vals);
+                });
+            }
 
-        res.redirect('/user/home');
-    } catch (err) {
-        throw err;
+            res.redirect('/user/home');
+        } catch (err) {
+            throw err;
+        }
+    } else {
+        //user not logged in - redirect to login page
+        res.redirect('/login');
     }
+
+
 
 };
 
@@ -276,7 +337,7 @@ function validateEmail(email) {
     */
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (emailRegex.test(email)) {
+    if (emailRegex.test(email)) {
         return true;
     } else {
         return false;
@@ -345,7 +406,7 @@ function getCurrentTime() {
 function formatDatabaseDate(date) {
     const databaseDate = new Date(date);
     const year = databaseDate.getFullYear();
-    const month = databaseDate.getMonth() +1; //zero indexed
+    const month = databaseDate.getMonth() + 1; //zero indexed
     const day = databaseDate.getDate();
 
     return `${day}/${month}/${year}`;
@@ -353,7 +414,7 @@ function formatDatabaseDate(date) {
 
 async function fetchEmotionData() {
     const selectRatings = `SELECT emotion.emotion_id, emotion, rating, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id`;
-    
+
     try {
         //run query to get the emotions and ratings data
         const [data, fielddata2] = await db.query(selectRatings);
