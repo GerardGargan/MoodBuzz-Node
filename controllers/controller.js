@@ -9,53 +9,63 @@ exports.getLogin = (req, res) => {
     const { isLoggedIn } = req.session;
 
     //check if user is already logged in, if so redirect to user home page
-    if(isLoggedIn){
+    if (isLoggedIn) {
         res.redirect('/user/home');
-    } else{
+    } else {
         //user is not logged in, render login page
         res.render('login', { currentPage: 'login' });
     }
 };
 
 exports.postLogin = async (req, res) => {
-    //destructure the values into variables
-    const { email, password } = req.body;
+    const { isLoggedIn } = req.session;
 
-    //set up in an array for the query function
-    const vals = [email, password];
-    const selectSQL = `SELECT * FROM user WHERE email_address = ?`;
+    //perform check to ensure user isnt already logged in
+    if (isLoggedIn) {
+        //if logged in, redirect - dont allow the registration to contune
+        res.redirect('/user/home');
+    } else {
+        //user isnt logged in
 
-    try {
-        const [userData, fieldData] = await db.query(selectSQL, vals);
-        if (userData.length >= 1) {
-            console.log('user exists');
-            //access the first element of the array to get the user details (we should only ever return one element)
-            console.log(userData[0].email_address);
+        //destructure the values into variables
+        const { email, password } = req.body;
 
-            //get the stored hashed password
-            const hashedPassword = userData[0].password.toString();
+        //set up in an array for the query function
+        const vals = [email, password];
+        const selectSQL = `SELECT * FROM user WHERE email_address = ?`;
 
-            //check if the plain text password matches the hashed password
-            const passwordMatch = await comparePassword(password, hashedPassword);
-            if (passwordMatch) {
-                //email and password matches - successful log in
-                console.log('Email and Password match - ok to log in!');
-                //set up the session
-                const session = req.session;
-                session.isLoggedIn = true;
-                session.userid = userData[0].user_id;
-                session.userName = userData[0].first_name;
-                console.log(session);
-                //redirect to user homepage
-                res.redirect('/user/home');
+        try {
+            const [userData, fieldData] = await db.query(selectSQL, vals);
+            if (userData.length >= 1) {
+                console.log('user exists');
+                //access the first element of the array to get the user details (we should only ever return one element)
+                console.log(userData[0].email_address);
+
+                //get the stored hashed password
+                const hashedPassword = userData[0].password.toString();
+
+                //check if the plain text password matches the hashed password
+                const passwordMatch = await comparePassword(password, hashedPassword);
+                if (passwordMatch) {
+                    //email and password matches - successful log in
+                    console.log('Email and Password match - ok to log in!');
+                    //set up the session
+                    const session = req.session;
+                    session.isLoggedIn = true;
+                    session.userid = userData[0].user_id;
+                    session.userName = userData[0].first_name;
+                    console.log(session);
+                    //redirect to user homepage
+                    res.redirect('/user/home');
+                } else {
+                    console.log('Password does not match')
+                }
             } else {
-                console.log('Password does not match')
+                console.log('user does not exist');
             }
-        } else {
-            console.log('user does not exist');
+        } catch (err) {
+            throw err;
         }
-    } catch (err) {
-        throw err;
     }
 };
 
@@ -63,68 +73,77 @@ exports.getRegister = (req, res) => {
     const { isLoggedIn } = req.session;
 
     //check if user is already logged in, if so redirect to user home page
-    if(isLoggedIn){
+    if (isLoggedIn) {
         res.redirect('/user/home');
     } else {
         //user is not logged in, render register page
-       res.render('register', { currentPage: 'register' }); 
+        res.render('register', { currentPage: 'register' });
     }
 };
 
 exports.postRegister = async (req, res) => {
-    let { firstname, surname, email, password } = req.body;
-    console.log(`${firstname} ${surname} ${email} ${password}`);
+    const { isLoggedIn } = req.session;
 
-    //sanitise user input
-    firstname = firstname.trim();
-    surname = surname.trim();
-    email = email.trim();
-
-    /* log out for testing
-    console.log(validatePassword(password));
-    console.log(validateEmail(email));
-    console.log(validateName(firstname));
-    console.log(validateName(surname));
-    */
-
-    //perform validation checks on data
-    if (validateName(firstname) && validateName(surname) && validateEmail(email) && validatePassword(password)) {
-
-        //check if user already exists
-        const vals = [email];
-        const selectSQL = `SELECT user_id FROM user WHERE email_address = ?`;
-
-        try {
-            const [userDetails, fielddata] = await db.query(selectSQL, vals);
-            if (userDetails.length >= 1) {
-                console.log('User exists, cant complete registration');
-                //TODO stop registration and inform the user
-            } else {
-                console.log('User does not exist');
-                //continue registration - we have validated the data and checked the email doesnt already exist
-
-                //salt and hash password
-                const hashed = await hashPassword(password);
-                console.log(`hashed password ${hashed}`);
-
-                const valsToInsert = [firstname, surname, email, hashed];
-                const insertSQL = `INSERT INTO user (first_name, last_name, email_address, password) VALUES (?, ?, ?, ?)`;
-
-                //insert user to database
-                const [rows, fielddata] = await db.query(insertSQL, valsToInsert);
-                console.log('success');
-
-                //TODO
-                //insert session
-                //redirect to user home?
-
-            }
-        } catch (err) {
-            if (err) console.log(err);
-        }
+    //check if user is already logged in, if so redirect to user home page
+    if (isLoggedIn) {
+        res.redirect('/user/home');
     } else {
-        //invalid data - did not pass validation functions
-        console.log('invalid data entered!!');
+        //user isnt logged in, safe to continue registration
+
+        let { firstname, surname, email, password } = req.body;
+        console.log(`${firstname} ${surname} ${email} ${password}`);
+
+        //sanitise user input
+        firstname = firstname.trim();
+        surname = surname.trim();
+        email = email.trim();
+
+        /* log out for testing
+        console.log(validatePassword(password));
+        console.log(validateEmail(email));
+        console.log(validateName(firstname));
+        console.log(validateName(surname));
+        */
+
+        //perform validation checks on data
+        if (validateName(firstname) && validateName(surname) && validateEmail(email) && validatePassword(password)) {
+
+            //check if user already exists
+            const vals = [email];
+            const selectSQL = `SELECT user_id FROM user WHERE email_address = ?`;
+
+            try {
+                const [userDetails, fielddata] = await db.query(selectSQL, vals);
+                if (userDetails.length >= 1) {
+                    console.log('User exists, cant complete registration');
+                    //TODO stop registration and inform the user
+                } else {
+                    console.log('User does not exist');
+                    //continue registration - we have validated the data and checked the email doesnt already exist
+
+                    //salt and hash password
+                    const hashed = await hashPassword(password);
+                    console.log(`hashed password ${hashed}`);
+
+                    const valsToInsert = [firstname, surname, email, hashed];
+                    const insertSQL = `INSERT INTO user (first_name, last_name, email_address, password) VALUES (?, ?, ?, ?)`;
+
+                    //insert user to database
+                    const [rows, fielddata] = await db.query(insertSQL, valsToInsert);
+                    console.log('success');
+
+                    //TODO
+                    //insert session
+                    //redirect to user home?
+
+                }
+            } catch (err) {
+                if (err) console.log(err);
+            }
+        } else {
+            //invalid data - did not pass validation functions
+            console.log('invalid data entered!!');
+        }
     }
 };
 
