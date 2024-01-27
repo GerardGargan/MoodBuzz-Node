@@ -1,7 +1,7 @@
 body::before {
     display: block;
     content: '';
-    height: 60px;
+    height: 70px;
 }
 
 html,
@@ -62,4 +62,8 @@ body {
              /* <length> | <length> | <length> | <length> | <color> */
     box-shadow: 5px 5px 0px 3px rgba(0,0,0,0.8);
 }
+
+.bigger-icon {
+    font-size: 3em; 
+  }
 

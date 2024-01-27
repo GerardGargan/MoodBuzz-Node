@@ -1,3 +1,4 @@
+const { get } = require('http');
 const db = require('./../util/dbconn');
 const bcrypt = require('bcrypt');
 
@@ -53,7 +54,8 @@ exports.postLogin = async (req, res) => {
                     const session = req.session;
                     session.isLoggedIn = true;
                     session.userid = userData[0].user_id;
-                    session.userName = userData[0].first_name;
+                    session.firstName = userData[0].first_name;
+                    session.lastName = userData[0].last_name;
                     console.log(session);
                     //redirect to user homepage
                     res.redirect('/user/home');
@@ -148,7 +150,7 @@ exports.postRegister = async (req, res) => {
 };
 
 exports.getUserHomePage = async (req, res) => {
-    const { isLoggedIn, userid, userName } = req.session;
+    const { isLoggedIn, userid, firstName } = req.session;
 
     //check if user is logged in
     if (isLoggedIn) {
@@ -210,7 +212,7 @@ exports.getUserHomePage = async (req, res) => {
             }
 
             //render the page and data
-            res.render('userhome', { currentPage: 'userhome', groupedDataSorted, emotions, numberOfSnapshots, todaysSnapMessage, userName });
+            res.render('userhome', { currentPage: 'userhome', groupedDataSorted, emotions, numberOfSnapshots, todaysSnapMessage, firstName });
         } catch (err) {
             throw err;
         }
@@ -225,7 +227,7 @@ exports.getUserHomePage = async (req, res) => {
 
 exports.getNewSnapshotPage = async (req, res) => {
 
-    const { isLoggedIn, userName, userid } = req.session;
+    const { isLoggedIn, firstName, userid, lastName } = req.session;
 
     //check if user is logged in
     if (isLoggedIn) {
@@ -238,7 +240,10 @@ exports.getNewSnapshotPage = async (req, res) => {
 
         //console.log(JSON.stringify(groupedData));
         //console.log(triggerData);
-        res.render('snapshot', { groupedData, triggerData, currentPage: 'snapshot' });
+        const currentDate = formatDatabaseDate(getCurrentDate())
+        const dateTime = `${currentDate} ${getCurrentTime()}`;
+
+        res.render('snapshot', { groupedData, triggerData, currentPage: 'snapshot', lastName, firstName, dateTime });
 
     } else {
         //user isnt logged in - redirect to login page
@@ -248,7 +253,7 @@ exports.getNewSnapshotPage = async (req, res) => {
 
 exports.processNewSnapshot = async (req, res) => {
 
-    const { isLoggedIn, userName, userid } = req.session;
+    const { isLoggedIn, firstName, userid } = req.session;
 
     //check user is logged in
     if (isLoggedIn) {
