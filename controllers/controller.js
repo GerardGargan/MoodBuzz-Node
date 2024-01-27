@@ -118,12 +118,12 @@ exports.getUserHomePage = async (req, res) => {
     //check if user is logged in
     if(isLoggedIn) {        
         //this query retrieves the data from snapshots, and the emotions/levels recorded on those snapshots
-        const selectSnapshots = `SELECT snapshot.snapshot_id, date, time, emotion, emotion.emotion_id, rating FROM snapshot INNER JOIN snapshot_emotion ON snapshot.snapshot_id = snapshot_emotion.snapshot_id INNER JOIN emotion ON snapshot_emotion.emotion_id = emotion.emotion_id WHERE user_id = 4`; //user id hardcoded for now
+        const selectSnapshots = `SELECT snapshot.snapshot_id, date, time, emotion, emotion.emotion_id, rating FROM snapshot INNER JOIN snapshot_emotion ON snapshot.snapshot_id = snapshot_emotion.snapshot_id INNER JOIN emotion ON snapshot_emotion.emotion_id = emotion.emotion_id WHERE user_id = ?`; 
         //this query selects the emotions for our table headers
         const selectEmotions = `SELECT emotion FROM emotion`;
 
-        const todaysDate = [getCurrentDate()];
-        const selectTodaysSnapshots = `SELECT COUNT(snapshot_id) AS count FROM snapshot WHERE date = ?`;
+        const vals = [getCurrentDate(), userid];
+        const selectTodaysSnapshots = `SELECT COUNT(snapshot_id) AS count FROM snapshot WHERE date = ? AND user_id = ?`;
 
         //set up an empty array (for parsing data into an appropriate data structure to pass to the ejs template)
         const groupedData = {};
@@ -132,8 +132,8 @@ exports.getUserHomePage = async (req, res) => {
             
             //run the queries
             const [emotions, fieldData] = await db.query(selectEmotions);
-            const [data, fielddata] = await  db.query(selectSnapshots);
-            const [todaysSnapshots, fieldData2] = await db.query(selectTodaysSnapshots, todaysDate);
+            const [data, fielddata] = await  db.query(selectSnapshots, [userid]);
+            const [todaysSnapshots, fieldData2] = await db.query(selectTodaysSnapshots, vals);
             
             //initialise counter
             let numberOfSnapshots = 0;
@@ -175,7 +175,7 @@ exports.getUserHomePage = async (req, res) => {
             }
 
             //render the page and data
-            res.render('userhome', { currentPage: 'userhome', groupedDataSorted, emotions, numberOfSnapshots, todaysSnapMessage });
+            res.render('userhome', { currentPage: 'userhome', groupedDataSorted, emotions, numberOfSnapshots, todaysSnapMessage, userName });
         } catch(err) {
             throw err;
         }
@@ -190,17 +190,25 @@ exports.getUserHomePage = async (req, res) => {
 
 exports.getNewSnapshotPage = async (req, res) => {
 
-        const groupedData = await fetchEmotionData();
-
-        const selectTriggers = `SELECT trigger_id, trigger_name, icon FROM triggers`;
-
-        //run the query to get the triggers
-        const [triggerData, fieldData] = await db.query(selectTriggers);
-
-        //console.log(JSON.stringify(groupedData));
-        //console.log(triggerData);
-        res.render('snapshot', { groupedData, triggerData, currentPage: 'snapshot' });
+    const { isLoggedIn, userName, userid } = req.session;
     
+    //check if user is logged in
+    if(isLoggedIn) {
+
+    const groupedData = await fetchEmotionData();
+
+    const selectTriggers = `SELECT trigger_id, trigger_name, icon FROM triggers`;
+    //run the query to get the triggers
+    const [triggerData, fieldData] = await db.query(selectTriggers);
+
+    //console.log(JSON.stringify(groupedData));
+    //console.log(triggerData);
+     res.render('snapshot', { groupedData, triggerData, currentPage: 'snapshot' });
+
+    } else {
+        //user isnt logged in - redirect to login page
+        res.redirect('/login');
+    }
 };
 
 exports.processNewSnapshot = async (req, res) => {
