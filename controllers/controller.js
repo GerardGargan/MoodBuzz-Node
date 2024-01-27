@@ -31,8 +31,15 @@ exports.postLogin = async (req, res) => {
             const passwordMatch = await comparePassword(password, hashedPassword);
             if (passwordMatch) {
                 //email and password matches - successful log in
-                //TODO - store session and redirect to user home page
-                console.log('Password match');
+                console.log('Email and Password match - ok to log in!');
+                //set up the session
+                const session = req.session;
+                session.isLoggedIn = true;
+                session.userid = userData[0].user_id;
+                session.userName = userData[0].first_name;
+                console.log(session);
+                //redirect to user homepage
+                res.redirect('/user/home');
             } else {
                 console.log('Password does not match')
             }
