@@ -6,7 +6,15 @@ exports.getIndex = (req, res) => {
 };
 
 exports.getLogin = (req, res) => {
-    res.render('login', { currentPage: 'login' });
+    const { isLoggedIn } = req.session;
+
+    //check if user is already logged in, if so redirect to user home page
+    if(isLoggedIn){
+        res.redirect('/user/home');
+    } else{
+        //user is not logged in, render login page
+        res.render('login', { currentPage: 'login' });
+    }
 };
 
 exports.postLogin = async (req, res) => {
@@ -52,7 +60,15 @@ exports.postLogin = async (req, res) => {
 };
 
 exports.getRegister = (req, res) => {
-    res.render('register', { currentPage: 'register' });
+    const { isLoggedIn } = req.session;
+
+    //check if user is already logged in, if so redirect to user home page
+    if(isLoggedIn){
+        res.redirect('/user/home');
+    } else {
+        //user is not logged in, render register page
+       res.render('register', { currentPage: 'register' }); 
+    }
 };
 
 exports.postRegister = async (req, res) => {
