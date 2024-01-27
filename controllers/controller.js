@@ -115,7 +115,7 @@ exports.getUserHomePage = async (req, res) => {
     const selectTodaysSnapshots = `SELECT COUNT(snapshot_id) AS count FROM snapshot WHERE date = ?`;
 
     //set up an empty array (for parsing data into an appropriate data structure to pass to the ejs template)
-    const groupedData = [];
+    const groupedData = {};
 
     try {
         
@@ -146,12 +146,17 @@ exports.getUserHomePage = async (req, res) => {
             groupedData[snapshot_id].emotions.push({emotion_id: emotion_id, emotion: emotion, rating: rating});
         });
 
+        //transform to an array so we can sort the values
+        var groupedDataArray = Object.values(groupedData);
+
         //sort the snapshots based on the id, in descending order - so that the most recent is displayed first.
-        const groupedDataSortedDesc = groupedData.sort((a,b) => {
+        const groupedDataSorted = groupedDataArray.sort((a,b) => {
             return b.snapshot_id - a.snapshot_id;
         });
 
+        //set up todays message
         let todaysSnapMessage = null;
+        //check if there have been snapshots today and display an appropriate message
         if(todaysSnapshots[0].count>0) {
             todaysSnapMessage = { message: `You have recorded ${todaysSnapshots[0].count} snapshots today! Well done!`};
         } else {
@@ -159,7 +164,7 @@ exports.getUserHomePage = async (req, res) => {
         }
 
         //render the page and data
-        res.render('userhome', { currentPage: 'userhome', groupedDataSortedDesc, emotions, numberOfSnapshots, todaysSnapMessage });
+        res.render('userhome', { currentPage: 'userhome', groupedDataSorted, emotions, numberOfSnapshots, todaysSnapMessage });
     } catch(err) {
         throw err;
     }

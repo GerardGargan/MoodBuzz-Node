@@ -1,3 +1,4 @@
+        
         const passwordInput = document.getElementById('password');
         const visibilityButton = document.getElementById('visibility');
 
