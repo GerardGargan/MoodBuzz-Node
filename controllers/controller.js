@@ -116,9 +116,9 @@ exports.getUserHomePage = async (req, res) => {
     const { isLoggedIn, userid, userName } = req.session;
 
     //check if user is logged in
-    if(isLoggedIn) {        
+    if (isLoggedIn) {
         //this query retrieves the data from snapshots, and the emotions/levels recorded on those snapshots
-        const selectSnapshots = `SELECT snapshot.snapshot_id, date, time, emotion, emotion.emotion_id, rating FROM snapshot INNER JOIN snapshot_emotion ON snapshot.snapshot_id = snapshot_emotion.snapshot_id INNER JOIN emotion ON snapshot_emotion.emotion_id = emotion.emotion_id WHERE user_id = ?`; 
+        const selectSnapshots = `SELECT snapshot.snapshot_id, date, time, emotion, emotion.emotion_id, rating FROM snapshot INNER JOIN snapshot_emotion ON snapshot.snapshot_id = snapshot_emotion.snapshot_id INNER JOIN emotion ON snapshot_emotion.emotion_id = emotion.emotion_id WHERE user_id = ?`;
         //this query selects the emotions for our table headers
         const selectEmotions = `SELECT emotion FROM emotion`;
 
@@ -129,21 +129,21 @@ exports.getUserHomePage = async (req, res) => {
         const groupedData = {};
 
         try {
-            
+
             //run the queries
             const [emotions, fieldData] = await db.query(selectEmotions);
-            const [data, fielddata] = await  db.query(selectSnapshots, [userid]);
+            const [data, fielddata] = await db.query(selectSnapshots, [userid]);
             const [todaysSnapshots, fieldData2] = await db.query(selectTodaysSnapshots, vals);
-            
+
             //initialise counter
             let numberOfSnapshots = 0;
             //loop through each row, we need to create an array of snapshot objects, that each contain an array of emotions with ratings
             data.forEach(row => {
                 //destructure into variables
-                const {snapshot_id, date, time, emotion, emotion_id, rating} = row;
+                const { snapshot_id, date, time, emotion, emotion_id, rating } = row;
 
                 //check if the snapshot object already exists in the array, if not create the object
-                if(!groupedData[snapshot_id]) {
+                if (!groupedData[snapshot_id]) {
                     groupedData[snapshot_id] = {
                         snapshot_id,
                         date: formatDatabaseDate(date),
@@ -151,32 +151,32 @@ exports.getUserHomePage = async (req, res) => {
                         emotions: [],
                     }
                     //increase the counter to keep track of how many snapshots there are in the array
-                    numberOfSnapshots +=1;
+                    numberOfSnapshots += 1;
                 }
                 //add the emotion into the emotions array (within the snapshot object), along with the id and rating
-                groupedData[snapshot_id].emotions.push({emotion_id: emotion_id, emotion: emotion, rating: rating});
+                groupedData[snapshot_id].emotions.push({ emotion_id: emotion_id, emotion: emotion, rating: rating });
             });
 
             //transform to an array so we can sort the values
             var groupedDataArray = Object.values(groupedData);
 
             //sort the snapshots based on the id, in descending order - so that the most recent is displayed first.
-            const groupedDataSorted = groupedDataArray.sort((a,b) => {
+            const groupedDataSorted = groupedDataArray.sort((a, b) => {
                 return b.snapshot_id - a.snapshot_id;
             });
 
             //set up todays message
             let todaysSnapMessage = null;
             //check if there have been snapshots today and display an appropriate message
-            if(todaysSnapshots[0].count>0) {
-                todaysSnapMessage = { message: `You have recorded ${todaysSnapshots[0].count} snapshots today! Well done!`};
+            if (todaysSnapshots[0].count > 0) {
+                todaysSnapMessage = { message: `You have recorded ${todaysSnapshots[0].count} snapshots today! Well done!` };
             } else {
-                todaysSnapMessage = { message: `You have not recorded any snapshots yet today`};
+                todaysSnapMessage = { message: `You have not recorded any snapshots yet today` };
             }
 
             //render the page and data
             res.render('userhome', { currentPage: 'userhome', groupedDataSorted, emotions, numberOfSnapshots, todaysSnapMessage, userName });
-        } catch(err) {
+        } catch (err) {
             throw err;
         }
     } else {
@@ -191,19 +191,19 @@ exports.getUserHomePage = async (req, res) => {
 exports.getNewSnapshotPage = async (req, res) => {
 
     const { isLoggedIn, userName, userid } = req.session;
-    
+
     //check if user is logged in
-    if(isLoggedIn) {
+    if (isLoggedIn) {
 
-    const groupedData = await fetchEmotionData();
+        const groupedData = await fetchEmotionData();
 
-    const selectTriggers = `SELECT trigger_id, trigger_name, icon FROM triggers`;
-    //run the query to get the triggers
-    const [triggerData, fieldData] = await db.query(selectTriggers);
+        const selectTriggers = `SELECT trigger_id, trigger_name, icon FROM triggers`;
+        //run the query to get the triggers
+        const [triggerData, fieldData] = await db.query(selectTriggers);
 
-    //console.log(JSON.stringify(groupedData));
-    //console.log(triggerData);
-     res.render('snapshot', { groupedData, triggerData, currentPage: 'snapshot' });
+        //console.log(JSON.stringify(groupedData));
+        //console.log(triggerData);
+        res.render('snapshot', { groupedData, triggerData, currentPage: 'snapshot' });
 
     } else {
         //user isnt logged in - redirect to login page
@@ -213,57 +213,66 @@ exports.getNewSnapshotPage = async (req, res) => {
 
 exports.processNewSnapshot = async (req, res) => {
 
-    //Extract data from the URL (assuming they are in the query parameters)
-    const formData = req.query;
-    const { notes } = req.query;
-    const user_id = 4; //hardcode for now
+    const { isLoggedIn, userName, userid } = req.session;
 
-    //Process the form data and prepare it for database insertion
-    const emotionsToInsert = [];
+    //check user is logged in
+    if (isLoggedIn) {
+        //Extract data from the URL (assuming they are in the query parameters)
+        const formData = req.query;
+        const { notes } = req.query;
 
-    try {
-        //insert snapshot record first
-        const snapshotInsert = `INSERT INTO snapshot (user_id, date, time, note) VALUES (?, ?, ?, ?)`;
-        const date = getCurrentDate();
-        const time = getCurrentTime();
-        const snapshotVals = [user_id, date, time, notes];
-        const triggersToInsert = Array.isArray(req.query.trigger) ? req.query.trigger : (req.query.trigger ? [req.query.trigger] : []);
-        //Ensures triggers are stored in an array so we can later iterate through - as if only one trigger is submitted it does not create an array, it is stored as a string. We have avoided this behaviour.
-        //We have also done a check to ensure we dont create an array with one object of undefined - if no triggers are selected
-        const [snapInsert, fieldData] = await db.query(snapshotInsert, snapshotVals);
-        //store the id of the snapshot - needs to be inserted on each many to many record we insert on the many to many table
-        const snapshotId = snapInsert.insertId;
-        //loop through emotions and values in the url query and insert into array
-        for (const id in formData) {
-            if (Object.hasOwnProperty.call(formData, id) && id != 'notes' && id != 'trigger') {
-                const value = formData[id];
-                // push the data into the array as an object with the snapshot id, emotion id and the value submitted
-                emotionsToInsert.push({ snapshotId, id, value });
+        //Process the form data and prepare it for database insertion
+        const emotionsToInsert = [];
+
+        try {
+            //insert snapshot record first
+            const snapshotInsert = `INSERT INTO snapshot (user_id, date, time, note) VALUES (?, ?, ?, ?)`;
+            const date = getCurrentDate();
+            const time = getCurrentTime();
+            const snapshotVals = [userid, date, time, notes];
+            const triggersToInsert = Array.isArray(req.query.trigger) ? req.query.trigger : (req.query.trigger ? [req.query.trigger] : []);
+            //Ensures triggers are stored in an array so we can later iterate through - as if only one trigger is submitted it does not create an array, it is stored as a string. We have avoided this behaviour.
+            //We have also done a check to ensure we dont create an array with one object of undefined - if no triggers are selected
+            const [snapInsert, fieldData] = await db.query(snapshotInsert, snapshotVals);
+            //store the id of the snapshot - needs to be inserted on each many to many record we insert on the many to many table
+            const snapshotId = snapInsert.insertId;
+            //loop through emotions and values in the url query and insert into array
+            for (const id in formData) {
+                if (Object.hasOwnProperty.call(formData, id) && id != 'notes' && id != 'trigger') {
+                    const value = formData[id];
+                    // push the data into the array as an object with the snapshot id, emotion id and the value submitted
+                    emotionsToInsert.push({ snapshotId, id, value });
+                }
             }
-        }
-        //console.log(emotionsToInsert);
+            //console.log(emotionsToInsert);
 
-        //now insert each emotion record in the many to many table snapshot_emotion
-        if (emotionsToInsert.length > 0) { //check first if we have any records to insert
-            const emotionQuery = 'INSERT INTO snapshot_emotion (snapshot_id, emotion_id, rating) VALUES ?';
-            const [rows, fielddata] = await db.query(emotionQuery, [emotionsToInsert.map(record => [record.snapshotId, record.id, record.value])]);
-        }
+            //now insert each emotion record in the many to many table snapshot_emotion
+            if (emotionsToInsert.length > 0) { //check first if we have any records to insert
+                const emotionQuery = 'INSERT INTO snapshot_emotion (snapshot_id, emotion_id, rating) VALUES ?';
+                const [rows, fielddata] = await db.query(emotionQuery, [emotionsToInsert.map(record => [record.snapshotId, record.id, record.value])]);
+            }
 
-        //now insert each trigger in the many to many table snapshot_trigger
-        if (triggersToInsert.length > 0) {
-            console.log(triggersToInsert.length);
-            console.log(triggersToInsert);
-            const triggerQuery = `INSERT INTO snapshot_trigger (snapshot_id, trigger_id) VALUES (?, ?)`;
-            triggersToInsert.forEach(async trig => {
-                const vals = [snapshotId, trig];
-                const [data, fielddata] = await db.query(triggerQuery, vals);
-            });
-        }
+            //now insert each trigger in the many to many table snapshot_trigger
+            if (triggersToInsert.length > 0) {
+                console.log(triggersToInsert.length);
+                console.log(triggersToInsert);
+                const triggerQuery = `INSERT INTO snapshot_trigger (snapshot_id, trigger_id) VALUES (?, ?)`;
+                triggersToInsert.forEach(async trig => {
+                    const vals = [snapshotId, trig];
+                    const [data, fielddata] = await db.query(triggerQuery, vals);
+                });
+            }
 
-        res.redirect('/user/home');
-    } catch (err) {
-        throw err;
+            res.redirect('/user/home');
+        } catch (err) {
+            throw err;
+        }
+    } else {
+        //user not logged in - redirect to login page
+        res.redirect('/login');
     }
+
+
 
 };
 
@@ -293,7 +302,7 @@ function validateEmail(email) {
     */
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (emailRegex.test(email)) {
+    if (emailRegex.test(email)) {
         return true;
     } else {
         return false;
@@ -362,7 +371,7 @@ function getCurrentTime() {
 function formatDatabaseDate(date) {
     const databaseDate = new Date(date);
     const year = databaseDate.getFullYear();
-    const month = databaseDate.getMonth() +1; //zero indexed
+    const month = databaseDate.getMonth() + 1; //zero indexed
     const day = databaseDate.getDate();
 
     return `${day}/${month}/${year}`;
@@ -370,7 +379,7 @@ function formatDatabaseDate(date) {
 
 async function fetchEmotionData() {
     const selectRatings = `SELECT emotion.emotion_id, emotion, rating, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id`;
-    
+
     try {
         //run query to get the emotions and ratings data
         const [data, fielddata2] = await db.query(selectRatings);
