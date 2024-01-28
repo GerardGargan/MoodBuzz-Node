@@ -374,7 +374,7 @@ exports.getViewSnapshot = async (req, res) => {
         */
         
 
-        res.render('viewsnapshot', {snapshot: groupedData[id], triggers: trigrows});
+        res.render('viewsnapshot', {snapshot: groupedData[id], triggers: trigrows, firstName, lastName});
 
     } else {
         //users not logged in - redirect

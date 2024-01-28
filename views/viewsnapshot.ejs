@@ -25,7 +25,28 @@
 
             <section class="bg-section">
                 <div class="container">
-                    <div class="row py-4">
+                    <!--User info section-->
+                    <div class="pb-4 pt-2">
+                        <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle bigger-icon"></i>
+                            <div class="ps-2 pt-3">
+                                <div>
+                                    <%= firstName %> <%= lastName %>
+                                </div>
+                                <div>
+                                    <span class="small"><%= date %> <%= time %></span>
+                                </div>
+                            </div>
+                            <!--Action buttons-->
+                            <div class="ms-auto mt-auto">
+                                <a href="/user/snapshot/edit/<%= snapshot_id %>" class="btn btn-primary me-2">Edit</a>
+                                <a href="/user/snapshot/del/<%= snapshot_id %>" class="btn btn-danger">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Emotion section-->
+                    <div class="row pb-4">
                         <div class="col">
                             <div class="card">
                                 <h5 class="card-header">Emotion Levels</h5>
@@ -104,6 +125,8 @@
                               </div>
                         </div>
                     </div>
+
+                    
 
                 </div>
             </section>
