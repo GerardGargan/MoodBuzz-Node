@@ -16,12 +16,25 @@
                 <li class="nav-item">
                     <a href="./#questions" class="nav-link">Questions</a>
                 </li>
-                <li class="nav-item">
-                    <a href="./register" class="nav-link">Create Account</a>
-                </li>
-                <li class="nav-item">
-                    <a href="./login" class="nav-link">Login</a>
-                </li>
+                <% if(isLoggedIn) { %>
+                    <li class="nav-item">
+                        <a href="/user/home" class="nav-link">User Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/user/snapshot" class="nav-link">New Snapshot</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/user/logout" class="nav-link">Logout</a>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item">
+                        <a href="./register" class="nav-link">Create Account</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./login" class="nav-link">Login</a>
+                    </li>
+                <% } %>
+                
             </ul>
         </div>
     </div>
