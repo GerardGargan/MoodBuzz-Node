@@ -382,6 +382,46 @@ exports.getViewSnapshot = async (req, res) => {
     }
 };
 
+exports.deleteSnapshot = async (req, res) => {
+    //get the snapshot id from the parameters
+    const { id } = req.params;
+    //get session details
+    const { isLoggedIn, userid, firstName, lastName } = req.session;
+
+    //check user is logged in
+    if(isLoggedIn){
+        //check the snapshot exists AND that it belongs to the current user logged in - query the database
+        const snapshotQuery = `SELECT * FROM snapshot WHERE snapshot_id = ? AND user_id = ?`;
+        const [snapshotRows, fieldData] = await db.query(snapshotQuery, [id, userid]);
+
+        //check that a snapshot has been returned
+        if(snapshotRows.length>0) {
+            //snapshot exists, perform deletion
+            const deleteTriggersQuery = `DELETE FROM snapshot_trigger WHERE snapshot_id = ?`;
+            const deleteEmotionsLogged = `DELETE FROM snapshot_emotion WHERE snapshot_id = ?`;
+            const deleteSnapshotQuery = `DELETE FROM snapshot WHERE snapshot_id = ?`;
+
+            try{
+            const [delTrig, fielddata] = await db.query(deleteTriggersQuery ,[id]);
+            const [delEmo, fielddata2] = await db.query(deleteEmotionsLogged, [id]);
+            const [delSap, fielddata3] = await db.query(deleteSnapshotQuery, [id]);
+            } catch(err) {
+                throw err;
+            }
+            console.log('Deletion successful');
+            res.redirect('/user/home');
+
+        } else {
+            //snapshot doesnt exist or belongs to another user
+            console.log('Snapshot doesnt exist or belongs to another user');
+        }
+    } else {
+        //user not logged in - redirect to login
+        res.redirect('/login');
+    }
+    
+};
+
 exports.getNotFound = (req, res) => {
     //render page not found
     res.status(404).send('<h1>404: Page Not Found</h1>');
