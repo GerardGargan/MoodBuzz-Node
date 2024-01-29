@@ -5,10 +5,13 @@ const { group } = require('console');
 const util = require('util');
 
 exports.getIndex = (req, res) => {
-    res.render('index', { currentPage: 'home' });
+    //store if the user is logged in & pass to the template (for dynamic navbar links)
+    const { isLoggedIn } = req.session;
+    res.render('index', { currentPage: 'home', isLoggedIn });
 };
 
 exports.getLogin = (req, res) => {
+
     const { isLoggedIn } = req.session;
 
     //check if user is already logged in, if so redirect to user home page
@@ -16,7 +19,7 @@ exports.getLogin = (req, res) => {
         res.redirect('/user/home');
     } else {
         //user is not logged in, render login page
-        res.render('login', { currentPage: 'login' });
+        res.render('login', { currentPage: 'login', isLoggedIn });
     }
 };
 
@@ -81,7 +84,7 @@ exports.getRegister = (req, res) => {
         res.redirect('/user/home');
     } else {
         //user is not logged in, render register page
-        res.render('register', { currentPage: 'register' });
+        res.render('register', { currentPage: 'register', isLoggedIn });
     }
 };
 
@@ -122,7 +125,7 @@ exports.postRegister = async (req, res) => {
                     console.log('User exists, cant complete registration');
                     //TODO stop registration and inform the user
                 } else {
-                    console.log('User does not exist');
+                    console.log('User does not already exist');
                     //continue registration - we have validated the data and checked the email doesnt already exist
 
                     //salt and hash password
@@ -137,8 +140,9 @@ exports.postRegister = async (req, res) => {
                     console.log('success');
 
                     //TODO
-                    //insert session
+                    //insert success message
                     //redirect to user home?
+                    res.redirect('/login');
 
                 }
             } catch (err) {
@@ -214,7 +218,7 @@ exports.getUserHomePage = async (req, res) => {
             }
 
             //render the page and data
-            res.render('userhome', { currentPage: 'userhome', groupedDataSorted, emotions, numberOfSnapshots, todaysSnapMessage, firstName });
+            res.render('userhome', {groupedDataSorted, emotions, numberOfSnapshots, todaysSnapMessage, firstName });
         } catch (err) {
             throw err;
         }
@@ -245,7 +249,7 @@ exports.getNewSnapshotPage = async (req, res) => {
         const currentDate = formatDatabaseDate(getCurrentDate())
         const dateTime = `${currentDate} ${getCurrentTime()}`;
 
-        res.render('snapshot', { groupedData, triggerData, currentPage: 'snapshot', lastName, firstName, dateTime });
+        res.render('snapshot', { groupedData, triggerData, lastName, firstName, dateTime });
 
     } else {
         //user isnt logged in - redirect to login page
