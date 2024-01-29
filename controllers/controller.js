@@ -309,7 +309,7 @@ exports.processNewSnapshot = async (req, res) => {
                 });
             }
 
-            res.redirect('/user/home');
+            res.redirect(`/user/snapshot/view/${snapshotId}`);
         } catch (err) {
             throw err;
         }
