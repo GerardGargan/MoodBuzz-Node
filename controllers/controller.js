@@ -480,11 +480,64 @@ exports.getEdit = async (req, res) => {
 
         
         
-       console.log(JSON.stringify(groupedData));
+       //console.log(JSON.stringify(groupedData));
         
        res.render('editsnapshot', {snapshot: groupedData[id], triggers: trigrows, firstName, lastName});
     } else {
         //not logged in, redirect to login
+        res.redirect('/login');
+    }
+};
+
+exports.getEditUpdate = async (req, res) => {
+    const { isLoggedIn, firstName, userid } = req.session;
+    const { id } = req.params;
+
+    //check user is logged in
+    if (isLoggedIn) {
+        //Extract data from the URL (assuming they are in the query parameters)
+        const formData = req.query;
+        const { notes } = req.query;
+
+        //update notes
+        //update triggers (first delete existing)
+        //ignore emotion data
+
+        //Process the form data and prepare it for database insertion
+        const emotionsToInsert = [];
+
+        try {
+            //insert snapshot record first
+            const snapshotUpdate = `UPDATE snapshot SET note = ? WHERE snapshot_id = ?`;
+            const date = getCurrentDate();
+            const time = getCurrentTime();
+            const snapshotVals = [notes, id];
+            const triggersToInsert = Array.isArray(req.query.trigger) ? req.query.trigger : (req.query.trigger ? [req.query.trigger] : []);
+            //Ensures triggers are stored in an array so we can later iterate through - as if only one trigger is submitted it does not create an array, it is stored as a string. We have avoided this behaviour.
+            //We have also done a check to ensure we dont create an array with one object of undefined - if no triggers are selected
+            const [snapUpdate, fieldData] = await db.query(snapshotUpdate, snapshotVals);
+            
+            //delete all existing triggers, we will reinsert the triggers submitted to ensure we dont retain any that may have been deselected
+            const clearTriggers = `DELETE FROM snapshot_trigger WHERE snapshot_id = ?`;
+            const [delTrig, fieldData2] = await db.query(clearTriggers, [id]);
+
+           //now insert each trigger in the many to many table snapshot_trigger
+            if (triggersToInsert.length > 0) {
+                console.log(triggersToInsert.length);
+                console.log(triggersToInsert);
+                const triggerQuery = `INSERT INTO snapshot_trigger (snapshot_id, trigger_id) VALUES (?, ?)`;
+                triggersToInsert.forEach(async trig => {
+                    const vals = [id, trig];
+                    const [data, fielddata] = await db.query(triggerQuery, vals);
+                });
+            }
+
+            res.redirect(`/user/snapshot/view/${id}`);
+        } catch (err) {
+            throw err;
+        }
+    } else {
+        //user not logged in - redirect to login page
         res.redirect('/login');
     }
 };

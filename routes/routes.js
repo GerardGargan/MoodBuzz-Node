@@ -15,6 +15,7 @@ router.get('/user/snapshot/view/:id', controller.getViewSnapshot);
 router.get('/user/snapshot/del/:id', controller.deleteSnapshot);
 router.get('/user/logout', controller.getLogout);
 router.get('/user/snapshot/edit/:id', controller.getEdit);
+router.get('/user/snapshot/update/:id', controller.getEditUpdate);
 router.get('*', controller.getNotFound);
 
 module.exports = router;
