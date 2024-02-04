@@ -446,43 +446,51 @@ exports.getEdit = async (req, res) => {
         const [rows, fielddata] = await db.query(queryEmotions, vals);
         //console.log(rows);
 
-        const groupedData = {};
+        if(rows.length > 0) {
+            const groupedData = {};
 
-        rows.forEach(row => {
-            const { snapshot_id, user_id, note, date, time, snapshot_emotion_id, rating, emotion, emotion_id } = row;
-            if (!groupedData[snapshot_id]) {
-                groupedData[snapshot_id] = {
-                    snapshot_id,
-                    user_id,
-                    note,
-                    date: formatDatabaseDate(date),
-                    time,
-                    emotions: {},
-                }
-            }
-            groupedData[snapshot_id].emotions[emotion_id] = { emotion: emotion, emotion_id: emotion_id, snapshot_emotion_id: snapshot_emotion_id, rating: rating, ratings: {} };
-        });
-
-        //get rating data for each emotion and insert it into the groupedData object, under each emotion as an array of ratings
-        for (const emotion of Object.values(groupedData[id].emotions)) {
-            const vals = [emotion.emotion_id];
-            const query = `SELECT rating, emotion.emotion_id, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id WHERE emotion.emotion_id = ?`;
-            const [rows, fielddata] = await db.query(query, vals);
             rows.forEach(row => {
-                emotion.ratings[row.rating] = {rating: row.rating, short_desc: row.short_desc, long_desc: row.long_desc};
+                const { snapshot_id, user_id, note, date, time, snapshot_emotion_id, rating, emotion, emotion_id } = row;
+                if (!groupedData[snapshot_id]) {
+                    groupedData[snapshot_id] = {
+                        snapshot_id,
+                        user_id,
+                        note,
+                        date: formatDatabaseDate(date),
+                        time,
+                        emotions: {},
+                    }
+                }
+                groupedData[snapshot_id].emotions[emotion_id] = { emotion: emotion, emotion_id: emotion_id, snapshot_emotion_id: snapshot_emotion_id, rating: rating, ratings: {} };
             });
+    
+            //get rating data for each emotion and insert it into the groupedData object, under each emotion as an array of ratings
+            for (const emotion of Object.values(groupedData[id].emotions)) {
+                const vals = [emotion.emotion_id];
+                const query = `SELECT rating, emotion.emotion_id, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id WHERE emotion.emotion_id = ?`;
+                const [rows, fielddata] = await db.query(query, vals);
+                rows.forEach(row => {
+                    emotion.ratings[row.rating] = {rating: row.rating, short_desc: row.short_desc, long_desc: row.long_desc};
+                });
+            }
+    
+            //get the triggers for the snapshot
+            const triggerQuery = `SELECT trigger_name, icon, triggers.trigger_id, snapshot_trigger_id, CASE WHEN snapshot_trigger.snapshot_trigger_id IS NOT NULL THEN true ELSE false END AS selected FROM triggers LEFT JOIN snapshot_trigger ON triggers.trigger_id = snapshot_trigger.trigger_id AND snapshot_trigger.snapshot_id = ?`;
+            const [trigrows, field] = await db.query(triggerQuery, [id]);
+            console.log(trigrows);
+    
+            
+            
+           //console.log(JSON.stringify(groupedData));
+            
+           res.render('editsnapshot', {snapshot: groupedData[id], triggers: trigrows, firstName, lastName});
+
+        } else {
+            console.log('Record doesnt exist or doesnt belong to the user');
+            res.redirect('/user/home');
         }
 
-        //get the triggers for the snapshot
-        const triggerQuery = `SELECT trigger_name, icon, triggers.trigger_id, snapshot_trigger_id, CASE WHEN snapshot_trigger.snapshot_trigger_id IS NOT NULL THEN true ELSE false END AS selected FROM triggers LEFT JOIN snapshot_trigger ON triggers.trigger_id = snapshot_trigger.trigger_id AND snapshot_trigger.snapshot_id = ?`;
-        const [trigrows, field] = await db.query(triggerQuery, [id]);
-        console.log(trigrows);
 
-        
-        
-       //console.log(JSON.stringify(groupedData));
-        
-       res.render('editsnapshot', {snapshot: groupedData[id], triggers: trigrows, firstName, lastName});
     } else {
         //not logged in, redirect to login
         res.redirect('/login');
@@ -508,10 +516,10 @@ exports.getEditUpdate = async (req, res) => {
 
         try {
             //insert snapshot record first
-            const snapshotUpdate = `UPDATE snapshot SET note = ? WHERE snapshot_id = ?`;
+            const snapshotUpdate = `UPDATE snapshot SET note = ? WHERE snapshot_id = ? AND user_id = ?`;
             const date = getCurrentDate();
             const time = getCurrentTime();
-            const snapshotVals = [notes, id];
+            const snapshotVals = [notes, id, userid];
             const triggersToInsert = Array.isArray(req.query.trigger) ? req.query.trigger : (req.query.trigger ? [req.query.trigger] : []);
             //Ensures triggers are stored in an array so we can later iterate through - as if only one trigger is submitted it does not create an array, it is stored as a string. We have avoided this behaviour.
             //We have also done a check to ensure we dont create an array with one object of undefined - if no triggers are selected
@@ -521,7 +529,7 @@ exports.getEditUpdate = async (req, res) => {
             const clearTriggers = `DELETE FROM snapshot_trigger WHERE snapshot_id = ?`;
             const [delTrig, fieldData2] = await db.query(clearTriggers, [id]);
 
-           //now insert each trigger in the many to many table snapshot_trigger
+           //now insert each trigger in the many to many table snapshot_trigger that was submitted in the form
             if (triggersToInsert.length > 0) {
                 console.log(triggersToInsert.length);
                 console.log(triggersToInsert);
