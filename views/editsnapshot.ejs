@@ -139,13 +139,12 @@
                                 <div class="col">
                                     <div class="card">
                                         <div class="card-header">
-                                            Submit Snapshot
+                                            Update Snapshot
                                         </div>
                                         <div class="card-body">
-                                            <h5 class="card-title">Save your snapshot!</h5>
-                                            <input type="Submit" value="Save Snapshot"
+                                            <h5 class="card-title">Update your snapshot!</h5>
+                                            <input type="Submit" value="Submit Changes"
                                                 class="btn btn-xl btn-success me-2">
-                                            <button class="btn btn-xl btn-primary" id="resetbutton">Reset Form</button>
                                         </div>
                                     </div>
                                 </div>
@@ -161,7 +160,7 @@
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
 
-                    const emotionsData = <%- JSON.stringify(snapshot) %>;
+                    const snapshot = <%- JSON.stringify(snapshot) %>;
 
                     //get all range elements on the page
                     const rangeItems2 = document.querySelectorAll('input[type="range"]');
@@ -172,36 +171,10 @@
                             displayVal.textContent = `${range.value}`;
                             let emotion_id = range.getAttribute('name');
                             let rating_desc_div = document.getElementById(`${emotion_id}_rating_desc`);
-                            rating_desc_div.innerText = emotionsData.emotions[emotion_id].ratings[range.value].short_desc;
-                            //rating_desc_div.innerText = emotionsData[emotion_id].rating[range.value - 1].shortdesc;
+                            rating_desc_div.innerText = snapshot.emotions[emotion_id].ratings[range.value].short_desc;
+                            //rating_desc_div.innerText = snapshot[emotion_id].rating[range.value - 1].shortdesc;
 
                         });
-                    });
-
-                    //obtain the reset button, range sliders, checkboxes and notes input elements
-                    const resetButton = document.getElementById('resetbutton');
-                    const rangeItems = document.querySelectorAll('input[type="range"]');
-                    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-                    const notes = document.getElementById('notes');
-
-                    //add an event listener to the reset button for a click event
-                    resetButton.addEventListener('click', (event) => {
-                        //prevent the default behaviour of a button to submit the form
-                        event.preventDefault();
-                        //loop through all range sliders and reset to the default of 5
-                        rangeItems.forEach((rangeItem) => {
-                            const valueDiv = document.getElementById(`${rangeItem.id}-val-display`);
-                            rangeItem.value = 5;
-                            valueDiv.innerText = `5`;
-                        });
-
-                        //reset all checkboxes to unchecked
-                        checkboxes.forEach((checkbox) => {
-                            checkbox.checked = false;
-                        });
-
-                        //set notes to be empty
-                        notes.value = '';
                     });
                 });
             </script>
