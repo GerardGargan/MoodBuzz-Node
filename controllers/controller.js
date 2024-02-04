@@ -332,53 +332,61 @@ exports.getViewSnapshot = async (req, res) => {
 
         const vals = [id, userid];
         const [rows, fielddata] = await db.query(queryEmotions, vals);
-        //console.log(rows);
+        
+        if(rows.length > 1) {
+            //snapshot exists and belongs to user logged in, safe to display
+            const groupedData = {};
 
-        const groupedData = {};
-
-        rows.forEach(row => {
-            const { snapshot_id, user_id, note, date, time, snapshot_emotion_id, rating, emotion, emotion_id } = row;
-            if (!groupedData[snapshot_id]) {
-                groupedData[snapshot_id] = {
-                    snapshot_id,
-                    user_id,
-                    note,
-                    date: formatDatabaseDate(date),
-                    time,
-                    emotions: [],
-                }
-            }
-            groupedData[snapshot_id].emotions.push({ emotion: emotion, emotion_id: emotion_id, snapshot_emotion_id: snapshot_emotion_id, rating: rating, ratings: {} });
-        });
-
-        //get rating data for each emotion and insert it into the groupedData object, under each emotion as an array of ratings
-        for (const emotion of groupedData[id].emotions) {
-            const vals = [emotion.emotion_id];
-            const query = `SELECT rating, emotion.emotion_id, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id WHERE emotion.emotion_id = ?`;
-            const [rows, fielddata] = await db.query(query, vals);
             rows.forEach(row => {
-                emotion.ratings[row.rating] = {rating: row.rating, short_desc: row.short_desc, long_desc: row.long_desc};
+                const { snapshot_id, user_id, note, date, time, snapshot_emotion_id, rating, emotion, emotion_id } = row;
+                if (!groupedData[snapshot_id]) {
+                    groupedData[snapshot_id] = {
+                        snapshot_id,
+                        user_id,
+                        note,
+                        date: formatDatabaseDate(date),
+                        time,
+                        emotions: [],
+                    }
+                }
+                groupedData[snapshot_id].emotions.push({ emotion: emotion, emotion_id: emotion_id, snapshot_emotion_id: snapshot_emotion_id, rating: rating, ratings: {} });
             });
+    
+            //get rating data for each emotion and insert it into the groupedData object, under each emotion as an array of ratings
+            for (const emotion of groupedData[id].emotions) {
+                const vals = [emotion.emotion_id];
+                const query = `SELECT rating, emotion.emotion_id, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id WHERE emotion.emotion_id = ?`;
+                const [rows, fielddata] = await db.query(query, vals);
+                rows.forEach(row => {
+                    emotion.ratings[row.rating] = {rating: row.rating, short_desc: row.short_desc, long_desc: row.long_desc};
+                });
+            }
+    
+            //get the triggers for the snapshot
+            const triggerQuery = `SELECT trigger_name, icon, triggers.trigger_id, snapshot_trigger_id FROM snapshot_trigger INNER JOIN triggers ON snapshot_trigger.trigger_id = triggers.trigger_id WHERE snapshot_id = ?`;
+            const [trigrows, field] = await db.query(triggerQuery, [id]);
+            console.log(trigrows);
+    
+            
+            /*
+            groupedData[id].emotions.forEach(emotion => {
+                console.log(emotion.ratings);
+                //emotion.ratings.forEach(rating => {
+                    //console.log(`${emotion.emotion_id} ${rating.rating} ${rating.short_desc}`);
+                  //  console.log(rating);
+               // })
+            })
+            */
+            
+    
+            res.render('viewsnapshot', {snapshot: groupedData[id], triggers: trigrows, firstName, lastName});
+        } else {
+            //snapshot doesnt exist or doesnt belong to user logged in - redirecting
+            console.log('snapshot doesnt exist or doesnt belong to user logged in - redirecting');
+            res.redirect('/user/home');
         }
 
-        //get the triggers for the snapshot
-        const triggerQuery = `SELECT trigger_name, icon, triggers.trigger_id, snapshot_trigger_id FROM snapshot_trigger INNER JOIN triggers ON snapshot_trigger.trigger_id = triggers.trigger_id WHERE snapshot_id = ?`;
-        const [trigrows, field] = await db.query(triggerQuery, [id]);
-        console.log(trigrows);
 
-        
-        /*
-        groupedData[id].emotions.forEach(emotion => {
-            console.log(emotion.ratings);
-            //emotion.ratings.forEach(rating => {
-                //console.log(`${emotion.emotion_id} ${rating.rating} ${rating.short_desc}`);
-              //  console.log(rating);
-           // })
-        })
-        */
-        
-
-        res.render('viewsnapshot', {snapshot: groupedData[id], triggers: trigrows, firstName, lastName});
 
     } else {
         //users not logged in - redirect
@@ -398,9 +406,9 @@ exports.deleteSnapshot = async (req, res) => {
         const snapshotQuery = `SELECT * FROM snapshot WHERE snapshot_id = ? AND user_id = ?`;
         const [snapshotRows, fieldData] = await db.query(snapshotQuery, [id, userid]);
 
-        //check that a snapshot has been returned
+        //check that a snapshot has been returned and belongs to the user
         if(snapshotRows.length>0) {
-            //snapshot exists, perform deletion
+            //snapshot exists and belongs to the user, perform deletion
             const deleteTriggersQuery = `DELETE FROM snapshot_trigger WHERE snapshot_id = ?`;
             const deleteEmotionsLogged = `DELETE FROM snapshot_emotion WHERE snapshot_id = ?`;
             const deleteSnapshotQuery = `DELETE FROM snapshot WHERE snapshot_id = ?`;
