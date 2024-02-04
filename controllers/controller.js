@@ -332,53 +332,61 @@ exports.getViewSnapshot = async (req, res) => {
 
         const vals = [id, userid];
         const [rows, fielddata] = await db.query(queryEmotions, vals);
-        //console.log(rows);
+        
+        if(rows.length > 1) {
+            //snapshot exists and belongs to user logged in, safe to display
+            const groupedData = {};
 
-        const groupedData = {};
-
-        rows.forEach(row => {
-            const { snapshot_id, user_id, note, date, time, snapshot_emotion_id, rating, emotion, emotion_id } = row;
-            if (!groupedData[snapshot_id]) {
-                groupedData[snapshot_id] = {
-                    snapshot_id,
-                    user_id,
-                    note,
-                    date: formatDatabaseDate(date),
-                    time,
-                    emotions: [],
-                }
-            }
-            groupedData[snapshot_id].emotions.push({ emotion: emotion, emotion_id: emotion_id, snapshot_emotion_id: snapshot_emotion_id, rating: rating, ratings: {} });
-        });
-
-        //get rating data for each emotion and insert it into the groupedData object, under each emotion as an array of ratings
-        for (const emotion of groupedData[id].emotions) {
-            const vals = [emotion.emotion_id];
-            const query = `SELECT rating, emotion.emotion_id, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id WHERE emotion.emotion_id = ?`;
-            const [rows, fielddata] = await db.query(query, vals);
             rows.forEach(row => {
-                emotion.ratings[row.rating] = {rating: row.rating, short_desc: row.short_desc, long_desc: row.long_desc};
+                const { snapshot_id, user_id, note, date, time, snapshot_emotion_id, rating, emotion, emotion_id } = row;
+                if (!groupedData[snapshot_id]) {
+                    groupedData[snapshot_id] = {
+                        snapshot_id,
+                        user_id,
+                        note,
+                        date: formatDatabaseDate(date),
+                        time,
+                        emotions: [],
+                    }
+                }
+                groupedData[snapshot_id].emotions.push({ emotion: emotion, emotion_id: emotion_id, snapshot_emotion_id: snapshot_emotion_id, rating: rating, ratings: {} });
             });
+    
+            //get rating data for each emotion and insert it into the groupedData object, under each emotion as an array of ratings
+            for (const emotion of groupedData[id].emotions) {
+                const vals = [emotion.emotion_id];
+                const query = `SELECT rating, emotion.emotion_id, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id WHERE emotion.emotion_id = ?`;
+                const [rows, fielddata] = await db.query(query, vals);
+                rows.forEach(row => {
+                    emotion.ratings[row.rating] = {rating: row.rating, short_desc: row.short_desc, long_desc: row.long_desc};
+                });
+            }
+    
+            //get the triggers for the snapshot
+            const triggerQuery = `SELECT trigger_name, icon, triggers.trigger_id, snapshot_trigger_id FROM snapshot_trigger INNER JOIN triggers ON snapshot_trigger.trigger_id = triggers.trigger_id WHERE snapshot_id = ?`;
+            const [trigrows, field] = await db.query(triggerQuery, [id]);
+            console.log(trigrows);
+    
+            
+            /*
+            groupedData[id].emotions.forEach(emotion => {
+                console.log(emotion.ratings);
+                //emotion.ratings.forEach(rating => {
+                    //console.log(`${emotion.emotion_id} ${rating.rating} ${rating.short_desc}`);
+                  //  console.log(rating);
+               // })
+            })
+            */
+            
+    
+            res.render('viewsnapshot', {snapshot: groupedData[id], triggers: trigrows, firstName, lastName});
+        } else {
+            //snapshot doesnt exist or doesnt belong to user logged in - redirecting
+            console.log('snapshot doesnt exist or doesnt belong to user logged in - redirecting');
+            res.redirect('/user/home');
         }
 
-        //get the triggers for the snapshot
-        const triggerQuery = `SELECT trigger_name, icon, triggers.trigger_id FROM snapshot_trigger INNER JOIN triggers ON snapshot_trigger.trigger_id = triggers.trigger_id WHERE snapshot_id = ?`;
-        const [trigrows, field] = await db.query(triggerQuery, [id]);
-        console.log(trigrows);
 
-        
-        /*
-        groupedData[id].emotions.forEach(emotion => {
-            console.log(emotion.ratings);
-            //emotion.ratings.forEach(rating => {
-                //console.log(`${emotion.emotion_id} ${rating.rating} ${rating.short_desc}`);
-              //  console.log(rating);
-           // })
-        })
-        */
-        
-
-        res.render('viewsnapshot', {snapshot: groupedData[id], triggers: trigrows, firstName, lastName});
 
     } else {
         //users not logged in - redirect
@@ -398,9 +406,9 @@ exports.deleteSnapshot = async (req, res) => {
         const snapshotQuery = `SELECT * FROM snapshot WHERE snapshot_id = ? AND user_id = ?`;
         const [snapshotRows, fieldData] = await db.query(snapshotQuery, [id, userid]);
 
-        //check that a snapshot has been returned
+        //check that a snapshot has been returned and belongs to the user
         if(snapshotRows.length>0) {
-            //snapshot exists, perform deletion
+            //snapshot exists and belongs to the user, perform deletion
             const deleteTriggersQuery = `DELETE FROM snapshot_trigger WHERE snapshot_id = ?`;
             const deleteEmotionsLogged = `DELETE FROM snapshot_emotion WHERE snapshot_id = ?`;
             const deleteSnapshotQuery = `DELETE FROM snapshot WHERE snapshot_id = ?`;
@@ -430,6 +438,124 @@ exports.getLogout = (req, res) => {
     req.session.destroy(() => {
         res.redirect('/');
     });
+};
+
+exports.getEdit = async (req, res) => {
+    const { id } = req.params;
+    const { userid, isLoggedIn, firstName, lastName } = req.session;
+    
+    //check if user is logged in
+    if(isLoggedIn) {
+        //logged in, continue
+        const queryEmotions = `SELECT snapshot.snapshot_id, snapshot.user_id, note, date, time, snapshot_emotion_id, emotion, emotion.emotion_id, snapshot_emotion.rating FROM snapshot INNER JOIN snapshot_emotion ON snapshot.snapshot_id = snapshot_emotion.snapshot_id INNER JOIN emotion ON snapshot_emotion.emotion_id = emotion.emotion_id
+        WHERE snapshot.snapshot_id = ? AND user_id = ?`;
+
+        const vals = [id, userid];
+        const [rows, fielddata] = await db.query(queryEmotions, vals);
+        //console.log(rows);
+
+        if(rows.length > 0) {
+            const groupedData = {};
+
+            rows.forEach(row => {
+                const { snapshot_id, user_id, note, date, time, snapshot_emotion_id, rating, emotion, emotion_id } = row;
+                if (!groupedData[snapshot_id]) {
+                    groupedData[snapshot_id] = {
+                        snapshot_id,
+                        user_id,
+                        note,
+                        date: formatDatabaseDate(date),
+                        time,
+                        emotions: {},
+                    }
+                }
+                groupedData[snapshot_id].emotions[emotion_id] = { emotion: emotion, emotion_id: emotion_id, snapshot_emotion_id: snapshot_emotion_id, rating: rating, ratings: {} };
+            });
+    
+            //get rating data for each emotion and insert it into the groupedData object, under each emotion as an array of ratings
+            for (const emotion of Object.values(groupedData[id].emotions)) {
+                const vals = [emotion.emotion_id];
+                const query = `SELECT rating, emotion.emotion_id, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id WHERE emotion.emotion_id = ?`;
+                const [rows, fielddata] = await db.query(query, vals);
+                rows.forEach(row => {
+                    emotion.ratings[row.rating] = {rating: row.rating, short_desc: row.short_desc, long_desc: row.long_desc};
+                });
+            }
+    
+            //get the triggers for the snapshot
+            const triggerQuery = `SELECT trigger_name, icon, triggers.trigger_id, snapshot_trigger_id, CASE WHEN snapshot_trigger.snapshot_trigger_id IS NOT NULL THEN true ELSE false END AS selected FROM triggers LEFT JOIN snapshot_trigger ON triggers.trigger_id = snapshot_trigger.trigger_id AND snapshot_trigger.snapshot_id = ?`;
+            const [trigrows, field] = await db.query(triggerQuery, [id]);
+            console.log(trigrows);
+    
+            
+            
+           //console.log(JSON.stringify(groupedData));
+            
+           res.render('editsnapshot', {snapshot: groupedData[id], triggers: trigrows, firstName, lastName});
+
+        } else {
+            console.log('Record doesnt exist or doesnt belong to the user');
+            res.redirect('/user/home');
+        }
+
+
+    } else {
+        //not logged in, redirect to login
+        res.redirect('/login');
+    }
+};
+
+exports.getEditUpdate = async (req, res) => {
+    const { isLoggedIn, firstName, userid } = req.session;
+    const { id } = req.params;
+
+    //check user is logged in
+    if (isLoggedIn) {
+        //Extract data from the URL (assuming they are in the query parameters)
+        const formData = req.query;
+        const { notes } = req.query;
+
+        //update notes
+        //update triggers (first delete existing)
+        //ignore emotion data
+
+        //Process the form data and prepare it for database insertion
+        const emotionsToInsert = [];
+
+        try {
+            //insert snapshot record first
+            const snapshotUpdate = `UPDATE snapshot SET note = ? WHERE snapshot_id = ? AND user_id = ?`;
+            const date = getCurrentDate();
+            const time = getCurrentTime();
+            const snapshotVals = [notes, id, userid];
+            const triggersToInsert = Array.isArray(req.query.trigger) ? req.query.trigger : (req.query.trigger ? [req.query.trigger] : []);
+            //Ensures triggers are stored in an array so we can later iterate through - as if only one trigger is submitted it does not create an array, it is stored as a string. We have avoided this behaviour.
+            //We have also done a check to ensure we dont create an array with one object of undefined - if no triggers are selected
+            const [snapUpdate, fieldData] = await db.query(snapshotUpdate, snapshotVals);
+            
+            //delete all existing triggers, we will reinsert the triggers submitted to ensure we dont retain any that may have been deselected
+            const clearTriggers = `DELETE FROM snapshot_trigger WHERE snapshot_id = ?`;
+            const [delTrig, fieldData2] = await db.query(clearTriggers, [id]);
+
+           //now insert each trigger in the many to many table snapshot_trigger that was submitted in the form
+            if (triggersToInsert.length > 0) {
+                console.log(triggersToInsert.length);
+                console.log(triggersToInsert);
+                const triggerQuery = `INSERT INTO snapshot_trigger (snapshot_id, trigger_id) VALUES (?, ?)`;
+                triggersToInsert.forEach(async trig => {
+                    const vals = [id, trig];
+                    const [data, fielddata] = await db.query(triggerQuery, vals);
+                });
+            }
+
+            res.redirect(`/user/snapshot/view/${id}`);
+        } catch (err) {
+            throw err;
+        }
+    } else {
+        //user not logged in - redirect to login page
+        res.redirect('/login');
+    }
 };
 
 exports.getNotFound = (req, res) => {
