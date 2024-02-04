@@ -346,14 +346,14 @@ exports.getViewSnapshot = async (req, res) => {
                         note,
                         date: formatDatabaseDate(date),
                         time,
-                        emotions: [],
+                        emotions: {},
                     }
                 }
-                groupedData[snapshot_id].emotions.push({ emotion: emotion, emotion_id: emotion_id, snapshot_emotion_id: snapshot_emotion_id, rating: rating, ratings: {} });
+                groupedData[snapshot_id].emotions[emotion_id] = { emotion: emotion, emotion_id: emotion_id, snapshot_emotion_id: snapshot_emotion_id, rating: rating, ratings: {} };
             });
     
             //get rating data for each emotion and insert it into the groupedData object, under each emotion as an array of ratings
-            for (const emotion of groupedData[id].emotions) {
+            for (const emotion of Object.values(groupedData[id].emotions)) {
                 const vals = [emotion.emotion_id];
                 const query = `SELECT rating, emotion.emotion_id, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id WHERE emotion.emotion_id = ?`;
                 const [rows, fielddata] = await db.query(query, vals);
@@ -367,18 +367,7 @@ exports.getViewSnapshot = async (req, res) => {
             const [trigrows, field] = await db.query(triggerQuery, [id]);
             console.log(trigrows);
     
-            
-            /*
-            groupedData[id].emotions.forEach(emotion => {
-                console.log(emotion.ratings);
-                //emotion.ratings.forEach(rating => {
-                    //console.log(`${emotion.emotion_id} ${rating.rating} ${rating.short_desc}`);
-                  //  console.log(rating);
-               // })
-            })
-            */
-            
-    
+
             res.render('viewsnapshot', {snapshot: groupedData[id], triggers: trigrows, firstName, lastName});
         } else {
             //snapshot doesnt exist or doesnt belong to user logged in - redirecting

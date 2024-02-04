@@ -74,7 +74,8 @@
                                 <h5 class="card-header">Emotion Levels</h5>
                                 <div class="card-body">
                                     <div class="row g-4">
-                                        <% snapshot.emotions.forEach(emo=> { %>
+                                        <% const emotions = Object.values(snapshot.emotions); %>
+                                        <% emotions.forEach(emo=> { %>
                                             <div class="col-md-6">
 
                                                 <% 
