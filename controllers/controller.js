@@ -363,7 +363,7 @@ exports.getViewSnapshot = async (req, res) => {
   //check if user is logged in
   if (isLoggedIn) {
     try {
-      const response = await axios.get(`http://localhost:3001/snapshot/${id}`, { validateStatus: (status) => { return status < 500}, headers: {Authorization: `${userid}`} });
+      const response = await axios.get(`http://localhost:3001/snapshot/${id}`, { validateStatus: (status) => { return status < 500}, headers: {userid: `${userid}`} });
 
       if (response.status == 200) {
         //successfully retrieved a snapshot, render
@@ -375,7 +375,6 @@ exports.getViewSnapshot = async (req, res) => {
 
         res.render("viewsnapshot", {
           snapshot: response.data.result,
-          triggers: trigrows,
           firstName,
           lastName,
         });
