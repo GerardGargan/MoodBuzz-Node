@@ -363,28 +363,26 @@ exports.getViewSnapshot = async (req, res) => {
   //check if user is logged in
   if (isLoggedIn) {
     try {
-      const response = await axios.get(`http://localhost:3001/snapshot/${id}`, { validateStatus: (status) => { return status < 500}, headers: {Authorization: `${userid}`} });
+      const response = await axios.get(`http://localhost:3001/snapshot/${id}`, {
+        validateStatus: (status) => {
+          return status < 500;
+        },
+        headers: { userid: `${userid}` },
+      });
 
       if (response.status == 200) {
         //successfully retrieved a snapshot, render
 
-        //still need triggers - needs to refactor into api later
-        //get the triggers for the snapshot
-        const triggerQuery = `SELECT trigger_name, icon, triggers.trigger_id, snapshot_trigger_id FROM snapshot_trigger INNER JOIN triggers ON snapshot_trigger.trigger_id = triggers.trigger_id WHERE snapshot_id = ?`;
-        const [trigrows, field] = await db.query(triggerQuery, [id]);
-
         res.render("viewsnapshot", {
           snapshot: response.data.result,
-          triggers: trigrows,
           firstName,
           lastName,
         });
-        
       } else {
-        console.log('Snapshot doesnt exist');
+        console.log("Snapshot doesnt exist");
       }
     } catch {
-        console.log('error in catch');
+      console.log("error in catch");
     }
   } else {
     //users not logged in - redirect
@@ -445,78 +443,26 @@ exports.getEdit = async (req, res) => {
 
   //check if user is logged in
   if (isLoggedIn) {
-    //logged in, continue
-    const queryEmotions = `SELECT snapshot.snapshot_id, snapshot.user_id, note, date, time, snapshot_emotion_id, emotion, emotion.emotion_id, snapshot_emotion.rating FROM snapshot INNER JOIN snapshot_emotion ON snapshot.snapshot_id = snapshot_emotion.snapshot_id INNER JOIN emotion ON snapshot_emotion.emotion_id = emotion.emotion_id
-        WHERE snapshot.snapshot_id = ? AND user_id = ?`;
-
-    const vals = [id, userid];
-    const [rows, fielddata] = await db.query(queryEmotions, vals);
-    //console.log(rows);
-
-    if (rows.length > 0) {
-      const groupedData = {};
-
-      rows.forEach((row) => {
-        const {
-          snapshot_id,
-          user_id,
-          note,
-          date,
-          time,
-          snapshot_emotion_id,
-          rating,
-          emotion,
-          emotion_id,
-        } = row;
-        if (!groupedData[snapshot_id]) {
-          groupedData[snapshot_id] = {
-            snapshot_id,
-            user_id,
-            note,
-            date: formatDatabaseDate(date),
-            time,
-            emotions: {},
-          };
-        }
-        groupedData[snapshot_id].emotions[emotion_id] = {
-          emotion: emotion,
-          emotion_id: emotion_id,
-          snapshot_emotion_id: snapshot_emotion_id,
-          rating: rating,
-          ratings: {},
-        };
+    try {
+      const response = await axios.get(`http://localhost:3001/snapshot/${id}`, {
+        validateStatus: (status) => {
+          return status < 500;
+        },
+        headers: { userid: `${userid}` },
       });
 
-      //get rating data for each emotion and insert it into the groupedData object, under each emotion as an array of ratings
-      for (const emotion of Object.values(groupedData[id].emotions)) {
-        const vals = [emotion.emotion_id];
-        const query = `SELECT rating, emotion.emotion_id, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id WHERE emotion.emotion_id = ?`;
-        const [rows, fielddata] = await db.query(query, vals);
-        rows.forEach((row) => {
-          emotion.ratings[row.rating] = {
-            rating: row.rating,
-            short_desc: row.short_desc,
-            long_desc: row.long_desc,
-          };
-        });
+      if (response.status == 200) {
+        //success, render snapshot
+        res.render("editsnapshot", { snapshot: response.data.result, firstName, lastName });
+        
+      } else {
+        //unsuccessful, snapshot doesnt exist or doesnt belong to user
+        console.log(
+          "unsuccessful, snapshot doesnt exist or doesnt belong to user"
+        );
       }
-
-      //get the triggers for the snapshot
-      const triggerQuery = `SELECT trigger_name, icon, triggers.trigger_id, snapshot_trigger_id, CASE WHEN snapshot_trigger.snapshot_trigger_id IS NOT NULL THEN true ELSE false END AS selected FROM triggers LEFT JOIN snapshot_trigger ON triggers.trigger_id = snapshot_trigger.trigger_id AND snapshot_trigger.snapshot_id = ?`;
-      const [trigrows, field] = await db.query(triggerQuery, [id]);
-      console.log(trigrows);
-
-      //console.log(JSON.stringify(groupedData));
-
-      res.render("editsnapshot", {
-        snapshot: groupedData[id],
-        triggers: trigrows,
-        firstName,
-        lastName,
-      });
-    } else {
-      console.log("Record doesnt exist or doesnt belong to the user");
-      res.redirect("/user/home");
+    } catch (err) {
+      console.log(err);
     }
   } else {
     //not logged in, redirect to login
