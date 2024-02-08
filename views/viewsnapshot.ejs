@@ -112,19 +112,25 @@
                                 <h5 class="card-header">Triggers</h5>
                                 <div class="card-body">
                                     <div class="d-flex flex-wrap">
-                                  <% if(triggers.length == 0) { %>
-                                    <p>No triggers to display</p>
-                                  <% } else {
+                                  <% 
+                                  let count = 0;
                                   triggers.forEach(trigger => {
                                     var trig_name = trigger.trigger_name;
                                     var icon = trigger.icon;
+                                    if(trigger.selected == 1) {
                                     %>
                                     <div class="d-flex flex-column align-items-center px-3">
                                         <div><%= trig_name %></div>
                                         <div><i class="bi <%= icon %> bigger-icon"></i></div>
                                     </div>
-                                  <% })
-                                   } %>
+                                    
+                                  <% count += 1;
+                                }
+                                });
+                                if(count==0){ %>
+                                    <p>No triggers to display</p>
+                               <% }
+                                    %>
                                     </div>
                                 </div>
                               </div>
