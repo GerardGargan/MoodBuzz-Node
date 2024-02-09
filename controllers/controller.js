@@ -398,33 +398,34 @@ exports.deleteSnapshot = async (req, res) => {
 
   //check user is logged in
   if (isLoggedIn) {
-    //check the snapshot exists AND that it belongs to the current user logged in - query the database
-    const snapshotQuery = `SELECT * FROM snapshot WHERE snapshot_id = ? AND user_id = ?`;
-    const [snapshotRows, fieldData] = await db.query(snapshotQuery, [
-      id,
-      userid,
-    ]);
+    
+    try {
+      const response = await axios.delete(`http://localhost:3001/snapshot/${id}`, {
+        validateStatus: (status) => {
+          return status < 500;
+        },
+        headers: {
+          userid: userid
+        }
+      });
 
-    //check that a snapshot has been returned and belongs to the user
-    if (snapshotRows.length > 0) {
-      //snapshot exists and belongs to the user, perform deletion
-      const deleteTriggersQuery = `DELETE FROM snapshot_trigger WHERE snapshot_id = ?`;
-      const deleteEmotionsLogged = `DELETE FROM snapshot_emotion WHERE snapshot_id = ?`;
-      const deleteSnapshotQuery = `DELETE FROM snapshot WHERE snapshot_id = ?`;
-
-      try {
-        const [delTrig, fielddata] = await db.query(deleteTriggersQuery, [id]);
-        const [delEmo, fielddata2] = await db.query(deleteEmotionsLogged, [id]);
-        const [delSap, fielddata3] = await db.query(deleteSnapshotQuery, [id]);
-      } catch (err) {
-        throw err;
+      if(response.status == 200) {
+        //successful deletion, redirect
+        console.log(`snapshot ${id} deleted`);
+        res.redirect('/user/home');
+      } else {
+        //invalid id or does not belong to user, log out message
+        console.log(response.data.message);
+        //redirect to user home
+        res.redirect('/user/home');
       }
-      console.log("Deletion successful");
-      res.redirect("/user/home");
-    } else {
-      //snapshot doesnt exist or belongs to another user
-      console.log("Snapshot doesnt exist or belongs to another user");
+
+    } 
+    catch(err) {
+      //server error, log out error
+      console.log(response.data.message);
     }
+
   } else {
     //user not logged in - redirect to login
     res.redirect("/login");
