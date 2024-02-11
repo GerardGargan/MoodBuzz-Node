@@ -24,53 +24,40 @@ exports.getLogin = (req, res) => {
 
 exports.postLogin = async (req, res) => {
   const { isLoggedIn } = req.session;
-
+  const { email, password } = req.body;
   //perform check to ensure user isnt already logged in
   if (isLoggedIn) {
     //if logged in, redirect - dont allow the registration to contune
     res.redirect("/user/home");
   } else {
-    //user isnt logged in
-
-    //destructure the values into variables
-    const { email, password } = req.body;
-
-    //set up in an array for the query function
-    const vals = [email, password];
-    const selectSQL = `SELECT * FROM user WHERE email_address = ?`;
 
     try {
-      const [userData, fieldData] = await db.query(selectSQL, vals);
-      if (userData.length >= 1) {
-        console.log("user exists");
-        //access the first element of the array to get the user details (we should only ever return one element)
-        console.log(userData[0].email_address);
-
-        //get the stored hashed password
-        const hashedPassword = userData[0].password.toString();
-
-        //check if the plain text password matches the hashed password
-        const passwordMatch = await comparePassword(password, hashedPassword);
-        if (passwordMatch) {
-          //email and password matches - successful log in
-          console.log("Email and Password match - ok to log in!");
-          //set up the session
+      const endpoint = 'http://localhost:3001/user/login';
+      const vals = { email, password };
+      //post the form data to the api post route
+      const response = await axios.post(endpoint, vals, {validateStatus: (status) => {return status < 500}});
+      //if email and password are a match
+      if(response.status == 200) {
+        //success, set up session and redirect
+        //get the user data returned from the api
+          const userData = response.data.result;
+          //set up a session
           const session = req.session;
           session.isLoggedIn = true;
           session.userid = userData[0].user_id;
           session.firstName = userData[0].first_name;
           session.lastName = userData[0].last_name;
-          console.log(session);
+
           //redirect to user homepage
           res.redirect("/user/home");
-        } else {
-          console.log("Password does not match");
-        }
+
       } else {
-        console.log("user does not exist");
+        //invalid login credentials, handle error message to user
+        console.log(response.data.message);
       }
-    } catch (err) {
-      throw err;
+    } catch (err){
+      //server error
+      console.log(err);
     }
   }
 };
