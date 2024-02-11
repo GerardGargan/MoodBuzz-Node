@@ -124,86 +124,39 @@ exports.getUserHomePage = async (req, res) => {
 
   //check if user is logged in
   if (isLoggedIn) {
-    //this query retrieves the data from snapshots, and the emotions/levels recorded on those snapshots
-    const selectSnapshots = `SELECT snapshot.snapshot_id, date, time, emotion, emotion.emotion_id, rating FROM snapshot INNER JOIN snapshot_emotion ON snapshot.snapshot_id = snapshot_emotion.snapshot_id INNER JOIN emotion ON snapshot_emotion.emotion_id = emotion.emotion_id WHERE user_id = ?`;
-    //this query selects the emotions for our table headers
-    const selectEmotions = `SELECT emotion FROM emotion`;
-
-    const vals = [getCurrentDate(), userid];
-    const selectTodaysSnapshots = `SELECT COUNT(snapshot_id) AS count FROM snapshot WHERE date = ? AND user_id = ?`;
-
-    //set up an empty array (for parsing data into an appropriate data structure to pass to the ejs template)
-    const groupedData = {};
 
     try {
-      //run the queries
-      const [emotions, fieldData] = await db.query(selectEmotions);
-      const [data, fielddata] = await db.query(selectSnapshots, [userid]);
-      const [todaysSnapshots, fieldData2] = await db.query(
-        selectTodaysSnapshots,
-        vals
-      );
+      //query database, retrieve snapshots for the current user
+      const endpointSnapshots = `http://localhost:3001/snapshot/user/${userid}`;
+      const snapshotRequest = await axios.get(endpointSnapshots, {validateStatus: (status) => {return status < 500}});
+      const snapshots = snapshotRequest.data.result;
+      //get emotions data from the database
+      const endpointEmotions = `http://localhost:3001/emotions`;
+      const emotionsRequest = await axios.get(endpointEmotions, {validateStatus: (status) => {return status < 500}});
+      const emotions = emotionsRequest.data.result;
 
-      //initialise counter
-      let numberOfSnapshots = 0;
-      //loop through each row, we need to create an array of snapshot objects, that each contain an array of emotions with ratings
-      data.forEach((row) => {
-        //destructure into variables
-        const { snapshot_id, date, time, emotion, emotion_id, rating } = row;
+      //get the number of snapshots returned
+      const numberOfSnapshots = snapshots.length;
 
-        //check if the snapshot object already exists in the array, if not create the object
-        if (!groupedData[snapshot_id]) {
-          groupedData[snapshot_id] = {
-            snapshot_id,
-            date: formatDatabaseDate(date),
-            time,
-            emotions: [],
-          };
-          //increase the counter to keep track of how many snapshots there are in the array
-          numberOfSnapshots += 1;
-        }
-        //add the emotion into the emotions array (within the snapshot object), along with the id and rating
-        groupedData[snapshot_id].emotions.push({
-          emotion_id: emotion_id,
-          emotion: emotion,
-          rating: rating,
-        });
-      });
+      //count the number of snapshots recorded today
+      const countToday = countTodaysSnapshots(snapshots);
+      //pass this in to get todays message to display to the user
+      const todaysSnapMessage = todaysSnapshotMessage(countToday);
 
-      //transform to an array so we can sort the values
-      var groupedDataArray = Object.values(groupedData);
-
-      //sort the snapshots based on the id, in descending order - so that the most recent is displayed first.
-      const groupedDataSorted = groupedDataArray.sort((a, b) => {
-        return b.snapshot_id - a.snapshot_id;
-      });
-
-      //set up todays message
-      let todaysSnapMessage = null;
-      //check if there have been snapshots today and display an appropriate message
-      if (todaysSnapshots[0].count > 0) {
-        todaysSnapMessage = {
-          message: `You have recorded ${todaysSnapshots[0].count} snapshots today! Well done!`,
-        };
-      } else {
-        todaysSnapMessage = {
-          message: `You have not recorded any snapshots yet today`,
-        };
-      }
-
-      //render the page and data
       res.render("userhome", {
-        groupedDataSorted,
-        emotions,
+        groupedDataSorted: snapshots,
+        emotions: emotions,
         numberOfSnapshots,
         todaysSnapMessage,
         firstName,
       });
-    } catch (err) {
-      throw err;
+    }
+    catch (err) {
+      //handle error
+      console.log(err);
     }
   } else {
-    //user not logged in - redirect to login page
+    //user not logged in - redirect to login page,
     res.redirect("/login");
   }
 };
@@ -595,6 +548,33 @@ function formatDatabaseDate(date) {
   const day = databaseDate.getDate();
 
   return `${day}/${month}/${year}`;
+}
+
+function countTodaysSnapshots(snapshots) {
+  let countToday = 0;
+      let currentDate = formatDatabaseDate(getCurrentDate());
+      snapshots.forEach(snapshot => {
+        let date = snapshot.date;
+        if(date == currentDate) {
+          countToday += 1;
+        }
+      });
+      return countToday;
+}
+
+function todaysSnapshotMessage(number_of_snapshots) {
+  let todaysSnapMessage = null;
+      //check if there have been snapshots today and display an appropriate message
+      if (number_of_snapshots > 0) {
+        todaysSnapMessage = {
+          message: `You have recorded ${number_of_snapshots} snapshots today! Well done!`,
+        };
+      } else {
+        todaysSnapMessage = {
+          message: `You have not recorded any snapshots yet today`,
+        };
+      }
+      return todaysSnapMessage;
 }
 
 async function fetchEmotionData() {
