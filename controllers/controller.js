@@ -83,20 +83,13 @@ exports.postRegister = async (req, res) => {
   } else {
     //user isnt logged in, safe to continue registration
 
-    let { firstname, surname, email, password } = req.body;
+    let vals = { firstname, surname, email, password } = req.body;
     console.log(`${firstname} ${surname} ${email} ${password}`);
 
     //sanitise user input
     firstname = firstname.trim();
     surname = surname.trim();
     email = email.trim();
-
-    /* log out for testing
-        console.log(validatePassword(password));
-        console.log(validateEmail(email));
-        console.log(validateName(firstname));
-        console.log(validateName(surname));
-        */
 
     //perform validation checks on data
     if (
@@ -105,40 +98,24 @@ exports.postRegister = async (req, res) => {
       validateEmail(email) &&
       validatePassword(password)
     ) {
-      //check if user already exists
-      const vals = [email];
-      const selectSQL = `SELECT user_id FROM user WHERE email_address = ?`;
 
       try {
-        const [userDetails, fielddata] = await db.query(selectSQL, vals);
-        if (userDetails.length >= 1) {
-          console.log("User exists, cant complete registration");
-          //TODO stop registration and inform the user
+        const endpoint = 'http://localhost:3001/user/register';
+        const response = await axios.post(endpoint, vals, {validateStatus: (status) => {return status < 500}});
+        if(response.status == 201) {
+          //user created successfully, redirect to login
+          res.redirect('/login');
         } else {
-          console.log("User does not already exist");
-          //continue registration - we have validated the data and checked the email doesnt already exist
-
-          //salt and hash password
-          const hashed = await hashPassword(password);
-          console.log(`hashed password ${hashed}`);
-
-          const valsToInsert = [firstname, surname, email, hashed];
-          const insertSQL = `INSERT INTO user (first_name, last_name, email_address, password) VALUES (?, ?, ?, ?)`;
-
-          //insert user to database
-          const [rows, fielddata] = await db.query(insertSQL, valsToInsert);
-          console.log("success");
-
-          //TODO
-          //insert success message
-          //redirect to user home?
-          res.redirect("/login");
+          //user email already exists, handle error message
+          console.log('email already exists, cant complete registration')
+          res.redirect('/register');
         }
+
       } catch (err) {
-        if (err) console.log(err);
+        console.log(err);
       }
     } else {
-      //invalid data - did not pass validation functions
+      //invalid data - did not pass validation functions, handle error
       console.log("invalid data entered!!");
     }
   }
