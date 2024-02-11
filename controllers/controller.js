@@ -1,7 +1,5 @@
-const { get } = require("http");
 const db = require("./../util/dbconn");
 const bcrypt = require("bcrypt");
-const { group } = require("console");
 const axios = require("axios");
 
 exports.getIndex = (req, res) => {
