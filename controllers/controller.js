@@ -133,7 +133,7 @@ exports.getUserHomePage = async (req, res) => {
       //get emotions data from the database
       const endpointEmotions = `http://localhost:3001/emotions`;
       const emotionsRequest = await axios.get(endpointEmotions, {validateStatus: (status) => {return status < 500}});
-      const emotions = emotionsRequest.data.result;
+      const emotions = Object.values(emotionsRequest.data.result);
 
       //get the number of snapshots returned
       const numberOfSnapshots = snapshots.length;
@@ -166,24 +166,31 @@ exports.getNewSnapshotPage = async (req, res) => {
 
   //check if user is logged in
   if (isLoggedIn) {
-    const groupedData = await fetchEmotionData();
 
-    const selectTriggers = `SELECT trigger_id, trigger_name, icon FROM triggers`;
-    //run the query to get the triggers
-    const [triggerData, fieldData] = await db.query(selectTriggers);
+    try {
+      const endpointEmotions = `http://localhost:3001/emotions`;
+      const emotions = await axios.get(endpointEmotions, {validateStatus: (status) => {return status < 500}});
+      const groupedData = emotions.data.result;
 
-    //console.log(JSON.stringify(groupedData));
-    //console.log(triggerData);
-    const currentDate = formatDatabaseDate(getCurrentDate());
-    const dateTime = `${currentDate} ${getCurrentTime()}`;
+      const endpointTriggers = `http://localhost:3001/triggers`;
+      const triggers = await axios.get(endpointTriggers, {validateStatus: (status) => {return status < 500}});
+      const triggerData = triggers.data.result;
+      
+      const currentDate = formatDatabaseDate(getCurrentDate());
+      const dateTime = `${currentDate} ${getCurrentTime()}`;
 
-    res.render("snapshot", {
-      groupedData,
-      triggerData,
-      lastName,
-      firstName,
-      dateTime,
-    });
+      res.render("snapshot", {
+        groupedData,
+        triggerData,
+        lastName,
+        firstName,
+        dateTime,
+      });
+
+    } catch (err) {
+      //API error, status 500
+      console.log(err);
+    }
   } else {
     //user isnt logged in - redirect to login page
     res.redirect("/login");
