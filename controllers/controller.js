@@ -203,73 +203,22 @@ exports.processNewSnapshot = async (req, res) => {
   //check user is logged in
   if (isLoggedIn) {
     //Extract data from the URL (assuming they are in the query parameters)
-    const formData = req.query;
-    const { notes } = req.query;
+    const formData = req.body;
+    const { notes } = req.body;
+    console.log(req.body);
 
     //Process the form data and prepare it for database insertion
     const emotionsToInsert = [];
 
     try {
-      //insert snapshot record first
-      const snapshotInsert = `INSERT INTO snapshot (user_id, date, time, note) VALUES (?, ?, ?, ?)`;
-      const date = getCurrentDate();
-      const time = getCurrentTime();
-      const snapshotVals = [userid, date, time, notes];
-      const triggersToInsert = Array.isArray(req.query.trigger)
-        ? req.query.trigger
-        : req.query.trigger
-        ? [req.query.trigger]
-        : [];
-      //Ensures triggers are stored in an array so we can later iterate through - as if only one trigger is submitted it does not create an array, it is stored as a string. We have avoided this behaviour.
-      //We have also done a check to ensure we dont create an array with one object of undefined - if no triggers are selected
-      const [snapInsert, fieldData] = await db.query(
-        snapshotInsert,
-        snapshotVals
-      );
-      //store the id of the snapshot - needs to be inserted on each many to many record we insert on the many to many table
-      const snapshotId = snapInsert.insertId;
-      //loop through emotions and values in the url query and insert into array
-      for (const id in formData) {
-        if (
-          Object.hasOwnProperty.call(formData, id) &&
-          id != "notes" &&
-          id != "trigger"
-        ) {
-          const value = formData[id];
-          // push the data into the array as an object with the snapshot id, emotion id and the value submitted
-          emotionsToInsert.push({ snapshotId, id, value });
-        }
-      }
-      //console.log(emotionsToInsert);
-
-      //now insert each emotion record in the many to many table snapshot_emotion
-      if (emotionsToInsert.length > 0) {
-        //check first if we have any records to insert
-        const emotionQuery =
-          "INSERT INTO snapshot_emotion (snapshot_id, emotion_id, rating) VALUES ?";
-        const [rows, fielddata] = await db.query(emotionQuery, [
-          emotionsToInsert.map((record) => [
-            record.snapshotId,
-            record.id,
-            record.value,
-          ]),
-        ]);
-      }
-
-      //now insert each trigger in the many to many table snapshot_trigger
-      if (triggersToInsert.length > 0) {
-        console.log(triggersToInsert.length);
-        console.log(triggersToInsert);
-        const triggerQuery = `INSERT INTO snapshot_trigger (snapshot_id, trigger_id) VALUES (?, ?)`;
-        triggersToInsert.forEach(async (trig) => {
-          const vals = [snapshotId, trig];
-          const [data, fielddata] = await db.query(triggerQuery, vals);
-        });
-      }
-
+      const endpoint = 'http://localhost:3001/snapshot';
+      const response = await axios.post(endpoint, req.body, {validateStatus: (status) => {return status < 500}, headers: { userid: `${userid}` }});
+      const snapshotId = response.data.id;
       res.redirect(`/user/snapshot/view/${snapshotId}`);
+
     } catch (err) {
-      throw err;
+      //handle error
+      console.log(err);
     }
   } else {
     //user not logged in - redirect to login page
