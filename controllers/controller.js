@@ -1,4 +1,3 @@
-const db = require("./../util/dbconn");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
 
@@ -388,6 +387,7 @@ exports.postEditUpdate = async (req, res) => {
       });
 
       if(response.status == 201) {
+        //successful update, redirect to view the updated snapshot
         res.redirect(`/user/snapshot/view/${id}`);
       } else {
         //handle error - snapshot does not exist or does not blong to current logged in user
@@ -532,37 +532,4 @@ function todaysSnapshotMessage(number_of_snapshots) {
     };
   }
   return todaysSnapMessage;
-}
-
-async function fetchEmotionData() {
-  const selectRatings = `SELECT emotion.emotion_id, emotion, rating, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id`;
-
-  try {
-    //run query to get the emotions and ratings data
-    const [data, fielddata2] = await db.query(selectRatings);
-    //console.log(data)
-    const groupedData = {};
-    //parse data into an appropriate structure to pass to the template
-    data.forEach((row) => {
-      //if it doesnt already exist, create the emotion object
-      const { emotion_id, emotion, rating, short_desc, long_desc } = row;
-      if (!groupedData[emotion_id]) {
-        groupedData[emotion_id] = {
-          emotion_id,
-          emotion,
-          rating: [],
-        };
-      }
-      //push each rating data into the rating array in the emotion object
-      groupedData[emotion_id].rating.push({
-        rating: rating,
-        shortdesc: short_desc,
-        longdesc: long_desc,
-      });
-    });
-    //console.log(groupedData);
-    return groupedData;
-  } catch (err) {
-    throw err;
-  }
 }
