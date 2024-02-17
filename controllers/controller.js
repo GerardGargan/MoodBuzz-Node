@@ -1,4 +1,3 @@
-const db = require("./../util/dbconn");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
 
@@ -28,32 +27,34 @@ exports.postLogin = async (req, res) => {
     //if logged in, redirect - dont allow the registration to contune
     res.redirect("/user/home");
   } else {
-
     try {
-      const endpoint = 'http://localhost:3001/user/login';
+      const endpoint = "http://localhost:3001/user/login";
       const vals = { email, password };
       //post the form data to the api post route
-      const response = await axios.post(endpoint, vals, {validateStatus: (status) => {return status < 500}});
+      const response = await axios.post(endpoint, vals, {
+        validateStatus: (status) => {
+          return status < 500;
+        },
+      });
       //if email and password are a match
-      if(response.status == 200) {
+      if (response.status == 200) {
         //success, set up session and redirect
         //get the user data returned from the api
-          const userData = response.data.result;
-          //set up a session
-          const session = req.session;
-          session.isLoggedIn = true;
-          session.userid = userData[0].user_id;
-          session.firstName = userData[0].first_name;
-          session.lastName = userData[0].last_name;
+        const userData = response.data.result;
+        //set up a session
+        const session = req.session;
+        session.isLoggedIn = true;
+        session.userid = userData[0].user_id;
+        session.firstName = userData[0].first_name;
+        session.lastName = userData[0].last_name;
 
-          //redirect to user homepage
-          res.redirect("/user/home");
-
+        //redirect to user homepage
+        res.redirect("/user/home");
       } else {
         //invalid login credentials, handle error message to user
         console.log(response.data.message);
       }
-    } catch (err){
+    } catch (err) {
       //server error
       console.log(err);
     }
@@ -81,7 +82,7 @@ exports.postRegister = async (req, res) => {
   } else {
     //user isnt logged in, safe to continue registration
 
-    let vals = { firstname, surname, email, password } = req.body;
+    let vals = ({ firstname, surname, email, password } = req.body);
     console.log(`${firstname} ${surname} ${email} ${password}`);
 
     //sanitise user input
@@ -96,19 +97,21 @@ exports.postRegister = async (req, res) => {
       validateEmail(email) &&
       validatePassword(password)
     ) {
-
       try {
-        const endpoint = 'http://localhost:3001/user/register';
-        const response = await axios.post(endpoint, vals, {validateStatus: (status) => {return status < 500}});
-        if(response.status == 201) {
+        const endpoint = "http://localhost:3001/user/register";
+        const response = await axios.post(endpoint, vals, {
+          validateStatus: (status) => {
+            return status < 500;
+          },
+        });
+        if (response.status == 201) {
           //user created successfully, redirect to login
-          res.redirect('/login');
+          res.redirect("/login");
         } else {
           //user email already exists, handle error message
-          console.log('email already exists, cant complete registration')
-          res.redirect('/register');
+          console.log("email already exists, cant complete registration");
+          res.redirect("/register");
         }
-
       } catch (err) {
         console.log(err);
       }
@@ -124,15 +127,22 @@ exports.getUserHomePage = async (req, res) => {
 
   //check if user is logged in
   if (isLoggedIn) {
-
     try {
       //query database, retrieve snapshots for the current user
       const endpointSnapshots = `http://localhost:3001/snapshot/user/${userid}`;
-      const snapshotRequest = await axios.get(endpointSnapshots, {validateStatus: (status) => {return status < 500}});
+      const snapshotRequest = await axios.get(endpointSnapshots, {
+        validateStatus: (status) => {
+          return status < 500;
+        },
+      });
       const snapshots = snapshotRequest.data.result;
       //get emotions data from the database
       const endpointEmotions = `http://localhost:3001/emotions`;
-      const emotionsRequest = await axios.get(endpointEmotions, {validateStatus: (status) => {return status < 500}});
+      const emotionsRequest = await axios.get(endpointEmotions, {
+        validateStatus: (status) => {
+          return status < 500;
+        },
+      });
       const emotions = Object.values(emotionsRequest.data.result);
 
       //get the number of snapshots returned
@@ -150,8 +160,7 @@ exports.getUserHomePage = async (req, res) => {
         todaysSnapMessage,
         firstName,
       });
-    }
-    catch (err) {
+    } catch (err) {
       //handle error
       console.log(err);
     }
@@ -166,16 +175,23 @@ exports.getNewSnapshotPage = async (req, res) => {
 
   //check if user is logged in
   if (isLoggedIn) {
-
     try {
       const endpointEmotions = `http://localhost:3001/emotions`;
-      const emotions = await axios.get(endpointEmotions, {validateStatus: (status) => {return status < 500}});
+      const emotions = await axios.get(endpointEmotions, {
+        validateStatus: (status) => {
+          return status < 500;
+        },
+      });
       const groupedData = emotions.data.result;
 
       const endpointTriggers = `http://localhost:3001/triggers`;
-      const triggers = await axios.get(endpointTriggers, {validateStatus: (status) => {return status < 500}});
+      const triggers = await axios.get(endpointTriggers, {
+        validateStatus: (status) => {
+          return status < 500;
+        },
+      });
       const triggerData = triggers.data.result;
-      
+
       const currentDate = formatDatabaseDate(getCurrentDate());
       const dateTime = `${currentDate} ${getCurrentTime()}`;
 
@@ -186,7 +202,6 @@ exports.getNewSnapshotPage = async (req, res) => {
         firstName,
         dateTime,
       });
-
     } catch (err) {
       //API error, status 500
       console.log(err);
@@ -211,11 +226,15 @@ exports.processNewSnapshot = async (req, res) => {
     const emotionsToInsert = [];
 
     try {
-      const endpoint = 'http://localhost:3001/snapshot';
-      const response = await axios.post(endpoint, req.body, {validateStatus: (status) => {return status < 500}, headers: { userid: `${userid}` }});
+      const endpoint = "http://localhost:3001/snapshot";
+      const response = await axios.post(endpoint, req.body, {
+        validateStatus: (status) => {
+          return status < 500;
+        },
+        headers: { userid: `${userid}` },
+      });
       const snapshotId = response.data.id;
       res.redirect(`/user/snapshot/view/${snapshotId}`);
-
     } catch (err) {
       //handle error
       console.log(err);
@@ -269,34 +288,33 @@ exports.deleteSnapshot = async (req, res) => {
 
   //check user is logged in
   if (isLoggedIn) {
-    
     try {
-      const response = await axios.delete(`http://localhost:3001/snapshot/${id}`, {
-        validateStatus: (status) => {
-          return status < 500;
-        },
-        headers: {
-          userid: userid
+      const response = await axios.delete(
+        `http://localhost:3001/snapshot/${id}`,
+        {
+          validateStatus: (status) => {
+            return status < 500;
+          },
+          headers: {
+            userid: userid,
+          },
         }
-      });
+      );
 
-      if(response.status == 200) {
+      if (response.status == 200) {
         //successful deletion, redirect
         console.log(`snapshot ${id} deleted`);
-        res.redirect('/user/home');
+        res.redirect("/user/home");
       } else {
         //invalid id or does not belong to user, log out message
         console.log(response.data.message);
         //redirect to user home
-        res.redirect('/user/home');
+        res.redirect("/user/home");
       }
-
-    } 
-    catch(err) {
+    } catch (err) {
       //server error, log out error
       console.log(response.data.message);
     }
-
   } else {
     //user not logged in - redirect to login
     res.redirect("/login");
@@ -325,8 +343,11 @@ exports.getEdit = async (req, res) => {
 
       if (response.status == 200) {
         //success, render snapshot
-        res.render("editsnapshot", { snapshot: response.data.result, firstName, lastName });
-        
+        res.render("editsnapshot", {
+          snapshot: response.data.result,
+          firstName,
+          lastName,
+        });
       } else {
         //unsuccessful, snapshot doesnt exist or doesnt belong to user
         console.log(
@@ -342,59 +363,39 @@ exports.getEdit = async (req, res) => {
   }
 };
 
-exports.getEditUpdate = async (req, res) => {
+exports.postEditUpdate = async (req, res) => {
+  //get user info from the session
   const { isLoggedIn, firstName, userid } = req.session;
+  //get the id of the snapshot being edited
   const { id } = req.params;
 
   //check user is logged in
   if (isLoggedIn) {
-    //Extract data from the URL (assuming they are in the query parameters)
-    const formData = req.query;
-    const { notes } = req.query;
+    //user is logged in
+    //get the data from the form
+    const formData = req.body;
 
-    //update notes
-    //update triggers (first delete existing)
-    //ignore emotion data
-
-    //Process the form data and prepare it for database insertion
-    const emotionsToInsert = [];
-
+    //API endpoint for editing
+    const endpoint = `http://localhost:3001/snapshot/edit/${id}`;
     try {
-      //insert snapshot record first
-      const snapshotUpdate = `UPDATE snapshot SET note = ? WHERE snapshot_id = ? AND user_id = ?`;
-      const date = getCurrentDate();
-      const time = getCurrentTime();
-      const snapshotVals = [notes, id, userid];
-      const triggersToInsert = Array.isArray(req.query.trigger)
-        ? req.query.trigger
-        : req.query.trigger
-        ? [req.query.trigger]
-        : [];
-      //Ensures triggers are stored in an array so we can later iterate through - as if only one trigger is submitted it does not create an array, it is stored as a string. We have avoided this behaviour.
-      //We have also done a check to ensure we dont create an array with one object of undefined - if no triggers are selected
-      const [snapUpdate, fieldData] = await db.query(
-        snapshotUpdate,
-        snapshotVals
-      );
+      //send patch request to API with formData
+      const response = await axios.patch(endpoint, formData, {
+        validateStatus: (status) => {
+          return status < 500;
+        },
+        headers: { userid: `${userid}` }
+      });
 
-      //delete all existing triggers, we will reinsert the triggers submitted to ensure we dont retain any that may have been deselected
-      const clearTriggers = `DELETE FROM snapshot_trigger WHERE snapshot_id = ?`;
-      const [delTrig, fieldData2] = await db.query(clearTriggers, [id]);
-
-      //now insert each trigger in the many to many table snapshot_trigger that was submitted in the form
-      if (triggersToInsert.length > 0) {
-        console.log(triggersToInsert.length);
-        console.log(triggersToInsert);
-        const triggerQuery = `INSERT INTO snapshot_trigger (snapshot_id, trigger_id) VALUES (?, ?)`;
-        triggersToInsert.forEach(async (trig) => {
-          const vals = [id, trig];
-          const [data, fielddata] = await db.query(triggerQuery, vals);
-        });
+      if(response.status == 201) {
+        //successful update, redirect to view the updated snapshot
+        res.redirect(`/user/snapshot/view/${id}`);
+      } else {
+        //handle error - snapshot does not exist or does not blong to current logged in user
+        console.log(response.data.message);
       }
-
-      res.redirect(`/user/snapshot/view/${id}`);
     } catch (err) {
-      throw err;
+      //server error, handle
+      console.log(err.message);
     }
   } else {
     //user not logged in - redirect to login page
@@ -508,60 +509,27 @@ function formatDatabaseDate(date) {
 
 function countTodaysSnapshots(snapshots) {
   let countToday = 0;
-      let currentDate = formatDatabaseDate(getCurrentDate());
-      snapshots.forEach(snapshot => {
-        let date = snapshot.date;
-        if(date == currentDate) {
-          countToday += 1;
-        }
-      });
-      return countToday;
+  let currentDate = formatDatabaseDate(getCurrentDate());
+  snapshots.forEach((snapshot) => {
+    let date = snapshot.date;
+    if (date == currentDate) {
+      countToday += 1;
+    }
+  });
+  return countToday;
 }
 
 function todaysSnapshotMessage(number_of_snapshots) {
   let todaysSnapMessage = null;
-      //check if there have been snapshots today and display an appropriate message
-      if (number_of_snapshots > 0) {
-        todaysSnapMessage = {
-          message: `You have recorded ${number_of_snapshots} snapshots today! Well done!`,
-        };
-      } else {
-        todaysSnapMessage = {
-          message: `You have not recorded any snapshots yet today`,
-        };
-      }
-      return todaysSnapMessage;
-}
-
-async function fetchEmotionData() {
-  const selectRatings = `SELECT emotion.emotion_id, emotion, rating, short_desc, long_desc FROM emotion INNER JOIN emotion_rating ON emotion.emotion_id = emotion_rating.emotion_id INNER JOIN rating ON emotion_rating.rating_id = rating.rating_id`;
-
-  try {
-    //run query to get the emotions and ratings data
-    const [data, fielddata2] = await db.query(selectRatings);
-    //console.log(data)
-    const groupedData = {};
-    //parse data into an appropriate structure to pass to the template
-    data.forEach((row) => {
-      //if it doesnt already exist, create the emotion object
-      const { emotion_id, emotion, rating, short_desc, long_desc } = row;
-      if (!groupedData[emotion_id]) {
-        groupedData[emotion_id] = {
-          emotion_id,
-          emotion,
-          rating: [],
-        };
-      }
-      //push each rating data into the rating array in the emotion object
-      groupedData[emotion_id].rating.push({
-        rating: rating,
-        shortdesc: short_desc,
-        longdesc: long_desc,
-      });
-    });
-    //console.log(groupedData);
-    return groupedData;
-  } catch (err) {
-    throw err;
+  //check if there have been snapshots today and display an appropriate message
+  if (number_of_snapshots > 0) {
+    todaysSnapMessage = {
+      message: `You have recorded ${number_of_snapshots} snapshots today! Well done!`,
+    };
+  } else {
+    todaysSnapMessage = {
+      message: `You have not recorded any snapshots yet today`,
+    };
   }
+  return todaysSnapMessage;
 }
