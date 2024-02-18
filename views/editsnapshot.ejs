@@ -14,6 +14,14 @@
 <body>
     <!--Navbar-->
     <%- include('user_nav'); %>
+
+    <!-- Handle and display any errors -->
+    <% if(error) { %>
+        <div class="alert alert-danger" role="alert">
+            <%= error %>
+          </div>
+    <% } else { %>
+
     <% var triggers = snapshot.triggers; %>
         <section class="bg-section">
             <div class="container">
@@ -155,7 +163,7 @@
                 </form>
             </div>
         </section>
-
+        <% } %>
         <!--Footer-->
         <%- include('footer'); %>
             <script>

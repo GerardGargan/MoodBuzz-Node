@@ -226,6 +226,7 @@ exports.getViewSnapshot = async (req, res) => {
           error: false
         });
       } else {
+        //pass error message back to the view snapshot page
         res.render('viewsnapshot', {
           snapshot: null,
           firstName,
@@ -234,6 +235,7 @@ exports.getViewSnapshot = async (req, res) => {
         })
       }
     } catch {
+      //server error status 500 - log out
       console.log("error in catch");
     }
 };
@@ -297,12 +299,16 @@ exports.getEdit = async (req, res) => {
           snapshot: response.data.result,
           firstName,
           lastName,
+          error: false
         });
       } else {
         //unsuccessful, snapshot doesnt exist or doesnt belong to user
-        console.log(
-          "unsuccessful, snapshot doesnt exist or doesnt belong to user"
-        );
+        res.render("editsnapshot", {
+          snapshot: response.data.result,
+          firstName,
+          lastName,
+          error: 'Snapshot doesnt exist or doesnt belong to current user'
+        });
       }
     } catch (err) {
       console.log(err);
