@@ -62,7 +62,7 @@ exports.postRegister = async (req, res) => {
     let vals = ({ firstname, surname, email, password } = req.body);
     console.log(`${firstname} ${surname} ${email} ${password}`);
 
-    //sanitise user input
+    //sanitise user input, remove any leading or trailing whitespace
     firstname = firstname.trim();
     surname = surname.trim();
     email = email.trim();
@@ -184,17 +184,12 @@ exports.getNewSnapshotPage = async (req, res) => {
 exports.processNewSnapshot = async (req, res) => {
   const { firstName, userid } = req.session;
 
-    //Extract data from the URL (assuming they are in the query parameters)
+    //Extract data from the request body
     const formData = req.body;
-    const { notes } = req.body;
-    console.log(req.body);
-
-    //Process the form data and prepare it for database insertion
-    const emotionsToInsert = [];
 
     try {
       const endpoint = "http://localhost:3001/snapshot";
-      const response = await axios.post(endpoint, req.body, {
+      const response = await axios.post(endpoint, formData, {
         validateStatus: (status) => {
           return status < 500;
         },
@@ -203,7 +198,7 @@ exports.processNewSnapshot = async (req, res) => {
       const snapshotId = response.data.id;
       res.redirect(`/user/snapshot/view/${snapshotId}`);
     } catch (err) {
-      //handle error
+      //Server error, status 500 - log out
       console.log(err);
     }
 };
@@ -228,9 +223,15 @@ exports.getViewSnapshot = async (req, res) => {
           snapshot: response.data.result,
           firstName,
           lastName,
+          error: false
         });
       } else {
-        console.log("Snapshot doesnt exist");
+        res.render('viewsnapshot', {
+          snapshot: null,
+          firstName,
+          lastName,
+          error: 'Snapshot does not exist or does not belong to current user'
+        })
       }
     } catch {
       console.log("error in catch");
