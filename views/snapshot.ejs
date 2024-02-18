@@ -161,7 +161,8 @@
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
 
-                    const emotionsData = <%- JSON.stringify(groupedData) %>;
+                    const emotionsDataString = `<%- JSON.stringify(groupedData) %>`;
+                    const emotionsData = JSON.parse(emotionsDataString);
 
                     //get all range elements on the page
                     const rangeItems2 = document.querySelectorAll('input[type="range"]');
