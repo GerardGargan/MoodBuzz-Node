@@ -8,7 +8,7 @@ exports.isAuth = (req, res, next) => {
     next();
 }
 
-//used to stop user from seeing pages such as login and register pages as they are already logged in
+//used to stop user from seeing pages such as login and register pages when they are already logged in
 exports.isLoggedIn = (req, res, next) => {
     const { isLoggedIn }  = req.session;
     
