@@ -232,7 +232,7 @@ exports.getViewSnapshot = async (req, res) => {
           firstName,
           lastName,
           error: 'Snapshot does not exist or does not belong to current user'
-        })
+        });
       }
     } catch {
       //server error status 500 - log out
@@ -264,10 +264,13 @@ exports.deleteSnapshot = async (req, res) => {
         console.log(`snapshot ${id} deleted`);
         res.redirect("/user/home");
       } else {
-        //invalid id or does not belong to user, log out message
-        console.log(response.data.message);
-        //redirect to user home
-        res.redirect("/user/home");
+        //invalid id or does not belong to user, render error message
+        res.render('viewsnapshot', {
+          snapshot: null,
+          firstName,
+          lastName,
+          error: response.data.message
+        })
       }
     } catch (err) {
       //server error, log out error
@@ -304,7 +307,7 @@ exports.getEdit = async (req, res) => {
       } else {
         //unsuccessful, snapshot doesnt exist or doesnt belong to user
         res.render("editsnapshot", {
-          snapshot: response.data.result,
+          snapshot: null,
           firstName,
           lastName,
           error: 'Snapshot doesnt exist or doesnt belong to current user'
@@ -317,7 +320,7 @@ exports.getEdit = async (req, res) => {
 
 exports.postEditUpdate = async (req, res) => {
   //get user info from the session
-  const { firstName, userid } = req.session;
+  const { firstName, lastName, userid } = req.session;
   //get the id of the snapshot being edited
   const { id } = req.params;
 
@@ -339,8 +342,13 @@ exports.postEditUpdate = async (req, res) => {
         //successful update, redirect to view the updated snapshot
         res.redirect(`/user/snapshot/view/${id}`);
       } else {
-        //handle error - snapshot does not exist or does not blong to current logged in user
-        console.log(response.data.message);
+        //snapshot doesnt exist or doesnt belong to current logged in user, display error
+        res.render("editsnapshot", {
+          snapshot: null,
+          firstName,
+          lastName,
+          error: 'Snapshot doesnt exist or doesnt belong to current user'
+        });
       }
     } catch (err) {
       //server error, handle
