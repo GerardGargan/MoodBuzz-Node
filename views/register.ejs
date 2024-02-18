@@ -19,6 +19,15 @@
             <div class="window-container">
                 <h2 class="text-center mb-4">Create an Account</h1>
                     <form method="post" action="/register">
+                        
+                        <!-- Error handling section -->
+                        <% if(error) { %>
+                            <div class="alert alert-danger" role="alert">
+                                <%= error %>
+                            </div>
+                        <% } %>
+                        <!-- End of error handling -->
+
                         <!-- First Name, Last Name, Email Address, Password-->
                         <div class="d-block d-md-flex gap-3">
                             <div>

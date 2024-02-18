@@ -9,11 +9,12 @@ exports.getIndex = (req, res) => {
 
 exports.getLogin = (req, res) => {
   const { isLoggedIn } = req.session;
-    res.render("login", { currentPage: "login", isLoggedIn });
+    res.render("login", { currentPage: "login", isLoggedIn, error: false });
 };
 
 exports.postLogin = async (req, res) => {
 
+  const { isLoggedIn } = req.session;
   const { email, password } = req.body;
 
     try {
@@ -42,6 +43,7 @@ exports.postLogin = async (req, res) => {
       } else {
         //invalid login credentials, handle error message to user
         console.log(response.data.message);
+        res.render("login", { currentPage: "login", isLoggedIn, error: 'Incorrect email or password' });
       }
     } catch (err) {
       //server error
@@ -51,7 +53,7 @@ exports.postLogin = async (req, res) => {
 
 exports.getRegister = (req, res) => {
   const { isLoggedIn } = req.session;
-    res.render("register", { currentPage: "register", isLoggedIn });
+    res.render("register", { currentPage: "register", isLoggedIn, error: false });
 };
 
 exports.postRegister = async (req, res) => {
@@ -60,18 +62,28 @@ exports.postRegister = async (req, res) => {
     let vals = ({ firstname, surname, email, password } = req.body);
     console.log(`${firstname} ${surname} ${email} ${password}`);
 
-    //sanitise user input
+    //sanitise user input, remove any leading or trailing whitespace
     firstname = firstname.trim();
     surname = surname.trim();
     email = email.trim();
 
-    //perform validation checks on data
-    if (
-      validateName(firstname) &&
-      validateName(surname) &&
-      validateEmail(email) &&
-      validatePassword(password)
-    ) {
+    //perform validation checks on data, render an error message for each scenario
+    if(!validateName(firstname) || !validateName(surname)){
+      //names do not meet business rules, render error on registration page
+      return res.render("register", { currentPage: "register", isLoggedIn, error: 'First and last name must be between 2-50 characters and contain no special characters' });
+    }
+
+    if(!validateEmail(email)) {
+      //email does not meet business rules, render error on registration page
+      return res.render("register", { currentPage: "register", isLoggedIn, error: 'Invalid email address' });
+    }
+
+    if(!validatePassword(password)) {
+      //password does not meet business rules, render error on reigstration page
+      return res.render("register", { currentPage: "register", isLoggedIn, error: 'Password must be at least 8 characters long and contain a capital letter' });
+    }
+
+    //we have passed all validation checks on user inputs, proceed to attempt registration with API call
       try {
         const endpoint = "http://localhost:3001/user/register";
         const response = await axios.post(endpoint, vals, {
@@ -83,17 +95,12 @@ exports.postRegister = async (req, res) => {
           //user created successfully, redirect to login
           res.redirect("/login");
         } else {
-          //user email already exists, handle error message
-          console.log("email already exists, cant complete registration");
-          res.redirect("/register");
+          //email already exists, render error on registration page
+          res.render("register", { currentPage: "register", isLoggedIn, error: 'Email already exists' });
         }
       } catch (err) {
         console.log(err);
       }
-    } else {
-      //invalid data - did not pass validation functions, handle error
-      console.log("invalid data entered!!");
-    }
 };
 
 exports.getUserHomePage = async (req, res) => {
@@ -177,17 +184,12 @@ exports.getNewSnapshotPage = async (req, res) => {
 exports.processNewSnapshot = async (req, res) => {
   const { firstName, userid } = req.session;
 
-    //Extract data from the URL (assuming they are in the query parameters)
+    //Extract data from the request body
     const formData = req.body;
-    const { notes } = req.body;
-    console.log(req.body);
-
-    //Process the form data and prepare it for database insertion
-    const emotionsToInsert = [];
 
     try {
       const endpoint = "http://localhost:3001/snapshot";
-      const response = await axios.post(endpoint, req.body, {
+      const response = await axios.post(endpoint, formData, {
         validateStatus: (status) => {
           return status < 500;
         },
@@ -196,7 +198,7 @@ exports.processNewSnapshot = async (req, res) => {
       const snapshotId = response.data.id;
       res.redirect(`/user/snapshot/view/${snapshotId}`);
     } catch (err) {
-      //handle error
+      //Server error, status 500 - log out
       console.log(err);
     }
 };
@@ -221,11 +223,19 @@ exports.getViewSnapshot = async (req, res) => {
           snapshot: response.data.result,
           firstName,
           lastName,
+          error: false
         });
       } else {
-        console.log("Snapshot doesnt exist");
+        //pass error message back to the view snapshot page
+        res.render('viewsnapshot', {
+          snapshot: null,
+          firstName,
+          lastName,
+          error: 'Snapshot does not exist or does not belong to current user'
+        });
       }
     } catch {
+      //server error status 500 - log out
       console.log("error in catch");
     }
 };
@@ -254,10 +264,13 @@ exports.deleteSnapshot = async (req, res) => {
         console.log(`snapshot ${id} deleted`);
         res.redirect("/user/home");
       } else {
-        //invalid id or does not belong to user, log out message
-        console.log(response.data.message);
-        //redirect to user home
-        res.redirect("/user/home");
+        //invalid id or does not belong to user, render error message
+        res.render('viewsnapshot', {
+          snapshot: null,
+          firstName,
+          lastName,
+          error: response.data.message
+        })
       }
     } catch (err) {
       //server error, log out error
@@ -289,12 +302,16 @@ exports.getEdit = async (req, res) => {
           snapshot: response.data.result,
           firstName,
           lastName,
+          error: false
         });
       } else {
         //unsuccessful, snapshot doesnt exist or doesnt belong to user
-        console.log(
-          "unsuccessful, snapshot doesnt exist or doesnt belong to user"
-        );
+        res.render("editsnapshot", {
+          snapshot: null,
+          firstName,
+          lastName,
+          error: 'Snapshot doesnt exist or doesnt belong to current user'
+        });
       }
     } catch (err) {
       console.log(err);
@@ -303,7 +320,7 @@ exports.getEdit = async (req, res) => {
 
 exports.postEditUpdate = async (req, res) => {
   //get user info from the session
-  const { firstName, userid } = req.session;
+  const { firstName, lastName, userid } = req.session;
   //get the id of the snapshot being edited
   const { id } = req.params;
 
@@ -325,8 +342,13 @@ exports.postEditUpdate = async (req, res) => {
         //successful update, redirect to view the updated snapshot
         res.redirect(`/user/snapshot/view/${id}`);
       } else {
-        //handle error - snapshot does not exist or does not blong to current logged in user
-        console.log(response.data.message);
+        //snapshot doesnt exist or doesnt belong to current logged in user, display error
+        res.render("editsnapshot", {
+          snapshot: null,
+          firstName,
+          lastName,
+          error: 'Snapshot doesnt exist or doesnt belong to current user'
+        });
       }
     } catch (err) {
       //server error, handle
@@ -370,7 +392,7 @@ function validateName(name) {
   const minLength = 2;
   const maxLength = 50;
   const nameRegex = /^[A-Za-z\s-]+$/;
-  //check if name is within the allowed range and doesnt contain any special characters or numbers
+  //check if name is within the allowed range (2-50) and doesnt contain any special characters or numbers
 
   if (
     name.length >= minLength &&
