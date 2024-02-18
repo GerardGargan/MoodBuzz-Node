@@ -20,6 +20,15 @@
             <div class="window-container">
                 <h2 class="text-center mb-4">Login</h2>
                 <form method="post" action="/login">
+
+                    <!-- Error handling section -->
+                    <% if(error) { %>
+                        <div class="alert alert-danger" role="alert">
+                            <%= error %>
+                          </div>
+                    <% } %>
+                    <!-- End of error handling -->
+                    
                     <label for="email" class="form-label">Email Address</label>
                     <input type="email" class="form-control mb-3" id="email" name="email" placeholder="Enter your email"
                         required>

@@ -9,11 +9,12 @@ exports.getIndex = (req, res) => {
 
 exports.getLogin = (req, res) => {
   const { isLoggedIn } = req.session;
-    res.render("login", { currentPage: "login", isLoggedIn });
+    res.render("login", { currentPage: "login", isLoggedIn, error: false });
 };
 
 exports.postLogin = async (req, res) => {
 
+  const { isLoggedIn } = req.session;
   const { email, password } = req.body;
 
     try {
@@ -42,6 +43,7 @@ exports.postLogin = async (req, res) => {
       } else {
         //invalid login credentials, handle error message to user
         console.log(response.data.message);
+        res.render("login", { currentPage: "login", isLoggedIn, error: 'Incorrect email or password' });
       }
     } catch (err) {
       //server error
