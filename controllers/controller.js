@@ -53,7 +53,7 @@ exports.postLogin = async (req, res) => {
 
 exports.getRegister = (req, res) => {
   const { isLoggedIn } = req.session;
-    res.render("register", { currentPage: "register", isLoggedIn });
+    res.render("register", { currentPage: "register", isLoggedIn, error: false });
 };
 
 exports.postRegister = async (req, res) => {
@@ -67,13 +67,23 @@ exports.postRegister = async (req, res) => {
     surname = surname.trim();
     email = email.trim();
 
-    //perform validation checks on data
-    if (
-      validateName(firstname) &&
-      validateName(surname) &&
-      validateEmail(email) &&
-      validatePassword(password)
-    ) {
+    //perform validation checks on data, render an error message for each scenario
+    if(!validateName(firstname) || !validateName(surname)){
+      //names do not meet business rules, render error on registration page
+      return res.render("register", { currentPage: "register", isLoggedIn, error: 'First and last name must be between 2-50 characters and contain no special characters' });
+    }
+
+    if(!validateEmail(email)) {
+      //email does not meet business rules, render error on registration page
+      return res.render("register", { currentPage: "register", isLoggedIn, error: 'Invalid email address' });
+    }
+
+    if(!validatePassword(password)) {
+      //password does not meet business rules, render error on reigstration page
+      return res.render("register", { currentPage: "register", isLoggedIn, error: 'Password must be at least 8 characters long and contain a capital letter' });
+    }
+
+    //we have passed all validation checks on user inputs, proceed to attempt registration with API call
       try {
         const endpoint = "http://localhost:3001/user/register";
         const response = await axios.post(endpoint, vals, {
@@ -85,17 +95,12 @@ exports.postRegister = async (req, res) => {
           //user created successfully, redirect to login
           res.redirect("/login");
         } else {
-          //user email already exists, handle error message
-          console.log("email already exists, cant complete registration");
-          res.redirect("/register");
+          //email already exists, render error on registration page
+          res.render("register", { currentPage: "register", isLoggedIn, error: 'Email already exists' });
         }
       } catch (err) {
         console.log(err);
       }
-    } else {
-      //invalid data - did not pass validation functions, handle error
-      console.log("invalid data entered!!");
-    }
 };
 
 exports.getUserHomePage = async (req, res) => {
@@ -372,7 +377,7 @@ function validateName(name) {
   const minLength = 2;
   const maxLength = 50;
   const nameRegex = /^[A-Za-z\s-]+$/;
-  //check if name is within the allowed range and doesnt contain any special characters or numbers
+  //check if name is within the allowed range (2-50) and doesnt contain any special characters or numbers
 
   if (
     name.length >= minLength &&
