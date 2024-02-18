@@ -9,24 +9,13 @@ exports.getIndex = (req, res) => {
 
 exports.getLogin = (req, res) => {
   const { isLoggedIn } = req.session;
-
-  //check if user is already logged in, if so redirect to user home page
-  if (isLoggedIn) {
-    res.redirect("/user/home");
-  } else {
-    //user is not logged in, render login page
     res.render("login", { currentPage: "login", isLoggedIn });
-  }
 };
 
 exports.postLogin = async (req, res) => {
-  const { isLoggedIn } = req.session;
+
   const { email, password } = req.body;
-  //perform check to ensure user isnt already logged in
-  if (isLoggedIn) {
-    //if logged in, redirect - dont allow the registration to contune
-    res.redirect("/user/home");
-  } else {
+
     try {
       const endpoint = "http://localhost:3001/user/login";
       const vals = { email, password };
@@ -58,29 +47,15 @@ exports.postLogin = async (req, res) => {
       //server error
       console.log(err);
     }
-  }
 };
 
 exports.getRegister = (req, res) => {
   const { isLoggedIn } = req.session;
-
-  //check if user is already logged in, if so redirect to user home page
-  if (isLoggedIn) {
-    res.redirect("/user/home");
-  } else {
-    //user is not logged in, render register page
     res.render("register", { currentPage: "register", isLoggedIn });
-  }
 };
 
 exports.postRegister = async (req, res) => {
   const { isLoggedIn } = req.session;
-
-  //check if user is already logged in, if so redirect to user home page
-  if (isLoggedIn) {
-    res.redirect("/user/home");
-  } else {
-    //user isnt logged in, safe to continue registration
 
     let vals = ({ firstname, surname, email, password } = req.body);
     console.log(`${firstname} ${surname} ${email} ${password}`);
@@ -119,14 +94,11 @@ exports.postRegister = async (req, res) => {
       //invalid data - did not pass validation functions, handle error
       console.log("invalid data entered!!");
     }
-  }
 };
 
 exports.getUserHomePage = async (req, res) => {
-  const { isLoggedIn, userid, firstName } = req.session;
+  const { userid, firstName } = req.session;
 
-  //check if user is logged in
-  if (isLoggedIn) {
     try {
       //query database, retrieve snapshots for the current user
       const endpointSnapshots = `http://localhost:3001/snapshot/user/${userid}`;
@@ -164,17 +136,11 @@ exports.getUserHomePage = async (req, res) => {
       //handle error
       console.log(err);
     }
-  } else {
-    //user not logged in - redirect to login page,
-    res.redirect("/login");
-  }
 };
 
 exports.getNewSnapshotPage = async (req, res) => {
-  const { isLoggedIn, firstName, userid, lastName } = req.session;
+  const { firstName, userid, lastName } = req.session;
 
-  //check if user is logged in
-  if (isLoggedIn) {
     try {
       const endpointEmotions = `http://localhost:3001/emotions`;
       const emotions = await axios.get(endpointEmotions, {
@@ -206,17 +172,11 @@ exports.getNewSnapshotPage = async (req, res) => {
       //API error, status 500
       console.log(err);
     }
-  } else {
-    //user isnt logged in - redirect to login page
-    res.redirect("/login");
-  }
 };
 
 exports.processNewSnapshot = async (req, res) => {
-  const { isLoggedIn, firstName, userid } = req.session;
+  const { firstName, userid } = req.session;
 
-  //check user is logged in
-  if (isLoggedIn) {
     //Extract data from the URL (assuming they are in the query parameters)
     const formData = req.body;
     const { notes } = req.body;
@@ -239,19 +199,13 @@ exports.processNewSnapshot = async (req, res) => {
       //handle error
       console.log(err);
     }
-  } else {
-    //user not logged in - redirect to login page
-    res.redirect("/login");
-  }
 };
 
 exports.getViewSnapshot = async (req, res) => {
-  const { isLoggedIn, userid, firstName, lastName } = req.session;
+  const { userid, firstName, lastName } = req.session;
   const { id } = req.params;
   console.log(id);
 
-  //check if user is logged in
-  if (isLoggedIn) {
     try {
       const response = await axios.get(`http://localhost:3001/snapshot/${id}`, {
         validateStatus: (status) => {
@@ -274,20 +228,14 @@ exports.getViewSnapshot = async (req, res) => {
     } catch {
       console.log("error in catch");
     }
-  } else {
-    //users not logged in - redirect
-    res.redirect("/login");
-  }
 };
 
 exports.deleteSnapshot = async (req, res) => {
   //get the snapshot id from the parameters
   const { id } = req.params;
   //get session details
-  const { isLoggedIn, userid, firstName, lastName } = req.session;
+  const { userid, firstName, lastName } = req.session;
 
-  //check user is logged in
-  if (isLoggedIn) {
     try {
       const response = await axios.delete(
         `http://localhost:3001/snapshot/${id}`,
@@ -315,10 +263,6 @@ exports.deleteSnapshot = async (req, res) => {
       //server error, log out error
       console.log(response.data.message);
     }
-  } else {
-    //user not logged in - redirect to login
-    res.redirect("/login");
-  }
 };
 
 exports.getLogout = (req, res) => {
@@ -329,10 +273,8 @@ exports.getLogout = (req, res) => {
 
 exports.getEdit = async (req, res) => {
   const { id } = req.params;
-  const { userid, isLoggedIn, firstName, lastName } = req.session;
+  const { userid, firstName, lastName } = req.session;
 
-  //check if user is logged in
-  if (isLoggedIn) {
     try {
       const response = await axios.get(`http://localhost:3001/snapshot/${id}`, {
         validateStatus: (status) => {
@@ -357,21 +299,14 @@ exports.getEdit = async (req, res) => {
     } catch (err) {
       console.log(err);
     }
-  } else {
-    //not logged in, redirect to login
-    res.redirect("/login");
-  }
 };
 
 exports.postEditUpdate = async (req, res) => {
   //get user info from the session
-  const { isLoggedIn, firstName, userid } = req.session;
+  const { firstName, userid } = req.session;
   //get the id of the snapshot being edited
   const { id } = req.params;
 
-  //check user is logged in
-  if (isLoggedIn) {
-    //user is logged in
     //get the data from the form
     const formData = req.body;
 
@@ -397,10 +332,6 @@ exports.postEditUpdate = async (req, res) => {
       //server error, handle
       console.log(err.message);
     }
-  } else {
-    //user not logged in - redirect to login page
-    res.redirect("/login");
-  }
 };
 
 exports.getNotFound = (req, res) => {
