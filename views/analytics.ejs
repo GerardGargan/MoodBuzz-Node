@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link href="/style.css" rel="stylesheet">
+    <title>Analytics</title>
+</head>
+<body>
+    <%- include('user_nav'); %>
+
+    <!--Main section-->
+    <section class="px-3 px-sm-5 bg-section">
+        <div class="container py-5">
+            <h3 class="pb-2">Your Analytics</h3>
+            <!--Cards-->
+            <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+                <!--First card-->
+                <div class="col">
+                    <div class="card bg-light d-flex h-100">
+                        <h5 class="card-header">
+                            Snapshots over time
+                        </h5>
+                        <div class="card-body">
+                            <p>test</p>
+                        </div>
+                    </div>
+                </div>
+                <!--Second card-->
+                <div class="col">
+                    <div class="card bg-light d-flex h-100">
+                        <h5 class="card-header">
+                            Snapshots this month
+                        </h5>
+                        <div class="card-body">
+                            <p>test</p>
+                        </div>
+                    </div>
+                </div>
+            </div>            
+        </div>
+    </section>
+    
+    <%- include('footer'); %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+                    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+                    crossorigin="anonymous"></script>
+</body>
+</html>

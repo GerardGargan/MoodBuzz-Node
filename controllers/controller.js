@@ -356,6 +356,10 @@ exports.postEditUpdate = async (req, res) => {
     }
 };
 
+exports.getAnalytics = (req, res) => {
+  res.render('analytics');
+};
+
 exports.getNotFound = (req, res) => {
   //render page not found
   res.status(404).send("<h1>404: Page Not Found</h1>");
