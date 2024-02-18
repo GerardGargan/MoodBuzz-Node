@@ -169,7 +169,8 @@
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
 
-                    const snapshot = <%- JSON.stringify(snapshot) %>;
+                    const snapshotStringified = `<%- JSON.stringify(snapshot) %>`;
+                    const snapshot = JSON.parse(snapshotStringified);
 
                     //get all range elements on the page
                     const rangeItems2 = document.querySelectorAll('input[type="range"]');
