@@ -26,7 +26,9 @@
                             Snapshots recorded this year
                         </h5>
                         <div class="card-body">
-                            <canvas id="all_snapshots"></canvas>
+                            <div class="chart-container" style="position: relative; height: 225px;">
+                                <canvas id="all_snapshots"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -68,8 +70,9 @@
             type: 'bar',
             data: chartData,
             options: {
+                responsive: true,
                 animation: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 scales: { y: { min: 0, max: maxYValue, ticks: {
                     stepSize: 1
                 } } },
