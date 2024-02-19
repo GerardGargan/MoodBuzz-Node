@@ -50,14 +50,21 @@
     <%- include('footer'); %>
 
     <script>
+        //store the data passed in from the render function
         const dates = `<%- JSON.stringify(dates); %>`;
         const counts = `<%- JSON.stringify(counts); %>`;
         let maxYValue = `<%- JSON.stringify(maxYAxisValue); %>`;
+
+        //increment the maxYValue by 1 to make the chart more asthetic
         maxYValue = parseInt(++maxYValue);
         
+        //parse the counts data
         var yvals = JSON.parse(counts);
 
+        //parse the dates data
         const xlabels = JSON.parse(dates);
+
+        //set up chart data
         const chartData = {
             labels: xlabels,
             datasets: [{
@@ -66,6 +73,8 @@
                 pointRadius: 3
             }]
         };
+
+        //chart configuration setup
         const chartConfig = {
             type: 'bar',
             data: chartData,
@@ -88,6 +97,7 @@
             }
         };
 
+        //call the chart constructor with the id of the canvas target element
         const chart = new Chart('all_snapshots', chartConfig);
     </script>
 
