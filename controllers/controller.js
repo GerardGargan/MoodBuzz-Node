@@ -356,8 +356,35 @@ exports.postEditUpdate = async (req, res) => {
     }
 };
 
-exports.getAnalytics = (req, res) => {
-  res.render('analytics');
+exports.getAnalytics = async (req, res) => {
+  const { userid } = req.session;
+
+  try {
+
+    const endpoint = `http://localhost:3001/snapshot/analytics/snapshotspermonth/${userid}`;
+    const response = await axios.get(endpoint, {
+      validateStatus: (status) => {
+        return status < 500;
+      }
+    });
+    const data = response.data.result;
+
+    const maxYAxisValue = Math.max(...Object.values(data));
+
+    const dates = [];
+    const counts = [];
+
+    for (const [date, count] of Object.entries(data)) {
+      dates.push(date);
+      counts.push(count);
+    }
+
+    res.render('analytics', { dates, counts, maxYAxisValue });
+
+  } catch(err) {
+    //server error 500
+    console.log(err);
+  }
 };
 
 exports.getNotFound = (req, res) => {

@@ -23,7 +23,7 @@
                 <div class="col">
                     <div class="card bg-light d-flex h-100">
                         <h5 class="card-header">
-                            Snapshots over time
+                            Snapshots recorded this year
                         </h5>
                         <div class="card-body">
                             <canvas id="all_snapshots"></canvas>
@@ -34,7 +34,7 @@
                 <div class="col">
                     <div class="card bg-light d-flex h-100">
                         <h5 class="card-header">
-                            Snapshots this month
+                            Snapshots broken down by weekday
                         </h5>
                         <div class="card-body">
                             <p>test</p>
@@ -48,9 +48,14 @@
     <%- include('footer'); %>
 
     <script>
-        var yvals = [1, 5, 7, 3, 0 ,10, 8];
+        const dates = `<%- JSON.stringify(dates); %>`;
+        const counts = `<%- JSON.stringify(counts); %>`;
+        let maxYValue = `<%- JSON.stringify(maxYAxisValue); %>`;
+        maxYValue = parseInt(++maxYValue);
+        
+        var yvals = JSON.parse(counts);
 
-        const xlabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const xlabels = JSON.parse(dates);
         const chartData = {
             labels: xlabels,
             datasets: [{
@@ -60,19 +65,21 @@
             }]
         };
         const chartConfig = {
-            type: 'line',
+            type: 'bar',
             data: chartData,
             options: {
                 animation: true,
                 maintainAspectRatio: true,
-                scales: { y: { min: 0, max: 10 } },
+                scales: { y: { min: 0, max: maxYValue, ticks: {
+                    stepSize: 1
+                } } },
                 plugins: {
                     legend: { display: false },
                     tooltip: { enabled: true },
                     title: {
                         display: true,
-                        text: 'Snapshots over time',
-                        font: { size: 20 }
+                        text: 'Snapshots recorded by month',
+                        font: { size: 15 }
                     }
                 }
             }
