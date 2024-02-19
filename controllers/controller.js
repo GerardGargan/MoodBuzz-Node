@@ -357,28 +357,34 @@ exports.postEditUpdate = async (req, res) => {
 };
 
 exports.getAnalytics = async (req, res) => {
+  //get the userid from the session
   const { userid } = req.session;
 
   try {
-
+    //API endpoint for data retrieval
     const endpoint = `http://localhost:3001/snapshot/analytics/snapshotspermonth/${userid}`;
     const response = await axios.get(endpoint, {
       validateStatus: (status) => {
         return status < 500;
       }
     });
+    //store the result
     const data = response.data.result;
 
+    //get the maximum count that was returned from the dataset (used for max y-axis value)
     const maxYAxisValue = Math.max(...Object.values(data));
 
+    //set up empty arrays to hold dates and counts (chart.js requires arrays)
     const dates = [];
     const counts = [];
 
+    //loop through the result set and populate the arrays using destructuring
     for (const [date, count] of Object.entries(data)) {
       dates.push(date);
       counts.push(count);
     }
 
+    //render the analytics template with the data 
     res.render('analytics', { dates, counts, maxYAxisValue });
 
   } catch(err) {
