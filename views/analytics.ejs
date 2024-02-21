@@ -39,7 +39,9 @@
                             Snapshots broken down by weekday
                         </h5>
                         <div class="card-body">
-                            <p>test</p>
+                            <div class="chart-container" style="position: relative; height: 225px;">
+                                <canvas id="weekday_snapshots"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -51,24 +53,26 @@
 
     <script>
         //store the data passed in from the render function
+
+        //process monthly data first
         const dates = `<%- JSON.stringify(dates); %>`;
-        const counts = `<%- JSON.stringify(counts); %>`;
-        let maxYValue = `<%- JSON.stringify(maxYAxisValue); %>`;
+        const counts = `<%- JSON.stringify(monthlyCounts); %>`;
+        let maxYValue = `<%- JSON.stringify(maxYAxisValueMonthly); %>`;
 
         //increment the maxYValue by 1 to make the chart more asthetic
         maxYValue = parseInt(++maxYValue);
         
         //parse the counts data
-        var yvals = JSON.parse(counts);
+        var yvalsMonthly = JSON.parse(counts);
 
         //parse the dates data
-        const xlabels = JSON.parse(dates);
+        const xlabelsMonthly = JSON.parse(dates);
 
         //set up chart data
-        const chartData = {
-            labels: xlabels,
+        const chartDataMonthly = {
+            labels: xlabelsMonthly,
             datasets: [{
-                data: yvals,
+                data: yvalsMonthly,
                 lineTension: 0,
                 pointRadius: 3
             }]
@@ -77,7 +81,7 @@
         //chart configuration setup
         const chartConfig = {
             type: 'bar',
-            data: chartData,
+            data: chartDataMonthly,
             options: {
                 responsive: true,
                 animation: true,
@@ -98,7 +102,54 @@
         };
 
         //call the chart constructor with the id of the canvas target element
-        const chart = new Chart('all_snapshots', chartConfig);
+        const chartMonthly = new Chart('all_snapshots', chartConfig);
+
+        //now set up second chart - showing snapshots by weekday
+        const days = `<%- JSON.stringify(weekdays); %>`;
+        const dayCounts = `<%- JSON.stringify(weekdaycounts); %>`;
+        let maxWeekdayCount = `<%- JSON.stringify(maxWeekdayValue); %>`;
+
+        //parse back to javascript objects
+        const xlabelsWeekdays = JSON.parse(days);
+        const yValsWeekdays = JSON.parse(dayCounts);
+        let maxYAxisWeekday = parseInt(++maxWeekdayCount);
+
+                //set up chart data
+                const chartDataWeekdays = {
+            labels: xlabelsWeekdays,
+            datasets: [{
+                data: yValsWeekdays,
+                lineTension: 0,
+                pointRadius: 3
+            }]
+        };
+
+        //chart configuration setup
+        const chartConfigWeekdays = {
+            type: 'bar',
+            data: chartDataWeekdays,
+            options: {
+                responsive: true,
+                animation: true,
+                maintainAspectRatio: false,
+                scales: { y: { min: 0, max: maxYAxisWeekday, ticks: {
+                    stepSize: 1
+                } } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true },
+                    title: {
+                        display: true,
+                        text: 'Snapshots recorded by weekday',
+                        font: { size: 15 }
+                    }
+                }
+            }
+        };
+
+        const chartWeekday = new Chart('weekday_snapshots', chartConfigWeekdays)
+        
+
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"

@@ -361,32 +361,48 @@ exports.getAnalytics = async (req, res) => {
   const { userid } = req.session;
 
   try {
-    //API endpoint for data retrieval
-    const endpoint = `http://localhost:3001/snapshot/analytics/snapshotspermonth/${userid}`;
-    const response = await axios.get(endpoint, {
+    //API endpoint for data retrieval for snapshots by month (month: count)
+    const endpointMonthly = `http://localhost:3001/snapshot/analytics/snapshotspermonth/${userid}`;
+    const responseMonthly = await axios.get(endpointMonthly, {
       validateStatus: (status) => {
         return status < 500;
       }
     });
     //store the result
-    const data = response.data.result;
+    const monthlyData = responseMonthly.data.result;
 
     //get the maximum count that was returned from the dataset (used for max y-axis value)
-    const maxYAxisValue = Math.max(...Object.values(data));
+    const maxYAxisValueMonthly = Math.max(...Object.values(monthlyData));
 
     //set up empty arrays to hold dates and counts (chart.js requires arrays)
     const dates = [];
-    const counts = [];
+    const monthlyCounts = [];
 
     //loop through the result set and populate the arrays using destructuring
-    for (const [date, count] of Object.entries(data)) {
+    for (const [date, count] of Object.entries(monthlyData)) {
       dates.push(date);
-      counts.push(count);
+      monthlyCounts.push(count);
     }
 
-    //render the analytics template with the data 
-    res.render('analytics', { dates, counts, maxYAxisValue });
+    //API endpoint for getting snapshots by weekday
+    const endpointWeekday = `http://localhost:3001/snapshot/analytics/snapshotsperday/${userid}`;
+    const responseWeekday = await axios.get(endpointWeekday, {
+      validateStatus: (status) => {
+        return status < 500;
+      }
+    });
 
+    //access the data returned
+    const weekdayData = responseWeekday.data.result;
+
+    //set up arrays to hold weekdays and counts
+    const weekdays = Object.keys(weekdayData);
+    const weekdaycounts = Object.values(weekdayData);
+    const maxWeekdayValue = Math.max(...weekdaycounts)
+ 
+    //render the analytics template with the data 
+    res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue });
+  
   } catch(err) {
     //server error 500
     console.log(err);
