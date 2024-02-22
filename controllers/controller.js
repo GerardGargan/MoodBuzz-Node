@@ -398,10 +398,53 @@ exports.getAnalytics = async (req, res) => {
     //set up arrays to hold weekdays and counts
     const weekdays = Object.keys(weekdayData);
     const weekdaycounts = Object.values(weekdayData);
-    const maxWeekdayValue = Math.max(...weekdaycounts)
- 
+    const maxWeekdayValue = Math.max(...weekdaycounts);
+
+    //now get all snapshots, so we can chart emotion levels
+    const endpointAllSnapshots = `http://localhost:3001/snapshot/user/${userid}`;
+    const requestSnapshots = await axios.get(endpointAllSnapshots, {
+      validateStatus: (status) => {
+        return status < 500;
+      }
+    });
+
+    const snapshotData = requestSnapshots.data.result;
+    const groupedEmotionsData = {};
+
+    //loop through each snapshot, then each emotion. Check if it exists already, if not add it to the object
+    snapshotData.forEach((snapshot) => {
+      //loop through each emotion inside each snapshot
+      snapshot.emotions.forEach((emotion) => {
+        //check if the emotion exists in our grouped object
+        if(!groupedEmotionsData[emotion.emotion]) {
+          //it doesnt exist, create the emotion with an empty array
+          groupedEmotionsData[emotion.emotion] = [];
+        }
+
+        //add the rating to the array for the current emotion
+        groupedEmotionsData[emotion.emotion].push(emotion.rating);
+
+      })
+    });
+    console.log(JSON.stringify(groupedEmotionsData));
+
+    //loop through our data structure containing each emotion, each emotion has an array of ratings
+    Object.keys(groupedEmotionsData).forEach(emotion => {
+      //calculate the average for each emotion and store it against the emotion, replacing the array
+      groupedEmotionsData[emotion] = average(groupedEmotionsData[emotion]);
+    });
+    console.log(groupedEmotionsData);
+    //get an array of the emotions (keys) for chart js
+    const emotionLabels = Object.keys(groupedEmotionsData);
+    //get an array of the average ratings (values) for chart js
+    const emotionAverages = Object.values(groupedEmotionsData);
+    //get the max value
+    const maxEmotionValue = Math.max(...emotionAverages);
+    console.log(emotionLabels);
+    console.log(emotionAverages);
+
     //render the analytics template with the data 
-    res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue });
+    res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue, emotionLabels, emotionAverages, maxEmotionValue });
   
   } catch(err) {
     //server error 500
@@ -413,6 +456,17 @@ exports.getNotFound = (req, res) => {
   //render page not found
   res.status(404).send("<h1>404: Page Not Found</h1>");
 };
+
+//Function to get the average of an array of numbers, average is returned to 1 decimal place
+function average(numbers) {
+  let total = 0;
+  let count = 0;
+  numbers.forEach(number => {
+    total += number;
+    count++;
+  });
+  return (total/count).toFixed(1);
+}
 
 function validatePassword(password) {
   //regex to check if a password contains a capital letter

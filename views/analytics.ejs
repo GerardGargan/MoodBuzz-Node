@@ -1,159 +1,289 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <link href="/style.css" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"
+      integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+    />
+    <link href="/style.css" rel="stylesheet" />
     <title>Analytics</title>
-</head>
-<body>
+  </head>
+  <body>
     <%- include('user_nav'); %>
 
     <!--Main section-->
     <section class="px-3 px-sm-5 bg-section">
-        <div class="container py-5">
-            <h3 class="pb-2">Your Analytics</h3>
-            <!--Cards-->
-            <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
-                <!--First card-->
-                <div class="col">
-                    <div class="card bg-light d-flex h-100">
-                        <h5 class="card-header">
-                            Snapshots recorded this year
-                        </h5>
-                        <div class="card-body">
-                            <div class="chart-container" style="position: relative; height: 225px;">
-                                <canvas id="all_snapshots"></canvas>
-                            </div>
-                        </div>
-                    </div>
+      <div class="container py-5">
+        <h3 class="pb-2">Your Analytics</h3>
+        <!--Cards-->
+        <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+          <!--First card-->
+          <div class="col">
+            <div class="card bg-light d-flex h-100">
+              <h5 class="card-header">Snapshots recorded this year</h5>
+              <div class="card-body">
+                <div
+                  class="chart-container"
+                  style="position: relative; height: 225px"
+                >
+                  <canvas id="all_snapshots"></canvas>
                 </div>
-                <!--Second card-->
-                <div class="col">
-                    <div class="card bg-light d-flex h-100">
-                        <h5 class="card-header">
-                            Snapshots broken down by weekday
-                        </h5>
-                        <div class="card-body">
-                            <div class="chart-container" style="position: relative; height: 225px;">
-                                <canvas id="weekday_snapshots"></canvas>
-                            </div>
-                        </div>
-                    </div>
+              </div>
+            </div>
+          </div>
+          <!--Second card-->
+          <div class="col">
+            <div class="card bg-light d-flex h-100">
+              <h5 class="card-header">Snapshots broken down by weekday</h5>
+              <div class="card-body">
+                <div
+                  class="chart-container"
+                  style="position: relative; height: 225px"
+                >
+                  <canvas id="weekday_snapshots"></canvas>
                 </div>
-            </div>            
+              </div>
+            </div>
+          </div>
+          <!--Third card-->
+          <div class="col">
+            <div class="card bg-light d-flex h-100">
+              <h5 class="card-header">Average emotion levels</h5>
+              <div class="card-body">
+                <div
+                  class="chart-container"
+                  style="position: relative; height: 350px"
+                >
+                  <canvas id="emotion_avg"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--Third card-->
+          <div class="col">
+            <div class="card bg-light d-flex h-100">
+              <h5 class="card-header">Most common triggers</h5>
+              <div class="card-body">
+                <div
+                  class="chart-container"
+                  style="position: relative; height: 350px"
+                >
+                  <canvas id="common_triggers"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </section>
-    
+
     <%- include('footer'); %>
 
     <script>
-        //store the data passed in from the render function
+      //store the data passed in from the render function
 
-        //process monthly data first
-        const dates = `<%- JSON.stringify(dates); %>`;
-        const counts = `<%- JSON.stringify(monthlyCounts); %>`;
-        let maxYValue = `<%- JSON.stringify(maxYAxisValueMonthly); %>`;
+      //process monthly data first
+      const dates = `<%- JSON.stringify(dates); %>`;
+      const counts = `<%- JSON.stringify(monthlyCounts); %>`;
+      let maxYValue = `<%- JSON.stringify(maxYAxisValueMonthly); %>`;
 
-        //increment the maxYValue by 1 to make the chart more asthetic
-        maxYValue = parseInt(++maxYValue);
-        
-        //parse the counts data
-        var yvalsMonthly = JSON.parse(counts);
+      //increment the maxYValue by 1 to make the chart more asthetic
+      maxYValue = parseInt(++maxYValue);
 
-        //parse the dates data
-        const xlabelsMonthly = JSON.parse(dates);
+      //parse the counts data
+      var yvalsMonthly = JSON.parse(counts);
 
-        //set up chart data
-        const chartDataMonthly = {
-            labels: xlabelsMonthly,
-            datasets: [{
-                data: yvalsMonthly,
-                lineTension: 0,
-                pointRadius: 3
-            }]
-        };
+      //parse the dates data
+      const xlabelsMonthly = JSON.parse(dates);
 
-        //chart configuration setup
-        const chartConfig = {
-            type: 'bar',
-            data: chartDataMonthly,
-            options: {
-                responsive: true,
-                animation: true,
-                maintainAspectRatio: false,
-                scales: { y: { min: 0, max: maxYValue, ticks: {
-                    stepSize: 1
-                } } },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true },
-                    title: {
-                        display: true,
-                        text: 'Snapshots recorded by month',
-                        font: { size: 15 }
-                    }
-                }
-            }
-        };
+      //set up chart data
+      const chartDataMonthly = {
+        labels: xlabelsMonthly,
+        datasets: [
+          {
+            data: yvalsMonthly,
+            lineTension: 0,
+            pointRadius: 3,
+          },
+        ],
+      };
 
-        //call the chart constructor with the id of the canvas target element
-        const chartMonthly = new Chart('all_snapshots', chartConfig);
+      //chart configuration setup
+      const chartConfig = {
+        type: "bar",
+        data: chartDataMonthly,
+        options: {
+          responsive: true,
+          animation: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              min: 0,
+              max: maxYValue,
+              ticks: {
+                stepSize: 1,
+              },
+            },
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true },
+            title: {
+              display: false,
+              text: "Snapshots recorded by month",
+              font: { size: 15 },
+            },
+          },
+        },
+      };
 
-        //now set up second chart - showing snapshots by weekday
-        const days = `<%- JSON.stringify(weekdays); %>`;
-        const dayCounts = `<%- JSON.stringify(weekdaycounts); %>`;
-        let maxWeekdayCount = `<%- JSON.stringify(maxWeekdayValue); %>`;
+      //call the chart constructor with the id of the canvas target element
+      const chartMonthly = new Chart("all_snapshots", chartConfig);
 
-        //parse back to javascript objects
-        const xlabelsWeekdays = JSON.parse(days);
-        const yValsWeekdays = JSON.parse(dayCounts);
-        let maxYAxisWeekday = parseInt(++maxWeekdayCount);
+      //now set up second chart - showing snapshots by weekday
+      const days = `<%- JSON.stringify(weekdays); %>`;
+      const dayCounts = `<%- JSON.stringify(weekdaycounts); %>`;
+      let maxWeekdayCount = `<%- JSON.stringify(maxWeekdayValue); %>`;
 
-                //set up chart data
-                const chartDataWeekdays = {
-            labels: xlabelsWeekdays,
-            datasets: [{
-                data: yValsWeekdays,
-                lineTension: 0,
-                pointRadius: 3
-            }]
-        };
+      //parse back to javascript objects
+      const xlabelsWeekdays = JSON.parse(days);
+      const yValsWeekdays = JSON.parse(dayCounts);
+      let maxYAxisWeekday = parseInt(++maxWeekdayCount);
 
-        //chart configuration setup
-        const chartConfigWeekdays = {
-            type: 'bar',
-            data: chartDataWeekdays,
-            options: {
-                responsive: true,
-                animation: true,
-                maintainAspectRatio: false,
-                scales: { y: { min: 0, max: maxYAxisWeekday, ticks: {
-                    stepSize: 1
-                } } },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true },
-                    title: {
-                        display: true,
-                        text: 'Snapshots recorded by weekday',
-                        font: { size: 15 }
-                    }
-                }
-            }
-        };
+      //set up chart data
+      const chartDataWeekdays = {
+        labels: xlabelsWeekdays,
+        datasets: [
+          {
+            data: yValsWeekdays,
+            lineTension: 0,
+            pointRadius: 3,
+          },
+        ],
+      };
 
-        const chartWeekday = new Chart('weekday_snapshots', chartConfigWeekdays)
-        
+      //chart configuration setup
+      const chartConfigWeekdays = {
+        type: "bar",
+        data: chartDataWeekdays,
+        options: {
+          responsive: true,
+          animation: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              min: 0,
+              max: maxYAxisWeekday,
+              ticks: {
+                stepSize: 1,
+              },
+            },
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true },
+            title: {
+              display: false,
+              text: "Snapshots by weekday",
+              font: { size: 15 },
+            },
+          },
+        },
+      };
 
+      const chartWeekday = new Chart("weekday_snapshots", chartConfigWeekdays);
+
+      //Set up chart for average emotion values
+
+      const emotions = `<%- JSON.stringify(emotionLabels); %>`;
+      const emotionAvg = `<%- JSON.stringify(emotionAverages); %>`;
+      const maxEmotion = `<%- JSON.stringify(maxEmotionValue); %>`;
+
+      //parse back to javascript objects
+
+      const emotionLabels = JSON.parse(emotions);
+      const emotionAverageValues = JSON.parse(emotionAvg);
+      let maxEmotionValue = JSON.parse(maxEmotion);
+
+      let maxEmotionInt = parseInt(++maxEmotionValue);
+
+      const EmotionAvgdata = {
+        labels: emotionLabels,
+        datasets: [
+          {
+            label: "Average Emotion Ratings",
+            data: emotionAverageValues,
+            fill: true,
+            backgroundColor: "rgba(54, 162, 235, 0.2)", // Blue
+            borderColor: "rgb(54, 162, 235)", // Blue
+            pointBackgroundColor: "rgb(54, 162, 235)", // Blue
+            pointBorderColor: "#fff",
+            pointHoverBackgroundColor: "#fff",
+            pointHoverBorderColor: "rgb(54, 162, 235)", // Blue
+          },
+        ],
+      };
+
+      const emoAvgConfig = {
+        type: "radar",
+        data: EmotionAvgdata,
+        options: {
+          responsive: true,
+          animation: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 1,
+              max: 10,
+              ticks: {
+                stepSize: 2,
+              },
+              grid: {
+                lineWidth: 2,
+              },
+              pointLabels: {
+                font: { size: 13 }
+              },
+            },
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true },
+            title: {
+              display: false,
+              text: "Average emotion ratings",
+              font: { size: 15 },
+            },
+          },
+          elements: {
+            line: {
+              borderWidth: 3,
+            },
+          },
+        },
+      };
+
+      const emoAvgChart = new Chart("emotion_avg", emoAvgConfig);
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-                    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-                    crossorigin="anonymous"></script>
-</body>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>
