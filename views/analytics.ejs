@@ -278,6 +278,67 @@
       };
 
       const emoAvgChart = new Chart("emotion_avg", emoAvgConfig);
+
+      //set up chart for most common triggers
+
+      //parse and store the data from the server
+      const triggersData = `<%- JSON.stringify(triggers); %>`;
+      const triggersValsData = `<%- JSON.stringify(triggerVals); %>`;
+      const maxTriggerCountData = `<%- JSON.stringify(maxTriggerCount); %>`;
+      console.log(triggersValsData);
+      console.log(triggersData);
+
+      //parse back into javascript objects
+      const triggers = JSON.parse(triggersData);
+      const triggerVals = JSON.parse(triggersValsData);
+      let maxTriggerCount = JSON.parse(maxTriggerCountData);
+      //increment max y axis by one to leave some room at the top of the chart
+      let maxCountInt = parseInt(++maxTriggerCount);
+
+      //set up chart data
+      const chartDataTriggers = {
+        labels: triggers,
+        datasets: [
+          {
+            data: triggerVals,
+            lineTension: 0,
+            pointRadius: 3,
+          },
+        ],
+      };
+
+      //chart configuration setup
+      const chartConfigTriggers = {
+        type: "bar",
+        data: chartDataTriggers,
+        options: {
+          responsive: true,
+          animation: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              min: 0,
+              max: maxTriggerCount,
+              ticks: {
+                stepSize: 1,
+              },
+            },
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true },
+            title: {
+              display: false,
+              text: "Most common triggers",
+              font: { size: 15 },
+            },
+          },
+        },
+      };
+
+      const chartTrigger = new Chart("common_triggers", chartConfigTriggers);
+
+
     </script>
 
     <script

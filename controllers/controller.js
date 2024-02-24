@@ -455,17 +455,21 @@ exports.getAnalytics = async (req, res) => {
     //convert to an array of key value pairs (to allow sorting, wanting to show highest to lowest on graph)
     const triggerCountsArray = Object.entries(triggerCounts);
     
+    //sort from highest to lowest
     triggerCountsArray.sort((a, b) => b[1] - a[1]);
+    //set up empty arrays to hold the triggers and values (for graph js)
     const triggers = [];
     const triggerVals = [];
 
+    //loop through and populate the arrays
     triggerCountsArray.forEach(trigger => {
       triggers.push(trigger[0]);
-      triggerVals.push([trigger[1]]);
+      triggerVals.push(`${[trigger[1]]}`);
     });
 
+    //get the max value to use for the maximum y axis on the chart
     const maxTriggerCount = Math.max(...triggerVals);
-    console.log(maxTriggerCount);
+
 
     //render the analytics template with the data 
     res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue, emotionLabels, emotionAverages, maxEmotionValue, triggers, triggerVals, maxTriggerCount });
