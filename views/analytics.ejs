@@ -34,7 +34,7 @@
           <!--First card-->
           <div class="col">
             <div class="card bg-light d-flex h-100">
-              <h5 class="card-header">Snapshots recorded this year</h5>
+              <h5 class="card-header">Snapshots recorded by month</h5>
               <div class="card-body">
                 <div
                   class="chart-container"
@@ -48,7 +48,7 @@
           <!--Second card-->
           <div class="col">
             <div class="card bg-light d-flex h-100">
-              <h5 class="card-header">Snapshots broken down by weekday</h5>
+              <h5 class="card-header">Snapshots by weekday</h5>
               <div class="card-body">
                 <div
                   class="chart-container"
@@ -124,7 +124,7 @@
 
       //chart configuration setup
       const chartConfig = {
-        type: "bar",
+        type: "line",
         data: chartDataMonthly,
         options: {
           responsive: true,

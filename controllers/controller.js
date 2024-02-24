@@ -371,7 +371,7 @@ exports.getAnalytics = async (req, res) => {
     //store the result
     const monthlyData = responseMonthly.data.result;
 
-    //get the maximum count that was returned from the dataset (used for max y-axis value)
+    //get the maximum count that was returned from the dataset (used for setting max y-axis value on chart)
     const maxYAxisValueMonthly = Math.max(...Object.values(monthlyData));
 
     //set up empty arrays to hold dates and counts (chart.js requires arrays)
@@ -426,7 +426,7 @@ exports.getAnalytics = async (req, res) => {
 
       })
     });
-    console.log(JSON.stringify(groupedEmotionsData));
+ 
 
     //loop through our data structure containing each emotion, each emotion has an array of ratings
     Object.keys(groupedEmotionsData).forEach(emotion => {
@@ -440,11 +440,35 @@ exports.getAnalytics = async (req, res) => {
     const emotionAverages = Object.values(groupedEmotionsData);
     //get the max value
     const maxEmotionValue = Math.max(...emotionAverages);
-    console.log(emotionLabels);
-    console.log(emotionAverages);
+    
+    //now obtain all triggers and their counts for this user
+    const endpoint = `http://localhost:3001/triggers/analytics/${userid}`;
+    const triggersResponse = await axios.get(endpoint, {
+      validateStatus: (status) => {
+        return status < 500
+      }
+    });
+
+    //store the data in a varialbe
+    const triggerCounts = triggersResponse.data.result;
+   
+    //convert to an array of key value pairs (to allow sorting, wanting to show highest to lowest on graph)
+    const triggerCountsArray = Object.entries(triggerCounts);
+    
+    triggerCountsArray.sort((a, b) => b[1] - a[1]);
+    const triggers = [];
+    const triggerVals = [];
+
+    triggerCountsArray.forEach(trigger => {
+      triggers.push(trigger[0]);
+      triggerVals.push([trigger[1]]);
+    });
+
+    const maxTriggerCount = Math.max(...triggerVals);
+    console.log(maxTriggerCount);
 
     //render the analytics template with the data 
-    res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue, emotionLabels, emotionAverages, maxEmotionValue });
+    res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue, emotionLabels, emotionAverages, maxEmotionValue, triggers, triggerVals, maxTriggerCount });
   
   } catch(err) {
     //server error 500
