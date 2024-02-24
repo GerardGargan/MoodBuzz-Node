@@ -356,10 +356,145 @@ exports.postEditUpdate = async (req, res) => {
     }
 };
 
+exports.getAnalytics = async (req, res) => {
+  //get the userid from the session
+  const { userid } = req.session;
+
+  try {
+    //API endpoint for data retrieval for snapshots by month (month: count)
+    const endpointMonthly = `http://localhost:3001/snapshot/analytics/snapshotspermonth/${userid}`;
+    const responseMonthly = await axios.get(endpointMonthly, {
+      validateStatus: (status) => {
+        return status < 500;
+      }
+    });
+    //store the result
+    const monthlyData = responseMonthly.data.result;
+
+    //get the maximum count that was returned from the dataset (used for setting max y-axis value on chart)
+    const maxYAxisValueMonthly = Math.max(...Object.values(monthlyData));
+
+    //set up empty arrays to hold dates and counts (chart.js requires arrays)
+    const dates = [];
+    const monthlyCounts = [];
+
+    //loop through the result set and populate the arrays using destructuring
+    for (const [date, count] of Object.entries(monthlyData)) {
+      dates.push(date);
+      monthlyCounts.push(count);
+    }
+
+    //API endpoint for getting snapshots by weekday
+    const endpointWeekday = `http://localhost:3001/snapshot/analytics/snapshotsperday/${userid}`;
+    const responseWeekday = await axios.get(endpointWeekday, {
+      validateStatus: (status) => {
+        return status < 500;
+      }
+    });
+
+    //access the data returned
+    const weekdayData = responseWeekday.data.result;
+
+    //set up arrays to hold weekdays and counts
+    const weekdays = Object.keys(weekdayData);
+    const weekdaycounts = Object.values(weekdayData);
+    const maxWeekdayValue = Math.max(...weekdaycounts);
+
+    //now get all snapshots, so we can chart emotion levels
+    const endpointAllSnapshots = `http://localhost:3001/snapshot/user/${userid}`;
+    const requestSnapshots = await axios.get(endpointAllSnapshots, {
+      validateStatus: (status) => {
+        return status < 500;
+      }
+    });
+
+    const snapshotData = requestSnapshots.data.result;
+    const groupedEmotionsData = {};
+
+    //loop through each snapshot, then each emotion. Check if it exists already, if not add it to the object
+    snapshotData.forEach((snapshot) => {
+      //loop through each emotion inside each snapshot
+      snapshot.emotions.forEach((emotion) => {
+        //check if the emotion exists in our grouped object
+        if(!groupedEmotionsData[emotion.emotion]) {
+          //it doesnt exist, create the emotion with an empty array
+          groupedEmotionsData[emotion.emotion] = [];
+        }
+
+        //add the rating to the array for the current emotion
+        groupedEmotionsData[emotion.emotion].push(emotion.rating);
+
+      })
+    });
+ 
+
+    //loop through our data structure containing each emotion, each emotion has an array of ratings
+    Object.keys(groupedEmotionsData).forEach(emotion => {
+      //calculate the average for each emotion and store it against the emotion, replacing the array
+      groupedEmotionsData[emotion] = average(groupedEmotionsData[emotion]);
+    });
+    console.log(groupedEmotionsData);
+    //get an array of the emotions (keys) for chart js
+    const emotionLabels = Object.keys(groupedEmotionsData);
+    //get an array of the average ratings (values) for chart js
+    const emotionAverages = Object.values(groupedEmotionsData);
+    //get the max value
+    const maxEmotionValue = Math.max(...emotionAverages);
+    
+    //now obtain all triggers and their counts for this user
+    const endpoint = `http://localhost:3001/triggers/analytics/${userid}`;
+    const triggersResponse = await axios.get(endpoint, {
+      validateStatus: (status) => {
+        return status < 500
+      }
+    });
+
+    //store the data in a varialbe
+    const triggerCounts = triggersResponse.data.result;
+   
+    //convert to an array of key value pairs (to allow sorting, wanting to show highest to lowest on graph)
+    const triggerCountsArray = Object.entries(triggerCounts);
+    
+    //sort from highest to lowest
+    triggerCountsArray.sort((a, b) => b[1] - a[1]);
+    //set up empty arrays to hold the triggers and values (for graph js)
+    const triggers = [];
+    const triggerVals = [];
+
+    //loop through and populate the arrays
+    triggerCountsArray.forEach(trigger => {
+      triggers.push(trigger[0]);
+      triggerVals.push(`${[trigger[1]]}`);
+    });
+
+    //get the max value to use for the maximum y axis on the chart
+    const maxTriggerCount = Math.max(...triggerVals);
+
+
+    //render the analytics template with the data 
+    res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue, emotionLabels, emotionAverages, maxEmotionValue, triggers, triggerVals, maxTriggerCount });
+  
+  } catch(err) {
+    //server error 500
+    console.log(err);
+  }
+};
+
 exports.getNotFound = (req, res) => {
   //render page not found
   res.status(404).send("<h1>404: Page Not Found</h1>");
 };
+
+//Function to get the average of an array of numbers, average is returned to 1 decimal place
+function average(numbers) {
+  let total = 0;
+  let count = 0;
+  numbers.forEach(number => {
+    total += number;
+    count++;
+  });
+  return (total/count).toFixed(1);
+}
 
 function validatePassword(password) {
   //regex to check if a password contains a capital letter
