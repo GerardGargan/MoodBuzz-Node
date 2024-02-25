@@ -10,7 +10,10 @@ exports.getIndex = (req, res) => {
 
 exports.getLogin = (req, res) => {
   const { isLoggedIn } = req.session;
-    res.render("login", { currentPage: "login", isLoggedIn, error: false });
+  //check if a user was just registered, if so display success message
+  const successMessage = req.query.success ? 'Registration successful. You can now log in.' : null;
+
+    res.render("login", { currentPage: "login", isLoggedIn, error: false, successMessage });
 };
 
 exports.postLogin = async (req, res) => {
@@ -104,7 +107,7 @@ exports.postRegister = async (req, res) => {
         });
         if (response.status == 201) {
           //user created successfully, redirect to login
-          res.redirect("/login");
+          res.redirect('/login?success=1');
         } else {
           //email already exists, render error on registration page
           res.render("register", { currentPage: "register", isLoggedIn, error: 'Email already exists' });
@@ -116,6 +119,8 @@ exports.postRegister = async (req, res) => {
 
 exports.getUserHomePage = async (req, res) => {
   const { userid, firstName, lastName } = req.session;
+  //check if a deletion occured, so we can display a success message to the user
+  const deletedMessage = req.query.deleted ? 'Snapshot deleted' : null;
 
     try {
       //query database, retrieve snapshots for the current user
@@ -150,7 +155,7 @@ exports.getUserHomePage = async (req, res) => {
         emotions: emotions,
         numberOfSnapshots,
         todaysSnapMessage,
-        firstName, lastName, currentDateTime
+        firstName, lastName, currentDateTime, deletedMessage
       });
     } catch (err) {
       //handle error
@@ -209,7 +214,7 @@ exports.processNewSnapshot = async (req, res) => {
         headers: { userid: `${userid}` },
       });
       const snapshotId = response.data.id;
-      res.redirect(`/user/snapshot/view/${snapshotId}`);
+      res.redirect(`/user/snapshot/view/${snapshotId}?success=1`);
     } catch (err) {
       //Server error, status 500 - log out
       console.log(err);
@@ -219,7 +224,10 @@ exports.processNewSnapshot = async (req, res) => {
 exports.getViewSnapshot = async (req, res) => {
   const { userid, firstName, lastName } = req.session;
   const { id } = req.params;
-  console.log(id);
+
+  //check if a snapshot was successfully just added
+  const newSnapshotMessage = req.query.success ? 'Snapshot successfully recorded' : null;
+  const editSnapshotMessage = req.query.edit ? 'Snapshot updated' : null;
 
     try {
       const response = await axios.get(`http://localhost:3001/snapshot/${id}`, {
@@ -236,7 +244,9 @@ exports.getViewSnapshot = async (req, res) => {
           snapshot: response.data.result,
           firstName,
           lastName,
-          error: false
+          error: false,
+          newSnapshotMessage,
+          editSnapshotMessage
         });
       } else {
         //pass error message back to the view snapshot page
@@ -244,7 +254,9 @@ exports.getViewSnapshot = async (req, res) => {
           snapshot: null,
           firstName,
           lastName,
-          error: 'Snapshot does not exist or does not belong to current user'
+          error: 'Snapshot does not exist or does not belong to current user',
+          newSnapshotMessage,
+          editSnapshotMessage
         });
       }
     } catch {
@@ -275,14 +287,16 @@ exports.deleteSnapshot = async (req, res) => {
       if (response.status == 200) {
         //successful deletion, redirect
         console.log(`snapshot ${id} deleted`);
-        res.redirect("/user/home");
+        res.redirect("/user/home?deleted=1");
       } else {
         //invalid id or does not belong to user, render error message
         res.render('viewsnapshot', {
           snapshot: null,
           firstName,
           lastName,
-          error: response.data.message
+          error: response.data.message, 
+          newSnapshotMessage: null, 
+          editSnapshotMessage: null
         })
       }
     } catch (err) {
@@ -353,7 +367,7 @@ exports.postEditUpdate = async (req, res) => {
 
       if(response.status == 201) {
         //successful update, redirect to view the updated snapshot
-        res.redirect(`/user/snapshot/view/${id}`);
+        res.redirect(`/user/snapshot/view/${id}?edit=1`);
       } else {
         //snapshot doesnt exist or doesnt belong to current logged in user, display error
         res.render("editsnapshot", {

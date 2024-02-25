@@ -50,7 +50,16 @@
         var time=snapshot.time; 
         var triggers = snapshot.triggers;
         %>
-
+        <% if(newSnapshotMessage != null) { %>
+            <div class="alert alert-success m-0" role="alert">
+            <div class="container"><%= newSnapshotMessage %></div>
+            </div>
+        <% } %>
+        <% if(editSnapshotMessage != null) { %>
+            <div class="alert alert-success m-0" role="alert">
+            <div class="container"><%= editSnapshotMessage %></div>
+            </div>
+        <% } %>
             <section class="bg-section">
                 <div class="container">
                     <!--Breadcrumbs-->
