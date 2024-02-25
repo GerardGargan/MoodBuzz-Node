@@ -1,15 +1,50 @@
-## MoodBuzz Emotion Recording Web App
-### Queens University Belfast Web Project CSC7084
+# MoodBuzz Web App
 
-This project has been developed to satisfy the requirements of the web development module at QUB.
-The assignement involved building a web app that allows users to register, login and record/track their emotions over time.
-Users must be able to edit aspects of the snapshots, be able to view snapshots and have some sort of analytics/graphs.
+This web app was developed as part of the CSC7082 Web Development Module at Queens University Belfast.
 
-The app uses HTML, CSS, Javascript with some bootstrap and custom CSS for the front end.
-For the back end, we are using Node.js, express and mysql.
+The App itself is an emotion recording app. For fun, it was themed around my favorite christmas movie, home alone.
 
-The web app has been designed to be easily expanded to add new emotions and contextual triggers.
-None of these have been hardcoded, all of these form items are rendered from the database.
+## Table of Contents
 
-We have not built out a UI/Form to insert new emotions or triggers as it was not in the scope of the assignment however it would be easy to expand on this.
-Currently to add new emotions or contextual trigger options, you can manually create a record in the database and they will be rendered in the app.
+1. [Prerequisites](#prerequisites)
+2. [Installation](#installation)
+3. [Usage](#usage)
+4. [Features](#features)
+
+## Prerequisites
+
+- Node JS
+- Node Package Manager (NPM)
+- MoodBuzz API Server [https://github.com/GerardGargan/MoodBuzz-API](https://github.com/GerardGargan/MoodBuzz-API)
+- MoodBuzz API server database (see MoodBuzz-API README)
+
+This project relies on an API for CRUD processes. Please install the API and corresponding database, details can be found on the MoodBuzz API Server Repo's README.md
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/GerardGargan/MoodBuzz-Node.git
+
+# Navigate to the project directory
+cd MoodBuzz-Node
+
+# Install dependencies
+npm install
+```
+
+## Usage
+
+```bash
+npm start
+```
+
+## Features
+- User registration
+- Login
+- Record an emotive snapshot
+- Edit snapshots
+- Delete snapshots
+- View snapshots
+- View analytics
+
