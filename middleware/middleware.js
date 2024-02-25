@@ -3,6 +3,9 @@ exports.isAuth = (req, res, next) => {
     const { isLoggedIn } = req.session;
 
     if(!isLoggedIn) {
+        //store the url the person was trying to access, we will redirect here if the login is successful
+        req.session.route = req.originalUrl;
+        //redirect to the login page
         return res.redirect('/login');
     }
     next();

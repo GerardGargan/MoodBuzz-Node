@@ -38,9 +38,14 @@ exports.postLogin = async (req, res) => {
         session.userid = userData[0].user_id;
         session.firstName = userData[0].first_name;
         session.lastName = userData[0].last_name;
+        const orig_route = session.route;
 
-        //redirect to user homepage
-        res.redirect("/user/home");
+        //redirect to appropriate page
+        if(!orig_route) {
+          res.redirect("/user/home");
+        } else {
+          res.redirect(`${orig_route}`);
+        }
       } else {
         //invalid login credentials, handle error message to user
         console.log(response.data.message);
