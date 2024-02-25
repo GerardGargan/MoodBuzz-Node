@@ -110,7 +110,7 @@ exports.postRegister = async (req, res) => {
 };
 
 exports.getUserHomePage = async (req, res) => {
-  const { userid, firstName } = req.session;
+  const { userid, firstName, lastName } = req.session;
 
     try {
       //query database, retrieve snapshots for the current user
@@ -138,12 +138,14 @@ exports.getUserHomePage = async (req, res) => {
       //pass this in to get todays message to display to the user
       const todaysSnapMessage = todaysSnapshotMessage(countToday);
 
+      const currentDateTime = `${formatDatabaseDate(getCurrentDate())} ${getCurrentTime()}`;
+
       res.render("userhome", {
         groupedDataSorted: snapshots,
         emotions: emotions,
         numberOfSnapshots,
         todaysSnapMessage,
-        firstName,
+        firstName, lastName, currentDateTime
       });
     } catch (err) {
       //handle error

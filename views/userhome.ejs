@@ -18,7 +18,23 @@
         <!--Main section-->
         <section class="px-3 px-sm-5 bg-section">
             <div class="container py-5">
-                <h3 class="pb-2">Welcome <%= firstName %></h1>
+                <!-- User info -->
+                <div class="pb-2 pt-0">
+                    <h4 class="p-0 m-0">User Home Page</h4>
+                    <div class="d-flex align-items-center">
+                        
+                            <i class="bi bi-person-circle bigger-icon"></i>
+                        
+                        <div class="ps-2 pt-2">
+                            <div>
+                                <%= firstName %> <%= lastName %>
+                            </div>
+                            <div>
+                                <span class="small"><%= currentDateTime %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                     <!--Header cards-->
                     <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
