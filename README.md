@@ -8,8 +8,9 @@ The App itself is an emotion recording app. For fun, it was themed around my fav
 
 1. [Prerequisites](#prerequisites)
 2. [Installation](#installation)
-3. [Usage](#usage)
-4. [Features](#features)
+3. [Configuration](#configuration)
+4. [Usage](#usage)
+5. [Features](#features)
 
 ## Prerequisites
 
@@ -33,6 +34,17 @@ cd MoodBuzz-Node
 npm install
 ```
 
+## Configuration
+
+1. Create a new file named config.env in the root directory of the project
+2. Add the following code to config.env:
+
+```plaintext
+PORT = 3000
+```
+Change the port to suit your requirements
+
+
 ## Usage
 
 ```bash
@@ -47,4 +59,3 @@ npm start
 - Delete snapshots
 - View snapshots
 - View analytics
-
