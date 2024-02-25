@@ -59,56 +59,54 @@
                           <% if(numberOfSnapshots > 0) { %>
                           <p class="card-text">Below you will find all of your snapshots whch can be viewed, edited or deleted</p>
                           <div class="table-responsive">
-                            <table class="table table-sm table-hover table-striped">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Date</th>
-                                        <th scope="col">Time</th>
-                                        <% emotions.forEach(emotion=> { %>
-                                            <th scope="col" class="d-none d-md-table-cell">
-                                                <%= emotion.emotion %>
-                                            </th>
-                                        <% }) %>
-                                            <th scope="col"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% let count=numberOfSnapshots; %>
-                                    <%  groupedDataSorted.forEach(snapshot=> { %>
+                                <table class="table table-sm table-hover table-striped">
+                                    <thead class="table-dark">
                                         <tr>
-                                            <th scope="row">
-                                                <%= count %>
-                                            </th>
-                                             <td>
-                                                <%= snapshot.date %>
-                                            </td>
-                                            <td>
-                                                <%= snapshot.time %>
-                                            </td>
-                                            <% snapshot.emotions.forEach(emotion=> { %>
-                                                <td class="d-none d-md-table-cell">
-                                                    <%= emotion.rating %>
-                                                </td>
-                                                <% }) %>
-                                                    <td>
-                                                        <a href="/user/snapshot/view/<%= snapshot.snapshot_id %>"
-                                                                class="btn btn-success btn-sm">View</a>
-                                                    </td>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Time</th>
+                                            <% emotions.forEach(emotion=> { %>
+                                                <th scope="col" class="d-none d-md-table-cell">
+                                                    <%= emotion.emotion %>
+                                                </th>
+                                            <% }) %>
+                                                <th scope="col"></th>
                                         </tr>
-                                        <% count -=1; %>
-                                    <% }) %>
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        <% let count=numberOfSnapshots; %>
+                                        <%  groupedDataSorted.forEach(snapshot=> { %>
+                                            <tr>
+                                                <th scope="row">
+                                                    <%= count %>
+                                                </th>
+                                                <td>
+                                                    <%= snapshot.date %>
+                                                </td>
+                                                <td>
+                                                    <%= snapshot.time %>
+                                                </td>
+                                                <% snapshot.emotions.forEach(emotion=> { %>
+                                                    <td class="d-none d-md-table-cell">
+                                                        <%= emotion.rating %>
+                                                    </td>
+                                                    <% }) %>
+                                                        <td>
+                                                            <a href="/user/snapshot/view/<%= snapshot.snapshot_id %>"
+                                                                    class="btn btn-success btn-sm">View</a>
+                                                        </td>
+                                            </tr>
+                                            <% count -=1; %>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
                         </div>
                           <% } else { %>
                             <p class="card-text">You do not have any snapshots to display yet</p>
                           <% } %>
 
                         </div>
-                      </div>
-
-                    
+                    </div>
             </div>
         </section>
         <%- include('footer') %>
