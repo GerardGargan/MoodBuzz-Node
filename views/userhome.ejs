@@ -56,6 +56,7 @@
                         <h5 class="card-header">Snapshots</h5>
                         <div class="card-body">
                           <h5 class="card-title">Table of snapshots</h5>
+                          <% if(numberOfSnapshots > 0) { %>
                           <p class="card-text">Below you will find all of your snapshots whch can be viewed, edited or deleted</p>
                           <div class="table-responsive">
                             <table class="table table-sm table-hover table-striped">
@@ -100,6 +101,10 @@
                                 </tbody>
                             </table>
                         </div>
+                          <% } else { %>
+                            <p class="card-text">You do not have any snapshots to display yet</p>
+                          <% } %>
+
                         </div>
                       </div>
 
