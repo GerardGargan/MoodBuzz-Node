@@ -16,8 +16,8 @@ exports.getLogin = (req, res) => {
 exports.postLogin = async (req, res) => {
 
   const { isLoggedIn } = req.session;
-  const { email, password } = req.body;
-
+  let { email, password } = req.body;
+    
     try {
       const endpoint = "http://localhost:3001/user/login";
       const vals = { email, password };
@@ -65,13 +65,18 @@ exports.getRegister = (req, res) => {
 exports.postRegister = async (req, res) => {
   const { isLoggedIn } = req.session;
 
-    let vals = ({ firstname, surname, email, password } = req.body);
-    console.log(`${firstname} ${surname} ${email} ${password}`);
+    let { firstname, surname, email, password } = req.body;
 
-    //sanitise user input, remove any leading or trailing whitespace
-    firstname = firstname.trim();
-    surname = surname.trim();
-    email = email.trim();
+    //sanitise user input, remove any leading or trailing whitespace, force to be lowercase
+    firstname = firstname.trim().toLowerCase();
+    surname = surname.trim().toLowerCase();
+    email = email.trim().toLowerCase();
+
+    //capitalise first letter of firstname and surname
+    firstname = firstname.charAt(0).toUpperCase() + firstname.slice(1);
+    surname = surname.charAt(0).toUpperCase() + surname.slice(1);
+
+    const vals = { firstname, surname, email, password };
 
     //perform validation checks on data, render an error message for each scenario
     if(!validateName(firstname) || !validateName(surname)){
