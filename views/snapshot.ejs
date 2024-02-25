@@ -1,224 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <link href="/style.css" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+    />
+    <link href="/style.css" rel="stylesheet" />
     <title>Record Snapshot</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <!--Navbar-->
     <%- include('user_nav'); %>
-        <section class="bg-section">
-            <div class="container">
-                
-                <!-- Breadcrumbs -->
-                <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0 pt-2">
-                      <li class="breadcrumb-item"><a href="/user/home">User Home</a></li>
-                      <li class="breadcrumb-item active" aria-current="page">New Snapshot</li>
-                    </ol>
-                  </nav>
+    <section class="bg-section">
+      <div class="container">
+        <!-- Breadcrumbs -->
+        <nav style="--bs-breadcrumb-divider: '>'" aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0 pt-2">
+            <li class="breadcrumb-item"><a href="/user/home">User Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">
+              New Snapshot
+            </li>
+          </ol>
+        </nav>
 
-                  <!-- User info -->
-                <div class="pb-2 pt-0">
-                    <div class="d-flex align-items-center">
-                        
-                            <i class="bi bi-person-circle bigger-icon"></i>
-                        
-                        <div class="ps-2 pt-3">
-                            <div>
-                                <%= firstName %> <%= lastName %>
-                            </div>
-                            <div>
-                                <span class="small"><%= dateTime %></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <form method="POST" action="/user/snapshot">
-                    <div class="row pb-4">
-                        <div class="col-lg-8">
-                            <!--Left hand column-->
-                            <div class="row">
-                                <div class="col">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Emotion Ratings
-                                        </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title">Seven universal emotions</h5>
-                                            <p class="card-text">Use the sliders to adjust and record your current level
-                                                for
-                                                each emotion</p>
-                                            <div class="row g-4 mt-3" id="insertEmotionRanges">
-                                                <!--Insert a range for each slider-->
-                                                <% var valuesArray=Object.values(groupedData); %>
-                                                    <% valuesArray.forEach(emotion=> { %>
-                                                        <div class="col-xl-6 py-3 m-0">
-                                                            <div class="box-shadow bg-range py-3 px-4 rounded">
-                                                                <div
-                                                                    class="d-flex justify-content-between align-items-center">
-                                                                    <label for="<%= emotion.emotion %>"
-                                                                        class="form-label">
-                                                                        <h4><%= emotion.emotion %>
-                                                                        </h4>
-                                                                        <p id="<%= emotion.emotion_id %>_rating_desc">
-                                                                            <%= emotion.rating[4].shortdesc %>
-                                                                        </p>
-                                                                    </label>
-                                                                    <div>
-                                                                        <h3 class="bg-dark text-light p-3 rounded"
-                                                                            id="<%= emotion.emotion %>-val-display">5
-                                                                        </h3>
-                                                                    </div>
-                                                                </div>
+        <!-- User info -->
+        <div class="pb-2 pt-0">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-person-circle bigger-icon"></i>
 
-                                                                <input type="range" name="<%= emotion.emotion_id %>"
-                                                                    id="<%= emotion.emotion %>" class="form-range"
-                                                                    min="1" max="10" value="5">
-                                                                <div class="graduated-scale">
-                                                                    <% emotion.rating.forEach(rating=> { %>
-                                                                        <span>
-                                                                            <%= rating.rating %>
-                                                                        </span>
-                                                                        <% }) %>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <% }); %>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div class="col-lg-4">
-                            <!--Right hand column-->
-                            <div class="row pt-4 pt-lg-0">
-                                <div class="col">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Triggers
-                                        </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title">Select triggers</h5>
-                                            <div class="d-flex gap-3 flex-wrap" id="triggers">
-
-                                                <% triggerData.forEach(trigger=> { %>
-                                                    <input type="checkbox" class="btn-check" name="trigger"
-                                                        id="<%= trigger.trigger_name %>"
-                                                        value="<%= trigger.trigger_id %>" autocomplete="off" unchecked>
-                                                    <label class="btn btn-outline-primary"
-                                                        for="<%= trigger.trigger_name %>">
-                                                        <%= trigger.trigger_name %> <i
-                                                                class="bi <%= trigger.icon %>"></i>
-                                                    </label>
-                                                    <% }); %>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row pt-4">
-                                <div class="col">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Notes
-                                        </div>
-                                        <div class="card-body">
-                                            <label for="notes">
-                                                <h5 class="card-title">Add Notes</h5>
-                                            </label>
-                                            <div class="row mx-1">
-                                                <textarea name="notes" id="notes" placeholder="Enter notes"
-                                                    rows="5"></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row pt-4">
-                                <div class="col">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Submit Snapshot
-                                        </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title">Save your snapshot!</h5>
-                                            <input type="Submit" value="Save Snapshot"
-                                                class="btn btn-xl btn-success me-2">
-                                            <button class="btn btn-xl btn-primary" id="resetbutton">Reset Form</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+            <div class="ps-2 pt-3">
+              <div><%= firstName %> <%= lastName %></div>
+              <div>
+                <span class="small"><%= dateTime %></span>
+              </div>
             </div>
-        </section>
+          </div>
+        </div>
 
-        <!--Footer-->
-        <%- include('footer'); %>
-            <script>
-                document.addEventListener('DOMContentLoaded', () => {
+        <form method="POST" action="/user/snapshot">
+          <div class="row pb-4">
+            <div class="col-lg-8">
+              <!--Left hand column-->
+              <div class="row">
+                <div class="col">
+                  <div class="card">
+                    <div class="card-header">Emotion Ratings</div>
+                    <div class="card-body">
+                      <h5 class="card-title">Seven universal emotions</h5>
+                      <p class="card-text">
+                        Use the sliders to adjust and record your current level
+                        for each emotion
+                      </p>
+                      <div class="row g-4 mt-3" id="insertEmotionRanges">
+                        <!--Insert a range input control for each slider-->
+                        <% var valuesArray=Object.values(groupedData); %> <%
+                        valuesArray.forEach(emotion=> { %>
+                        <div class="col-xl-6 py-3 m-0">
+                          <div class="box-shadow bg-range py-3 px-4 rounded">
+                            <div
+                              class="d-flex justify-content-between align-items-center"
+                            >
+                              <label
+                                for="<%= emotion.emotion %>"
+                                class="form-label"
+                              >
+                                <h4><%= emotion.emotion %></h4>
+                                <p id="<%= emotion.emotion_id %>_rating_desc">
+                                  <%= emotion.rating[4].shortdesc %>
+                                </p>
+                              </label>
+                              <div>
+                                <h3
+                                  class="bg-dark text-light p-3 rounded"
+                                  id="<%= emotion.emotion %>-val-display"
+                                >
+                                  5
+                                </h3>
+                              </div>
+                            </div>
 
-                    const emotionsDataString = `<%- JSON.stringify(groupedData) %>`;
-                    const emotionsData = JSON.parse(emotionsDataString);
+                            <input
+                              type="range"
+                              name="<%= emotion.emotion_id %>"
+                              id="<%= emotion.emotion %>"
+                              class="form-range"
+                              min="1"
+                              max="10"
+                              value="5"
+                            />
+                            <div class="graduated-scale">
+                              <% emotion.rating.forEach(rating=> { %>
+                              <span> <%= rating.rating %> </span>
+                              <% }) %>
+                            </div>
+                          </div>
+                        </div>
+                        <% }); %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4">
+              <!--Right hand column-->
+              <div class="row pt-4 pt-lg-0">
+                <div class="col">
+                  <div class="card">
+                    <div class="card-header">Triggers</div>
+                    <div class="card-body">
+                      <h5 class="card-title">Select triggers</h5>
+                      <div class="d-flex gap-3 flex-wrap" id="triggers">
+                        <% triggerData.forEach(trigger=> { %>
+                        <input
+                          type="checkbox"
+                          class="btn-check"
+                          name="trigger"
+                          id="<%= trigger.trigger_name %>"
+                          value="<%= trigger.trigger_id %>"
+                          autocomplete="off"
+                          unchecked
+                        />
+                        <label
+                          class="btn btn-outline-primary"
+                          for="<%= trigger.trigger_name %>"
+                        >
+                          <%= trigger.trigger_name %>
+                          <i class="bi <%= trigger.icon %>"></i>
+                        </label>
+                        <% }); %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row pt-4">
+                <div class="col">
+                  <div class="card">
+                    <div class="card-header">Notes</div>
+                    <div class="card-body">
+                      <label for="notes">
+                        <h5 class="card-title">Add Notes</h5>
+                      </label>
+                      <div class="row mx-1">
+                        <textarea
+                          name="notes"
+                          id="notes"
+                          placeholder="Enter notes"
+                          rows="5"
+                        ></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row pt-4">
+                <div class="col">
+                  <div class="card">
+                    <div class="card-header">Submit Snapshot</div>
+                    <div class="card-body">
+                      <h5 class="card-title">Save your snapshot!</h5>
+                      <input
+                        type="Submit"
+                        value="Save Snapshot"
+                        class="btn btn-xl btn-success me-2"
+                      />
+                      <input
+                        type="reset"
+                        class="btn btn-xl btn-primary"
+                        id="resetbutton"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
 
-                    //get all range elements on the page
-                    const rangeItems2 = document.querySelectorAll('input[type="range"]');
-                    //loop through each range element, add an input event listener so that when the slider is moved, we update the div showing the current number selected
-                    rangeItems2.forEach((range) => {
-                        range.addEventListener('input', (event) => {
-                            let displayVal = document.getElementById(`${range.id}-val-display`);
-                            displayVal.textContent = `${range.value}`;
-                            let emotion_id = range.getAttribute('name');
-                            let rating_desc_div = document.getElementById(`${emotion_id}_rating_desc`);
-                            rating_desc_div.innerText = emotionsData[emotion_id].rating[range.value - 1].shortdesc;
+    <!--Footer-->
+    <%- include('footer'); %>
+    <script>
+      //check all content has loaded before attempting DOM manipulation
+      document.addEventListener("DOMContentLoaded", () => {
+        //get the data from the server (snapshot data structure containing relevant data such as emotions, ratings, values)
+        const emotionsDataString = `<%- JSON.stringify(groupedData) %>`;
+        const emotionsData = JSON.parse(emotionsDataString);
 
-                        });
-                    });
+        //get all range elements on the page
+        const rangeItems2 = document.querySelectorAll('input[type="range"]');
+        //loop through each range element, add an input event listener so that when the slider is moved, we update the div showing the current number selected and the text description of that rating
+        rangeItems2.forEach((range) => {
+          range.addEventListener("input", (event) => {
+            //get the element that holds the current rating selection on the page for that emotion
+            let displayVal = document.getElementById(`${range.id}-val-display`);
+            //update its text content to the new value selected on the slider
+            displayVal.textContent = `${range.value}`;
+            //obtain the emotion_id from the name element on the range input
+            let emotion_id = range.getAttribute("name");
+            //get the rating description div, this is what will hold the description text
+            let rating_desc_div = document.getElementById(
+              `${emotion_id}_rating_desc`
+            );
+            //update the text based on the value selected, using the data sent from the server
+            rating_desc_div.innerText =
+              emotionsData[emotion_id].rating[range.value - 1].shortdesc;
+          });
+        });
+      });
+    </script>
 
-                    //obtain the reset button, range sliders, checkboxes and notes input elements
-                    const resetButton = document.getElementById('resetbutton');
-                    const rangeItems = document.querySelectorAll('input[type="range"]');
-                    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-                    const notes = document.getElementById('notes');
-
-                    //add an event listener to the reset button for a click event
-                    resetButton.addEventListener('click', (event) => {
-                        //prevent the default behaviour of a button to submit the form
-                        event.preventDefault();
-                        //loop through all range sliders and reset to the default of 5
-                        rangeItems.forEach((rangeItem) => {
-                            const valueDiv = document.getElementById(`${rangeItem.id}-val-display`);
-                            rangeItem.value = 5;
-                            valueDiv.innerText = `5`;
-                        });
-
-                        //reset all checkboxes to unchecked
-                        checkboxes.forEach((checkbox) => {
-                            checkbox.checked = false;
-                        });
-
-                        //set notes to be empty
-                        notes.value = '';
-                    });
-                });
-            </script>
-
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-                integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-                crossorigin="anonymous"></script>
-</body>
-
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>
