@@ -14,7 +14,12 @@
 <body>
     <!-- Navigation menu -->
     <%- include('user_nav'); %>
-
+    <!--Check if deletion was successful, display success message-->
+    <% if(deletedMessage != null) { %>
+        <div class="alert alert-success m-0" role="alert">
+        <div class="container"><%= deletedMessage %></div>
+        </div>
+        <% } %>
         <!--Main section-->
         <section class="px-3 px-sm-5 bg-section">
             <div class="container py-5">
