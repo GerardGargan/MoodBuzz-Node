@@ -29,6 +29,10 @@
           <% if(error) { %>
           <div class="alert alert-danger" role="alert"><%= error %></div>
           <% } %>
+
+          <!--Client side validation/error handling-->
+          <div class="d-none alert alert-danger" id="error" role="alert"></div>
+
           <!-- End of error handling -->
 
           <!-- Form labels and controls-->
