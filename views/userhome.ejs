@@ -1,140 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <link href="/style.css" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+    />
+    <link href="/style.css" rel="stylesheet" />
     <title>User Home</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <!-- Navigation menu -->
     <%- include('user_nav'); %>
     <!--Check if deletion was successful, display success message-->
     <% if(deletedMessage != null) { %>
-        <div class="alert alert-success m-0" role="alert">
-        <div class="container"><%= deletedMessage %></div>
-        </div>
-        <% } %>
-        <!--Main section-->
-        <section class="px-3 px-sm-5 bg-section">
-            <div class="container py-5">
-                <!-- User info -->
-                <div class="pb-2 pt-0">
-                    <h4 class="p-0 m-0">User Home Page</h4>
-                    <div class="d-flex align-items-center">
-                        
-                            <i class="bi bi-person-circle bigger-icon"></i>
-                        
-                        <div class="ps-2 pt-3">
-                            <div>
-                                <%= firstName %> <%= lastName %>
-                            </div>
-                            <div>
-                                <span class="small"><%= currentDateTime %></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="alert alert-success m-0" role="alert">
+      <div class="container"><%= deletedMessage %></div>
+    </div>
+    <% } %>
+    <!--Main section-->
+    <section class="px-3 px-sm-5 bg-section">
+      <div class="container py-5">
+        <!-- User info -->
+        <div class="pb-2 pt-0">
+          <h4 class="p-0 m-0">User Home Page</h4>
+          <div class="d-flex align-items-center">
+            <i class="bi bi-person-circle bigger-icon"></i>
 
-                    <!--Header cards-->
-                    <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
-                        <div class="col">
-                            <div class="card bg-light d-flex flex-column h-100">
-                                <h5 class="card-header">
-                                    Todays Summary
-                                </h5>
-                                <div class="card-body">
-                                    <h5 class="card-title">Have you recorded a snapshot today?</h5>
-                                    <p class="card-text">
-                                        <%= todaysSnapMessage.message %>
-                                    </p>
-                                    <a href="/user/snapshot" class="btn btn-success">Record a snapshot</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-none d-md-block col">
-                            <div class="card bg-light d-flex flex-column h-100">
-                                <h5 class="card-header">
-                                    Analytics
-                                </h5>
-                                <div class="card-body">
-                                    <h5 class="card-title">Total snapshots</h5>
-                                    <p class="card-text">You have recorded a total of <%= numberOfSnapshots %> snapshots.</p>
-                                    <a href="/user/analytics" class="btn btn-success">View Graphs</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <!--Table of snapshots-->
-                    <div class="card">
-                        <h5 class="card-header">Snapshots</h5>
-                        <div class="card-body">
-                          <h5 class="card-title">Table of snapshots</h5>
-                          <% if(numberOfSnapshots > 0) { %>
-                          <p class="card-text">Below you will find all of your snapshots whch can be viewed, edited or deleted</p>
-                          <div class="table-responsive">
-                                <table class="table table-sm table-hover table-striped">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col">Date</th>
-                                            <th scope="col">Time</th>
-                                            <% emotions.forEach(emotion=> { %>
-                                                <th scope="col" class="d-none d-md-table-cell">
-                                                    <%= emotion.emotion %>
-                                                </th>
-                                            <% }) %>
-                                                <th scope="col"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% let count=numberOfSnapshots; %>
-                                        <%  groupedDataSorted.forEach(snapshot=> { %>
-                                            <tr>
-                                                <th scope="row">
-                                                    <%= count %>
-                                                </th>
-                                                <td>
-                                                    <%= snapshot.date %>
-                                                </td>
-                                                <td>
-                                                    <%= snapshot.time %>
-                                                </td>
-                                                <% snapshot.emotions.forEach(emotion=> { %>
-                                                    <td class="d-none d-md-table-cell">
-                                                        <%= emotion.rating %>
-                                                    </td>
-                                                    <% }) %>
-                                                        <td>
-                                                            <a href="/user/snapshot/view/<%= snapshot.snapshot_id %>"
-                                                                    class="btn btn-success btn-sm">View</a>
-                                                        </td>
-                                            </tr>
-                                            <% count -=1; %>
-                                        <% }) %>
-                                    </tbody>
-                                </table>
-                        </div>
-                          <% } else { %>
-                            <p class="card-text">You do not have any snapshots to display yet</p>
-                          <% } %>
-
-                        </div>
-                    </div>
+            <div class="ps-2 pt-3">
+              <div><%= firstName %> <%= lastName %></div>
+              <div>
+                <span class="small"><%= currentDateTime %></span>
+              </div>
             </div>
-        </section>
-        <%- include('footer') %>
+          </div>
+        </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-                    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-                    crossorigin="anonymous"></script>
-</body>
+        <!--Header cards-->
+        <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+          <div class="col">
+            <div class="card bg-light d-flex flex-column h-100">
+              <h5 class="card-header">Todays Summary</h5>
+              <div class="card-body">
+                <h5 class="card-title">Have you recorded a snapshot today?</h5>
+                <p class="card-text"><%= todaysSnapMessage.message %></p>
+                <a href="/user/snapshot" class="btn btn-success"
+                  >Record a snapshot</a
+                >
+              </div>
+            </div>
+          </div>
+          <div class="d-none d-md-block col">
+            <div class="card bg-light d-flex flex-column h-100">
+              <h5 class="card-header">Analytics</h5>
+              <div class="card-body">
+                <h5 class="card-title">Total snapshots</h5>
+                <p class="card-text">
+                  You have recorded a total of <%= numberOfSnapshots %>
+                  snapshots.
+                </p>
+                <a href="/user/analytics" class="btn btn-success"
+                  >View Graphs</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <!--Table of snapshots-->
+        <div class="card">
+          <h5 class="card-header">Snapshots</h5>
+          <div class="card-body">
+            <h5 class="card-title">Table of snapshots</h5>
+            <% if(numberOfSnapshots > 0) { %>
+            <p class="card-text">
+              Below you will find all of your snapshots whch can be viewed,
+              edited or deleted
+            </p>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover table-striped">
+                <thead class="table-dark">
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Time</th>
+                    <% emotions.forEach(emotion=> { %>
+                    <th scope="col" class="d-none d-md-table-cell">
+                      <%= emotion.emotion %>
+                    </th>
+                    <% }) %>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% let count=numberOfSnapshots; %> <%
+                  groupedDataSorted.forEach(snapshot=> { %>
+                  <tr>
+                    <th scope="row"><%= count %></th>
+                    <td><%= snapshot.date %></td>
+                    <td><%= snapshot.time %></td>
+                    <% snapshot.emotions.forEach(emotion=> { %>
+                    <td class="d-none d-md-table-cell">
+                      <%= emotion.rating %>
+                    </td>
+                    <% }) %>
+                    <td>
+                      <a
+                        href="/user/snapshot/view/<%= snapshot.snapshot_id %>"
+                        class="btn btn-success btn-sm"
+                        >View</a
+                      >
+                    </td>
+                  </tr>
+                  <% count -=1; %> <% }) %>
+                </tbody>
+              </table>
+            </div>
+            <% } else { %>
+            <p class="card-text">
+              You do not have any snapshots to display yet
+            </p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </section>
+    <%- include('footer') %>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>

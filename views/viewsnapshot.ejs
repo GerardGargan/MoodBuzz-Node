@@ -50,11 +50,13 @@
         var time=snapshot.time; 
         var triggers = snapshot.triggers;
         %>
+        <!--Check if a new snapshot was just recorded, display success message-->
         <% if(newSnapshotMessage != null) { %>
             <div class="alert alert-success m-0" role="alert">
             <div class="container"><%= newSnapshotMessage %></div>
             </div>
         <% } %>
+        <!--Check if a snapshot was just edited, display success message-->
         <% if(editSnapshotMessage != null) { %>
             <div class="alert alert-success m-0" role="alert">
             <div class="container"><%= editSnapshotMessage %></div>
@@ -123,7 +125,7 @@
                                                     </div>
                                                     <p><%= rating_desc_long %></p>
                                             </div>
-                                            <% }) %>
+                                        <% }) %>
                                     </div>
 
                                 </div>
@@ -175,9 +177,9 @@
                                         <%= note %>
                                     <% } %>
                                     
-                                </p>
+                                    </p>
                                 </div>
-                              </div>
+                            </div>
                         </div>
                     </div>
 
