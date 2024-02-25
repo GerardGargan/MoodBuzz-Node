@@ -16,7 +16,13 @@
     <%- include('user_nav'); %>
         <section class="bg-section">
             <div class="container">
-                <div class="pb-4 pt-2">
+                <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 pt-2">
+                      <li class="breadcrumb-item"><a href="/user/home">User Home</a></li>
+                      <li class="breadcrumb-item active" aria-current="page">New Snapshot</li>
+                    </ol>
+                  </nav>
+                <div class="pb-2 pt-0">
                     <div class="d-flex align-items-center">
                         
                             <i class="bi bi-person-circle bigger-icon"></i>
@@ -29,9 +35,9 @@
                                 <span class="small"><%= dateTime %></span>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
+                
                 <form method="POST" action="/user/snapshot">
                     <div class="row pb-4">
                         <div class="col-lg-8">

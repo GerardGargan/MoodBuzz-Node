@@ -27,8 +27,31 @@
 
     <!--Main section-->
     <section class="px-3 px-sm-5 bg-section">
-      <div class="container py-5">
-        <h3 class="pb-2">Your Analytics</h3>
+      <div class="container pb-5">
+
+        <!--Breadcrumbs-->
+        <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0 pt-2">
+            <li class="breadcrumb-item"><a href="/user/home">User Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Analytics</li>
+          </ol>
+        </nav>
+
+      <!--User info section-->
+      <div class="pb-2 pt-0">
+          <div class="d-flex align-items-center">
+                  <i class="bi bi-person-circle bigger-icon"></i>
+              <div class="ps-2 pt-3">
+                  <div>
+                      <%= firstName %> <%= lastName %>
+                  </div>
+                  <div>
+                      <h6>Analytics</h6>
+                  </div>
+              </div>
+          </div>
+      </div>
+
         <!--Cards-->
         <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
           <!--First card-->
@@ -73,7 +96,7 @@
               </div>
             </div>
           </div>
-          <!--Third card-->
+          <!--Fourth card-->
           <div class="col">
             <div class="card bg-light d-flex h-100">
               <h5 class="card-header">Most common triggers</h5>

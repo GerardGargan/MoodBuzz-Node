@@ -1,4 +1,4 @@
-//used to protect routes and check user is logged in
+//used to protect routes and check user is logged in, redirects to login if not
 exports.isAuth = (req, res, next) => {
     const { isLoggedIn } = req.session;
 

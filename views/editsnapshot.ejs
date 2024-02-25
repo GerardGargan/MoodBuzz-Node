@@ -25,11 +25,20 @@
     <% var triggers = snapshot.triggers; %>
         <section class="bg-section">
             <div class="container">
-                <div class="pb-4 pt-2">
+
+                <!--Breadcrumbs-->
+                <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 pt-2">
+                      <li class="breadcrumb-item"><a href="/user/home">User Home</a></li>
+                      <li class="breadcrumb-item"><a href="/user/snapshot/view/<%= snapshot.snapshot_id %>">View Snapshot</a></li>
+                      <li class="breadcrumb-item active" aria-current="page">Edit Snapshot</li>
+                    </ol>
+                  </nav>
+
+                <!--User info section-->
+                <div class="pb-2 pt-0">
                     <div class="d-flex align-items-center">
-                        
                             <i class="bi bi-person-circle bigger-icon"></i>
-                        
                         <div class="ps-2 pt-3">
                             <div>
                                 <%= firstName %> <%= lastName %>
@@ -38,12 +47,12 @@
                                 <span class="small"><%= snapshot.date %> <%= snapshot.time %></span>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
                 <form method="POST" action="/user/snapshot/update/<%= snapshot.snapshot_id %>">
                     <div class="row pb-4">
                         <div class="col-lg-8">
+
                             <!--Left hand column-->
                             <div class="row">
                                 <div class="col">
@@ -97,10 +106,10 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
+
+                        <!--Right hand column-->
                         <div class="col-lg-4">
-                            <!--Right hand column-->
                             <div class="row pt-4 pt-lg-0">
                                 <div class="col">
                                     <div class="card">

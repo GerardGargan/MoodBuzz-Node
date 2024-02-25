@@ -364,7 +364,7 @@ exports.postEditUpdate = async (req, res) => {
 
 exports.getAnalytics = async (req, res) => {
   //get the userid from the session
-  const { userid } = req.session;
+  const { userid, firstName, lastName } = req.session;
 
   try {
     //API endpoint for data retrieval for snapshots by month (month: count)
@@ -478,7 +478,7 @@ exports.getAnalytics = async (req, res) => {
 
 
     //render the analytics template with the data 
-    res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue, emotionLabels, emotionAverages, maxEmotionValue, triggers, triggerVals, maxTriggerCount });
+    res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue, emotionLabels, emotionAverages, maxEmotionValue, triggers, triggerVals, maxTriggerCount, firstName, lastName });
   
   } catch(err) {
     //server error 500
