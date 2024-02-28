@@ -131,14 +131,6 @@ exports.getUserHomePage = async (req, res) => {
         },
       });
       const snapshots = snapshotRequest.data.result;
-      //get emotions data from the database
-      const endpointEmotions = `http://localhost:3001/emotions`;
-      const emotionsRequest = await axios.get(endpointEmotions, {
-        validateStatus: (status) => {
-          return status < 500;
-        },
-      });
-      const emotions = Object.values(emotionsRequest.data.result);
 
       //get the number of snapshots returned
       const numberOfSnapshots = snapshots.length;
@@ -152,7 +144,6 @@ exports.getUserHomePage = async (req, res) => {
 
       res.render("userhome", {
         groupedDataSorted: snapshots,
-        emotions: emotions,
         numberOfSnapshots,
         todaysSnapMessage,
         firstName, lastName, currentDateTime, deletedMessage

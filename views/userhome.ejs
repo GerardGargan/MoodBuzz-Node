@@ -31,7 +31,6 @@
       <div class="container py-5">
         <!-- User info -->
         <div class="pb-2 pt-0">
-          <h4 class="p-0 m-0">User Home Page</h4>
           <div class="d-flex align-items-center">
             <i class="bi bi-person-circle bigger-icon"></i>
 
@@ -74,61 +73,43 @@
             </div>
           </div>
         </div>
+        <!--Snapshot section-->
+        <div>
+          <h3 class="pb-2">Snapshots</h3>
+          <div class="row row-cols-1 row-cols-md-2 g-3">
+          <% if(numberOfSnapshots > 0) {
+            //check if we have more than one snapshot, if so loop through each one
+            groupedDataSorted.forEach(snapshot => { 
+              //check the length of the note, shorten to 30 chars if needed
+              let note = snapshot.note.length > 30 ? `${snapshot.note.substring(0,30)}...` : snapshot.note; 
+              //if notes are empty, display an appropriate message
+              note = note == "" ? "No notes" : note; 
+              
+              //format the date
+              let parts = snapshot.date.split("/");
+              let day = parseInt(parts[0], 10);
+              let month = parseInt(parts[1], 10) - 1; // Months are zero-based
+              let year = parseInt(parts[2], 10);
 
-        <!--Table of snapshots-->
-        <div class="card">
-          <h5 class="card-header">Snapshots</h5>
-          <div class="card-body">
-            <h5 class="card-title">Table of snapshots</h5>
-            <% if(numberOfSnapshots > 0) { %>
-            <p class="card-text">
-              Below you will find all of your snapshots whch can be viewed,
-              edited or deleted
-            </p>
-            <div class="table-responsive">
-              <table class="table table-sm table-hover table-striped">
-                <thead class="table-dark">
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">Time</th>
-                    <% emotions.forEach(emotion=> { %>
-                    <th scope="col" class="d-none d-md-table-cell">
-                      <%= emotion.emotion %>
-                    </th>
-                    <% }) %>
-                    <th scope="col"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% let count=numberOfSnapshots; %> <%
-                  groupedDataSorted.forEach(snapshot=> { %>
-                  <tr>
-                    <th scope="row"><%= count %></th>
-                    <td><%= snapshot.date %></td>
-                    <td><%= snapshot.time %></td>
-                    <% snapshot.emotions.forEach(emotion=> { %>
-                    <td class="d-none d-md-table-cell">
-                      <%= emotion.rating %>
-                    </td>
-                    <% }) %>
-                    <td>
-                      <a
-                        href="/user/snapshot/view/<%= snapshot.snapshot_id %>"
-                        class="btn btn-success btn-sm"
-                        >View</a
-                      >
-                    </td>
-                  </tr>
-                  <% count -=1; %> <% }) %>
-                </tbody>
-              </table>
-            </div>
-            <% } else { %>
-            <p class="card-text">
-              You do not have any snapshots to display yet
-            </p>
-            <% } %>
+              let date = new Date(year, month, day);
+
+              let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+              let formattedDate = date.toLocaleDateString('en-GB', options); 
+              %>
+              
+                <div class="col">
+                  <a href="/user/snapshot/view/<%= snapshot.snapshot_id %>" class="card-link h-100">
+                    <div class="bg-white p-4 rounded shadow grow-on-hover h-100">
+                      <h5><%= formattedDate %></h5>
+                      <p class="fw-light"><%= note %></p>
+                    </div>
+                  </a>
+                </div>
+              
+            <% }) %>
+          <% } else { %>
+            <p>No snapshots to display yet</p>
+          <% } %>
           </div>
         </div>
       </div>
