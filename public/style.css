@@ -71,3 +71,20 @@ body {
     font-size: 3em; 
   }
 
+  .card-link {
+    color: inherit; 
+    text-decoration: none; 
+  }
+  
+  .card-link:hover {
+    color: inherit; 
+    text-decoration: none; 
+  }
+
+  .grow-on-hover {
+    transition: all 0.3s ease; 
+  }
+  
+  .grow-on-hover:hover {
+    transform: scale(1.05); 
+  }
