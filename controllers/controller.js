@@ -52,7 +52,7 @@ exports.postLogin = async (req, res) => {
       } else {
         //invalid login credentials, handle error message to user
         console.log(response.data.message);
-        res.render("login", { currentPage: "login", isLoggedIn, error: 'Incorrect email or password' });
+        res.render("login", { currentPage: "login", isLoggedIn, error: 'Incorrect email or password', successMessage: null });
       }
     } catch (err) {
       //server error
