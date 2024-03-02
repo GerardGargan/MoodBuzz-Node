@@ -1,4 +1,5 @@
 const axios = require("axios");
+//import custom utility functions
 const { average, validatePassword, validateEmail, validateName, getCurrentDate, getCurrentTime, 
   formatDatabaseDate, countTodaysSnapshots, todaysSnapshotMessage } = require('../util/helper_functions');
 
@@ -377,6 +378,7 @@ exports.postEditUpdate = async (req, res) => {
 exports.getAnalytics = async (req, res) => {
   //get the userid from the session
   const { userid, firstName, lastName } = req.session;
+  let { emotion } = req.query;
 
   try {
     //API endpoint for data retrieval for snapshots by month (month: count)
@@ -488,9 +490,47 @@ exports.getAnalytics = async (req, res) => {
     //get the max value to use for the maximum y axis on the chart
     const maxTriggerCount = Math.max(...triggerVals);
 
+    //get a list of emotions and ids for the dropdown filter
+    const emotionEndpoint = `http://localhost:3001/emotions`;
+    const emoRequest = await axios.get(emotionEndpoint, {
+      validateStatus: (status) => {
+        return status < 500
+      }
+    });
+    const emotions = emoRequest.data.result;
+
+    if(!emotion) {
+      //if there is no emotion in the query string, default it to the first emotion from our emotions table
+      emotion = Object.values(emotions)[0].emotion_id;
+    }
+
+    //now get specific emotion snapshot data by sending its id in the params of the api endpoint
+    const emotionSnapshotEndpoint = `http://localhost:3001/snapshot/analytics/emotion/${emotion}`;
+    const emotionSnapshotResponse = await axios.get(emotionSnapshotEndpoint, {
+      validateStatus: (status) => {
+        return status < 500
+      }, 
+      headers: { userid: `${userid}` }
+    });
+    
+    //store the result set
+    const emotionResult = emotionSnapshotResponse.data.result;
+    
+    //create empty arrays to ghold valuyes
+    const emoDateTimes = [];
+    const emoRatings = [];
+    //get the name of the emotio9n (for the chart title)
+    const emotionName = emotionResult.length > 0 ? emotionResult[0].emotion : null;
+
+    //loop through each row and populate the arrays with data
+    emotionResult.forEach(record => {
+      const dateTime = `${formatDatabaseDate(record.date)} ${record.time}`;
+      emoDateTimes.push(dateTime);
+      emoRatings.push(record.rating);
+    });
 
     //render the analytics template with the data 
-    res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue, emotionLabels, emotionAverages, maxEmotionValue, triggers, triggerVals, maxTriggerCount, firstName, lastName });
+    res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue, emotionLabels, emotionAverages, maxEmotionValue, triggers, triggerVals, maxTriggerCount, firstName, lastName, emotions, emotionSelected: emotion, emoDateTimes, emoRatings, emotionName });
   
   } catch(err) {
     //server error 500
