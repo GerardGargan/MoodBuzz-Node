@@ -28,32 +28,31 @@
     <!--Main section-->
     <section class="px-3 px-sm-5 bg-section">
       <div class="container pb-5">
-
         <!--Breadcrumbs-->
-        <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <nav style="--bs-breadcrumb-divider: '>'" aria-label="breadcrumb">
           <ol class="breadcrumb mb-0 pt-2">
             <li class="breadcrumb-item"><a href="/user/home">User Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Analytics</li>
+            <li class="breadcrumb-item active" aria-current="page">
+              Analytics
+            </li>
           </ol>
         </nav>
 
-      <!--User info section-->
-      <div class="pb-2 pt-0">
+        <!--User info section-->
+        <div class="pb-2 pt-0">
           <div class="d-flex align-items-center">
-                  <i class="bi bi-person-circle bigger-icon"></i>
-              <div class="ps-2 pt-3">
-                  <div>
-                      <%= firstName %> <%= lastName %>
-                  </div>
-                  <div>
-                      <h6>Analytics</h6>
-                  </div>
+            <i class="bi bi-person-circle bigger-icon"></i>
+            <div class="ps-2 pt-3">
+              <div><%= firstName %> <%= lastName %></div>
+              <div>
+                <h6>Analytics</h6>
               </div>
+            </div>
           </div>
-      </div>
+        </div>
 
         <!--Cards-->
-        <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+        <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
           <!--First card-->
           <div class="col">
             <div class="card bg-light d-flex h-100">
@@ -86,7 +85,7 @@
           <div class="col">
             <div class="card bg-light d-flex h-100">
               <h5 class="card-header">Average emotion levels</h5>
-              <div class="card-body">
+              <div class="card-body" id="avg_emotion_levels">
                 <div
                   class="chart-container"
                   style="position: relative; height: 350px"
@@ -100,12 +99,50 @@
           <div class="col">
             <div class="card bg-light d-flex h-100">
               <h5 class="card-header">Most common triggers</h5>
-              <div class="card-body">
+              <div class="card-body" id="triggers">
                 <div
                   class="chart-container"
                   style="position: relative; height: 350px"
                 >
                   <canvas id="common_triggers"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--New row-->
+        <div class="row row-cols-1 mb-5">
+          <!--First card-->
+          <div class="col">
+            <div class="card bg-light d-flex h-100">
+              <h5 class="card-header">Emotions over time</h5>
+              <div class="card-body" id="emotion_values">
+                <form action="/user/analytics" method="GET">
+                  <div class="d-flex gap-2 pb-3">
+                    <div>
+                      <select class="form-select" aria-label="Select Emotion" name="emotion" id="emotion_dropdown">
+                        <% Object.values(emotions).forEach(emotion => { %>
+                          <% const emotion_id = emotion.emotion_id; %>
+                          <% const emotion_name = emotion.emotion; %>
+                          <option value="<%= emotion_id %>" <%= emotionSelected == emotion_id ? 'selected' : '' %>><%= emotion_name %></option>
+                        <% }); %>
+                      </select>
+                    </div>
+                    <div>
+                      <input
+                        type="submit"
+                        class="btn btn-primary"
+                        value="Update"
+                      />
+                    </div>
+                  </div>
+                </form>
+
+                <div
+                  class="chart-container"
+                  style="position: relative; height: 350px"
+                >
+                  <canvas id="emotion_chart"></canvas>
                 </div>
               </div>
             </div>
@@ -244,63 +281,74 @@
 
       let maxEmotionInt = parseInt(++maxEmotionValue);
 
-      const EmotionAvgdata = {
-        labels: emotionLabels,
-        datasets: [
-          {
-            label: "Average Emotion Ratings",
-            data: emotionAverageValues,
-            fill: true,
-            backgroundColor: "rgba(54, 162, 235, 0.2)", // Blue
-            borderColor: "rgb(54, 162, 235)", // Blue
-            pointBackgroundColor: "rgb(54, 162, 235)", // Blue
-            pointBorderColor: "#fff",
-            pointHoverBackgroundColor: "#fff",
-            pointHoverBorderColor: "rgb(54, 162, 235)", // Blue
-          },
-        ],
-      };
+      if (emotionLabels.length > 0) {
+        const EmotionAvgdata = {
+          labels: emotionLabels,
+          datasets: [
+            {
+              label: "Average Emotion Ratings",
+              data: emotionAverageValues,
+              fill: true,
+              backgroundColor: "rgba(54, 162, 235, 0.2)", // Blue
+              borderColor: "rgb(54, 162, 235)", // Blue
+              pointBackgroundColor: "rgb(54, 162, 235)", // Blue
+              pointBorderColor: "#fff",
+              pointHoverBackgroundColor: "#fff",
+              pointHoverBorderColor: "rgb(54, 162, 235)", // Blue
+            },
+          ],
+        };
 
-      const emoAvgConfig = {
-        type: "radar",
-        data: EmotionAvgdata,
-        options: {
-          responsive: true,
-          animation: true,
-          maintainAspectRatio: false,
-          scales: {
-            r: {
-              min: 1,
-              max: 10,
-              ticks: {
-                stepSize: 2,
+        const emoAvgConfig = {
+          type: "radar",
+          data: EmotionAvgdata,
+          options: {
+            responsive: true,
+            animation: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                min: 1,
+                max: 10,
+                ticks: {
+                  stepSize: 2,
+                },
+                grid: {
+                  lineWidth: 2,
+                },
+                pointLabels: {
+                  font: { size: 13 },
+                },
               },
-              grid: {
-                lineWidth: 2,
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: { enabled: true },
+              title: {
+                display: false,
+                text: "Average emotion ratings",
+                font: { size: 15 },
               },
-              pointLabels: {
-                font: { size: 13 }
+            },
+            elements: {
+              line: {
+                borderWidth: 3,
               },
             },
           },
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true },
-            title: {
-              display: false,
-              text: "Average emotion ratings",
-              font: { size: 15 },
-            },
-          },
-          elements: {
-            line: {
-              borderWidth: 3,
-            },
-          },
-        },
-      };
+        };
 
-      const emoAvgChart = new Chart("emotion_avg", emoAvgConfig);
+        const emoAvgChart = new Chart("emotion_avg", emoAvgConfig);
+      } else {
+        //show appropriate message to user in the div
+        const emotion_div = document.getElementById("avg_emotion_levels");
+        //remove the canvas element (takes up height on the page)
+        const emotion_canvas = document.getElementById("emotion_avg");
+        emotion_canvas.remove();
+
+        //display message
+        emotion_div.innerText = `Record a snapshot to see this chart`;
+      }
 
       //set up chart for most common triggers
 
@@ -308,8 +356,6 @@
       const triggersData = `<%- JSON.stringify(triggers); %>`;
       const triggersValsData = `<%- JSON.stringify(triggerVals); %>`;
       const maxTriggerCountData = `<%- JSON.stringify(maxTriggerCount); %>`;
-      console.log(triggersValsData);
-      console.log(triggersData);
 
       //parse back into javascript objects
       const triggers = JSON.parse(triggersData);
@@ -318,50 +364,126 @@
       //increment max y axis by one to leave some room at the top of the chart
       let maxCountInt = parseInt(++maxTriggerCount);
 
-      //set up chart data
-      const chartDataTriggers = {
-        labels: triggers,
-        datasets: [
-          {
-            data: triggerVals,
-            lineTension: 0,
-            pointRadius: 3,
-          },
-        ],
-      };
+      if (triggers.length > 0) {
+        //set up chart data
+        const chartDataTriggers = {
+          labels: triggers,
+          datasets: [
+            {
+              data: triggerVals,
+              lineTension: 0,
+              pointRadius: 3,
+            },
+          ],
+        };
 
-      //chart configuration setup
-      const chartConfigTriggers = {
-        type: "bar",
-        data: chartDataTriggers,
-        options: {
-          responsive: true,
-          animation: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              min: 0,
-              max: maxTriggerCount,
-              ticks: {
-                stepSize: 1,
+        //chart configuration setup
+        const chartConfigTriggers = {
+          type: "bar",
+          data: chartDataTriggers,
+          options: {
+            responsive: true,
+            animation: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                min: 0,
+                max: maxTriggerCount,
+                ticks: {
+                  stepSize: 1,
+                },
+              },
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: { enabled: true },
+              title: {
+                display: false,
+                text: "Most common triggers",
+                font: { size: 15 },
               },
             },
           },
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true },
-            title: {
-              display: false,
-              text: "Most common triggers",
-              font: { size: 15 },
+        };
+
+        const chartTrigger = new Chart("common_triggers", chartConfigTriggers);
+      } else {
+        //get the divs for the trigger card and canvas
+        const trigger_div = document.getElementById("triggers");
+        const trigger_canvas = document.getElementById("common_triggers");
+        //remove the canvas element (takes up height on the page)
+        trigger_canvas.remove();
+        //display a message to the user
+        trigger_div.innerHTML = `Record a snapshot to see this chart`;
+      }
+
+      //new chart for selected emotions (dropdown)
+      //store the data passed in from the render function
+
+      //process monthly data first
+      const emoDates = `<%- JSON.stringify(emoDateTimes); %>`;
+      const emoRatings = `<%- JSON.stringify(emoRatings); %>`;
+
+      //parse the counts data
+      var yValsEmoRatings = JSON.parse(emoRatings);
+
+      //parse the dates data
+      const xLabelEmoDates = JSON.parse(emoDates);
+
+      if (xLabelEmoDates.length > 0) {
+        //set up chart data
+        const chartDataEmotion = {
+          labels: xLabelEmoDates,
+          datasets: [
+            {
+              data: yValsEmoRatings,
+              lineTension: 0,
+              pointRadius: 3,
+            },
+          ],
+        };
+
+        //chart configuration setup
+        const chartConfigEmotion = {
+          type: "line",
+          data: chartDataEmotion,
+          options: {
+            responsive: true,
+            animation: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                min: 0,
+                max: 10,
+                ticks: {
+                  stepSize: 2,
+                },
+              },
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: { enabled: true },
+              title: {
+                display: true,
+                text: '<%= emotionName %>',
+                font: { size: 15 },
+              },
             },
           },
-        },
-      };
+        };
 
-      const chartTrigger = new Chart("common_triggers", chartConfigTriggers);
+        //call the chart constructor with the id of the canvas target element
+        const chartEmotion = new Chart("emotion_chart", chartConfigEmotion);
+      } else {
+        //get the elements
+        const emotion_values_div = document.getElementById("emotion_values");
+        const emotion_values_canvas = document.getElementById("emotion_chart");
 
-
+        //remove canvas (Takes up height on the page)
+        emotion_values_canvas.remove();
+        //display message to user
+        emotion_values_div.innerText = `Record a snapshot to see this chart`;
+      }
     </script>
 
     <script
