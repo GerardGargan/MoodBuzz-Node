@@ -67,7 +67,7 @@ exports.postLogin = async (req, res) => {
       }
     } else {
       //invalid login credentials, handle error message to user
-      console.log(response.data.message);
+      //console.log(response.data.message);
       res.render("login", {
         currentPage: "login",
         isLoggedIn,
@@ -496,7 +496,7 @@ exports.getAnalytics = async (req, res) => {
       //calculate the average for each emotion and store it against the emotion, replacing the array
       groupedEmotionsData[emotion] = average(groupedEmotionsData[emotion]);
     });
-    console.log(groupedEmotionsData);
+    //console.log(groupedEmotionsData);
     //get an array of the emotions (keys) for chart js
     const emotionLabels = Object.keys(groupedEmotionsData);
     //get an array of the average ratings (values) for chart js
