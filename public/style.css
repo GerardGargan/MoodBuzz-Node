@@ -1,90 +1,95 @@
 body::before {
-    display: block;
-    content: '';
-    height: 70px;
+  display: block;
+  content: "";
+  height: 70px;
 }
 
 html,
 body {
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 0;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .window {
-    background-color: #D8E1E8;
-    min-height: 80vh;
+  background-color: #d8e1e8;
+  min-height: 80vh;
 }
 
 .window-container {
-    background-color: white;
-    border-radius: 8px;
-    padding: 30px;
-    max-width: 450px;
-    margin: auto;
-    box-shadow: 5px 5px 10px 3px rgba(0,0,0,0.1);
+  background-color: white;
+  border-radius: 8px;
+  padding: 30px;
+  max-width: 450px;
+  margin: auto;
+  box-shadow: 5px 5px 10px 3px rgba(0, 0, 0, 0.1);
 }
 
 .window-container-large {
-    background-color: white;
-    border-radius: 8px;
-    padding: 30px;
-    margin: auto;
-    box-shadow: 5px 5px 10px 3px rgba(0,0,0,0.1);
+  background-color: white;
+  border-radius: 8px;
+  padding: 30px;
+  margin: auto;
+  box-shadow: 5px 5px 10px 3px rgba(0, 0, 0, 0.1);
 }
 
 .w-35 {
-    max-width: 35%;
+  max-width: 35%;
 }
 
 .new-background {
-    background-color: #156394;
+  background-color: #156394;
 }
 
 .new-background-gradient {
-    background: rgb(2,0,36);
-    background: linear-gradient(0deg, rgba(2,0,36,1) 0%, rgba(44,52,127,1) 76%, rgba(21,99,148,1) 100%);
+  background: rgb(2, 0, 36);
+  background: linear-gradient(
+    0deg,
+    rgba(2, 0, 36, 1) 0%,
+    rgba(44, 52, 127, 1) 76%,
+    rgba(21, 99, 148, 1) 100%
+  );
 }
 
 .graduated-scale {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    padding-left: 2px;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  padding-left: 2px;
 }
 
 .bg-section {
-    background-color: #D8E1E8;
+  background-color: #d8e1e8;
 }
 
 .bg-range {
-    background-color: #c0ced9;
+  background-color: #c0ced9;
 }
 
 .box-shadow {
-    border: 2px solid black;
-    box-shadow: 5px 5px 0px 1px rgba(0,0,0,1.0);
+  border: 2px solid black;
+  box-shadow: 5px 5px 0px 1px rgba(0, 0, 0, 1);
 }
 
 .bigger-icon {
-    font-size: 3em; 
-  }
+  font-size: 3em;
+}
 
-  .card-link {
-    color: inherit; 
-    text-decoration: none; 
-  }
-  
-  .card-link:hover {
-    color: inherit; 
-    text-decoration: none; 
-  }
+.card-link {
+  color: inherit;
+  text-decoration: none;
+}
 
-  .grow-on-hover {
-    transition: all 0.3s ease; 
-  }
-  
-  .grow-on-hover:hover {
-    transform: scale(1.05); 
-  }
+.card-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.grow-on-hover {
+  transition: all 0.3s ease;
+}
+
+.grow-on-hover:hover {
+  transform: scale(1.05);
+}

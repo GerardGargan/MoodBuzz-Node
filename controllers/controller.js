@@ -1,7 +1,16 @@
 const axios = require("axios");
 //import custom utility functions
-const { average, validatePassword, validateEmail, validateName, getCurrentDate, getCurrentTime, 
-  formatDatabaseDate, countTodaysSnapshots, todaysSnapshotMessage } = require('../util/helper_functions');
+const {
+  average,
+  validatePassword,
+  validateEmail,
+  validateName,
+  getCurrentDate,
+  getCurrentTime,
+  formatDatabaseDate,
+  countTodaysSnapshots,
+  todaysSnapshotMessage,
+} = require("../util/helper_functions");
 
 exports.getIndex = (req, res) => {
   //store if the user is logged in & pass to the template (for dynamic navbar links)
@@ -12,205 +21,239 @@ exports.getIndex = (req, res) => {
 exports.getLogin = (req, res) => {
   const { isLoggedIn } = req.session;
   //check if a user was just registered, if so display success message
-  const successMessage = req.query.success ? 'Registration successful. You can now log in.' : null;
+  const successMessage = req.query.success
+    ? "Registration successful. You can now log in."
+    : null;
 
-    res.render("login", { currentPage: "login", isLoggedIn, error: false, successMessage });
+  res.render("login", {
+    currentPage: "login",
+    isLoggedIn,
+    error: false,
+    successMessage,
+  });
 };
 
 exports.postLogin = async (req, res) => {
-
   const { isLoggedIn } = req.session;
   let { email, password } = req.body;
-    
-    try {
-      const endpoint = "http://localhost:3001/user/login";
-      const vals = { email, password };
-      //post the form data to the api post route
-      const response = await axios.post(endpoint, vals, {
-        validateStatus: (status) => {
-          return status < 500;
-        },
-      });
-      //if email and password are a match
-      if (response.status == 200) {
-        //success, set up session and redirect
-        //get the user data returned from the api
-        const userData = response.data.result;
-        //set up a session
-        const session = req.session;
-        session.isLoggedIn = true;
-        session.userid = userData[0].user_id;
-        session.firstName = userData[0].first_name;
-        session.lastName = userData[0].last_name;
-        const orig_route = session.route;
 
-        //redirect to appropriate page
-        if(!orig_route) {
-          res.redirect("/user/home");
-        } else {
-          res.redirect(`${orig_route}`);
-        }
+  try {
+    const endpoint = "http://localhost:3001/user/login";
+    const vals = { email, password };
+    //post the form data to the api post route
+    const response = await axios.post(endpoint, vals, {
+      validateStatus: (status) => {
+        return status < 500;
+      },
+    });
+    //if email and password are a match
+    if (response.status == 200) {
+      //success, set up session and redirect
+      //get the user data returned from the api
+      const userData = response.data.result;
+      //set up a session
+      const session = req.session;
+      session.isLoggedIn = true;
+      session.userid = userData[0].user_id;
+      session.firstName = userData[0].first_name;
+      session.lastName = userData[0].last_name;
+      const orig_route = session.route;
+
+      //redirect to appropriate page
+      if (!orig_route) {
+        res.redirect("/user/home");
       } else {
-        //invalid login credentials, handle error message to user
-        console.log(response.data.message);
-        res.render("login", { currentPage: "login", isLoggedIn, error: 'Incorrect email or password', successMessage: null });
+        res.redirect(`${orig_route}`);
       }
-    } catch (err) {
-      //server error
-      console.log(err);
+    } else {
+      //invalid login credentials, handle error message to user
+      console.log(response.data.message);
+      res.render("login", {
+        currentPage: "login",
+        isLoggedIn,
+        error: "Incorrect email or password",
+        successMessage: null,
+      });
     }
+  } catch (err) {
+    //server error
+    console.log(err);
+  }
 };
 
 exports.getRegister = (req, res) => {
   const { isLoggedIn } = req.session;
-    res.render("register", { currentPage: "register", isLoggedIn, error: false });
+  res.render("register", { currentPage: "register", isLoggedIn, error: false });
 };
 
 exports.postRegister = async (req, res) => {
   const { isLoggedIn } = req.session;
 
-    let { firstname, surname, email, password } = req.body;
+  let { firstname, surname, email, password } = req.body;
 
-    //sanitise user input, remove any leading or trailing whitespace, force to be lowercase
-    firstname = firstname.trim().toLowerCase();
-    surname = surname.trim().toLowerCase();
-    email = email.trim().toLowerCase();
+  //sanitise user input, remove any leading or trailing whitespace, force to be lowercase
+  firstname = firstname.trim().toLowerCase();
+  surname = surname.trim().toLowerCase();
+  email = email.trim().toLowerCase();
 
-    //capitalise first letter of firstname and surname
-    firstname = firstname.charAt(0).toUpperCase() + firstname.slice(1);
-    surname = surname.charAt(0).toUpperCase() + surname.slice(1);
+  //capitalise first letter of firstname and surname
+  firstname = firstname.charAt(0).toUpperCase() + firstname.slice(1);
+  surname = surname.charAt(0).toUpperCase() + surname.slice(1);
 
-    const vals = { firstname, surname, email, password };
+  const vals = { firstname, surname, email, password };
 
-    //perform validation checks on data, render an error message for each scenario
-    if(!validateName(firstname) || !validateName(surname)){
-      //names do not meet business rules, render error on registration page
-      return res.render("register", { currentPage: "register", isLoggedIn, error: 'First and last name must be between 2-50 characters and contain no special characters' });
+  //perform validation checks on data, render an error message for each scenario
+  if (!validateName(firstname) || !validateName(surname)) {
+    //names do not meet business rules, render error on registration page
+    return res.render("register", {
+      currentPage: "register",
+      isLoggedIn,
+      error:
+        "First and last name must be between 2-50 characters and contain no special characters",
+    });
+  }
+
+  if (!validateEmail(email)) {
+    //email does not meet business rules, render error on registration page
+    return res.render("register", {
+      currentPage: "register",
+      isLoggedIn,
+      error: "Invalid email address",
+    });
+  }
+
+  if (!validatePassword(password)) {
+    //password does not meet business rules, render error on reigstration page
+    return res.render("register", {
+      currentPage: "register",
+      isLoggedIn,
+      error:
+        "Password must be at least 8 characters long and contain a capital letter",
+    });
+  }
+
+  //we have passed all validation checks on user inputs, proceed to attempt registration with API call
+  try {
+    const endpoint = "http://localhost:3001/user/register";
+    const response = await axios.post(endpoint, vals, {
+      validateStatus: (status) => {
+        return status < 500;
+      },
+    });
+    if (response.status == 201) {
+      //user created successfully, redirect to login
+      res.redirect("/login?success=1");
+    } else {
+      //email already exists, render error on registration page
+      res.render("register", {
+        currentPage: "register",
+        isLoggedIn,
+        error: "Email already exists",
+      });
     }
-
-    if(!validateEmail(email)) {
-      //email does not meet business rules, render error on registration page
-      return res.render("register", { currentPage: "register", isLoggedIn, error: 'Invalid email address' });
-    }
-
-    if(!validatePassword(password)) {
-      //password does not meet business rules, render error on reigstration page
-      return res.render("register", { currentPage: "register", isLoggedIn, error: 'Password must be at least 8 characters long and contain a capital letter' });
-    }
-
-    //we have passed all validation checks on user inputs, proceed to attempt registration with API call
-      try {
-        const endpoint = "http://localhost:3001/user/register";
-        const response = await axios.post(endpoint, vals, {
-          validateStatus: (status) => {
-            return status < 500;
-          },
-        });
-        if (response.status == 201) {
-          //user created successfully, redirect to login
-          res.redirect('/login?success=1');
-        } else {
-          //email already exists, render error on registration page
-          res.render("register", { currentPage: "register", isLoggedIn, error: 'Email already exists' });
-        }
-      } catch (err) {
-        console.log(err);
-      }
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 exports.getUserHomePage = async (req, res) => {
   const { userid, firstName, lastName } = req.session;
   //check if a deletion occured, so we can display a success message to the user
-  const deletedMessage = req.query.deleted ? 'Snapshot deleted' : null;
+  const deletedMessage = req.query.deleted ? "Snapshot deleted" : null;
 
-    try {
-      //query database, retrieve snapshots for the current user
-      const endpointSnapshots = `http://localhost:3001/snapshot/user/${userid}`;
-      const snapshotRequest = await axios.get(endpointSnapshots, {
-        validateStatus: (status) => {
-          return status < 500;
-        },
-      });
-      const snapshots = snapshotRequest.data.result;
+  try {
+    //query database, retrieve snapshots for the current user
+    const endpointSnapshots = `http://localhost:3001/snapshot/user/${userid}`;
+    const snapshotRequest = await axios.get(endpointSnapshots, {
+      validateStatus: (status) => {
+        return status < 500;
+      },
+    });
+    const snapshots = snapshotRequest.data.result;
 
-      //get the number of snapshots returned
-      const numberOfSnapshots = snapshots.length;
+    //get the number of snapshots returned
+    const numberOfSnapshots = snapshots.length;
 
-      //count the number of snapshots recorded today
-      const countToday = countTodaysSnapshots(snapshots);
-      //pass this in to get todays message to display to the user
-      const todaysSnapMessage = todaysSnapshotMessage(countToday);
+    //count the number of snapshots recorded today
+    const countToday = countTodaysSnapshots(snapshots);
+    //pass this in to get todays message to display to the user
+    const todaysSnapMessage = todaysSnapshotMessage(countToday);
 
-      const currentDateTime = `${formatDatabaseDate(getCurrentDate())} ${getCurrentTime()}`;
+    const currentDateTime = `${formatDatabaseDate(
+      getCurrentDate()
+    )} ${getCurrentTime()}`;
 
-      res.render("userhome", {
-        groupedDataSorted: snapshots,
-        numberOfSnapshots,
-        todaysSnapMessage,
-        firstName, lastName, currentDateTime, deletedMessage
-      });
-    } catch (err) {
-      //handle error
-      console.log(err);
-    }
+    res.render("userhome", {
+      groupedDataSorted: snapshots,
+      numberOfSnapshots,
+      todaysSnapMessage,
+      firstName,
+      lastName,
+      currentDateTime,
+      deletedMessage,
+    });
+  } catch (err) {
+    //handle error
+    console.log(err);
+  }
 };
 
 exports.getNewSnapshotPage = async (req, res) => {
   const { firstName, userid, lastName } = req.session;
 
-    try {
-      const endpointEmotions = `http://localhost:3001/emotions`;
-      const emotions = await axios.get(endpointEmotions, {
-        validateStatus: (status) => {
-          return status < 500;
-        },
-      });
-      const groupedData = emotions.data.result;
+  try {
+    const endpointEmotions = `http://localhost:3001/emotions`;
+    const emotions = await axios.get(endpointEmotions, {
+      validateStatus: (status) => {
+        return status < 500;
+      },
+    });
+    const groupedData = emotions.data.result;
 
-      const endpointTriggers = `http://localhost:3001/triggers`;
-      const triggers = await axios.get(endpointTriggers, {
-        validateStatus: (status) => {
-          return status < 500;
-        },
-      });
-      const triggerData = triggers.data.result;
+    const endpointTriggers = `http://localhost:3001/triggers`;
+    const triggers = await axios.get(endpointTriggers, {
+      validateStatus: (status) => {
+        return status < 500;
+      },
+    });
+    const triggerData = triggers.data.result;
 
-      const currentDate = formatDatabaseDate(getCurrentDate());
-      const dateTime = `${currentDate} ${getCurrentTime()}`;
+    const currentDate = formatDatabaseDate(getCurrentDate());
+    const dateTime = `${currentDate} ${getCurrentTime()}`;
 
-      res.render("snapshot", {
-        groupedData,
-        triggerData,
-        lastName,
-        firstName,
-        dateTime,
-      });
-    } catch (err) {
-      //API error, status 500
-      console.log(err);
-    }
+    res.render("snapshot", {
+      groupedData,
+      triggerData,
+      lastName,
+      firstName,
+      dateTime,
+    });
+  } catch (err) {
+    //API error, status 500
+    console.log(err);
+  }
 };
 
 exports.processNewSnapshot = async (req, res) => {
   const { firstName, userid } = req.session;
 
-    //Extract data from the request body
-    const formData = req.body;
+  //Extract data from the request body
+  const formData = req.body;
 
-    try {
-      const endpoint = "http://localhost:3001/snapshot";
-      const response = await axios.post(endpoint, formData, {
-        validateStatus: (status) => {
-          return status < 500;
-        },
-        headers: { userid: `${userid}` },
-      });
-      const snapshotId = response.data.id;
-      res.redirect(`/user/snapshot/view/${snapshotId}?success=1`);
-    } catch (err) {
-      //Server error, status 500 - log out
-      console.log(err);
-    }
+  try {
+    const endpoint = "http://localhost:3001/snapshot";
+    const response = await axios.post(endpoint, formData, {
+      validateStatus: (status) => {
+        return status < 500;
+      },
+      headers: { userid: `${userid}` },
+    });
+    const snapshotId = response.data.id;
+    res.redirect(`/user/snapshot/view/${snapshotId}?success=1`);
+  } catch (err) {
+    //Server error, status 500 - log out
+    console.log(err);
+  }
 };
 
 exports.getViewSnapshot = async (req, res) => {
@@ -218,43 +261,45 @@ exports.getViewSnapshot = async (req, res) => {
   const { id } = req.params;
 
   //check if a snapshot was successfully just added
-  const newSnapshotMessage = req.query.success ? 'Snapshot successfully recorded' : null;
-  const editSnapshotMessage = req.query.edit ? 'Snapshot updated' : null;
+  const newSnapshotMessage = req.query.success
+    ? "Snapshot successfully recorded"
+    : null;
+  const editSnapshotMessage = req.query.edit ? "Snapshot updated" : null;
 
-    try {
-      const response = await axios.get(`http://localhost:3001/snapshot/${id}`, {
-        validateStatus: (status) => {
-          return status < 500;
-        },
-        headers: { userid: `${userid}` },
+  try {
+    const response = await axios.get(`http://localhost:3001/snapshot/${id}`, {
+      validateStatus: (status) => {
+        return status < 500;
+      },
+      headers: { userid: `${userid}` },
+    });
+
+    if (response.status == 200) {
+      //successfully retrieved a snapshot, render
+
+      res.render("viewsnapshot", {
+        snapshot: response.data.result,
+        firstName,
+        lastName,
+        error: false,
+        newSnapshotMessage,
+        editSnapshotMessage,
       });
-
-      if (response.status == 200) {
-        //successfully retrieved a snapshot, render
-
-        res.render("viewsnapshot", {
-          snapshot: response.data.result,
-          firstName,
-          lastName,
-          error: false,
-          newSnapshotMessage,
-          editSnapshotMessage
-        });
-      } else {
-        //pass error message back to the view snapshot page
-        res.render('viewsnapshot', {
-          snapshot: null,
-          firstName,
-          lastName,
-          error: 'Snapshot does not exist or does not belong to current user',
-          newSnapshotMessage,
-          editSnapshotMessage
-        });
-      }
-    } catch {
-      //server error status 500 - log out
-      console.log("error in catch");
+    } else {
+      //pass error message back to the view snapshot page
+      res.render("viewsnapshot", {
+        snapshot: null,
+        firstName,
+        lastName,
+        error: "Snapshot does not exist or does not belong to current user",
+        newSnapshotMessage,
+        editSnapshotMessage,
+      });
     }
+  } catch {
+    //server error status 500 - log out
+    console.log("error in catch");
+  }
 };
 
 exports.deleteSnapshot = async (req, res) => {
@@ -263,38 +308,38 @@ exports.deleteSnapshot = async (req, res) => {
   //get session details
   const { userid, firstName, lastName } = req.session;
 
-    try {
-      const response = await axios.delete(
-        `http://localhost:3001/snapshot/${id}`,
-        {
-          validateStatus: (status) => {
-            return status < 500;
-          },
-          headers: {
-            userid: userid,
-          },
-        }
-      );
-
-      if (response.status == 200) {
-        //successful deletion, redirect
-        console.log(`snapshot ${id} deleted`);
-        res.redirect("/user/home?deleted=1");
-      } else {
-        //invalid id or does not belong to user, render error message
-        res.render('viewsnapshot', {
-          snapshot: null,
-          firstName,
-          lastName,
-          error: response.data.message, 
-          newSnapshotMessage: null, 
-          editSnapshotMessage: null
-        })
+  try {
+    const response = await axios.delete(
+      `http://localhost:3001/snapshot/${id}`,
+      {
+        validateStatus: (status) => {
+          return status < 500;
+        },
+        headers: {
+          userid: userid,
+        },
       }
-    } catch (err) {
-      //server error, log out error
-      console.log(response.data.message);
+    );
+
+    if (response.status == 200) {
+      //successful deletion, redirect
+      console.log(`snapshot ${id} deleted`);
+      res.redirect("/user/home?deleted=1");
+    } else {
+      //invalid id or does not belong to user, render error message
+      res.render("viewsnapshot", {
+        snapshot: null,
+        firstName,
+        lastName,
+        error: response.data.message,
+        newSnapshotMessage: null,
+        editSnapshotMessage: null,
+      });
     }
+  } catch (err) {
+    //server error, log out error
+    console.log(response.data.message);
+  }
 };
 
 exports.getLogout = (req, res) => {
@@ -307,34 +352,34 @@ exports.getEdit = async (req, res) => {
   const { id } = req.params;
   const { userid, firstName, lastName } = req.session;
 
-    try {
-      const response = await axios.get(`http://localhost:3001/snapshot/${id}`, {
-        validateStatus: (status) => {
-          return status < 500;
-        },
-        headers: { userid: `${userid}` },
-      });
+  try {
+    const response = await axios.get(`http://localhost:3001/snapshot/${id}`, {
+      validateStatus: (status) => {
+        return status < 500;
+      },
+      headers: { userid: `${userid}` },
+    });
 
-      if (response.status == 200) {
-        //success, render snapshot
-        res.render("editsnapshot", {
-          snapshot: response.data.result,
-          firstName,
-          lastName,
-          error: false
-        });
-      } else {
-        //unsuccessful, snapshot doesnt exist or doesnt belong to user
-        res.render("editsnapshot", {
-          snapshot: null,
-          firstName,
-          lastName,
-          error: 'Snapshot doesnt exist or doesnt belong to current user'
-        });
-      }
-    } catch (err) {
-      console.log(err);
+    if (response.status == 200) {
+      //success, render snapshot
+      res.render("editsnapshot", {
+        snapshot: response.data.result,
+        firstName,
+        lastName,
+        error: false,
+      });
+    } else {
+      //unsuccessful, snapshot doesnt exist or doesnt belong to user
+      res.render("editsnapshot", {
+        snapshot: null,
+        firstName,
+        lastName,
+        error: "Snapshot doesnt exist or doesnt belong to current user",
+      });
     }
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 exports.postEditUpdate = async (req, res) => {
@@ -343,36 +388,36 @@ exports.postEditUpdate = async (req, res) => {
   //get the id of the snapshot being edited
   const { id } = req.params;
 
-    //get the data from the form
-    const formData = req.body;
+  //get the data from the form
+  const formData = req.body;
 
-    //API endpoint for editing
-    const endpoint = `http://localhost:3001/snapshot/edit/${id}`;
-    try {
-      //send patch request to API with formData
-      const response = await axios.patch(endpoint, formData, {
-        validateStatus: (status) => {
-          return status < 500;
-        },
-        headers: { userid: `${userid}` }
+  //API endpoint for editing
+  const endpoint = `http://localhost:3001/snapshot/edit/${id}`;
+  try {
+    //send patch request to API with formData
+    const response = await axios.patch(endpoint, formData, {
+      validateStatus: (status) => {
+        return status < 500;
+      },
+      headers: { userid: `${userid}` },
+    });
+
+    if (response.status == 201) {
+      //successful update, redirect to view the updated snapshot
+      res.redirect(`/user/snapshot/view/${id}?edit=1`);
+    } else {
+      //snapshot doesnt exist or doesnt belong to current logged in user, display error
+      res.render("editsnapshot", {
+        snapshot: null,
+        firstName,
+        lastName,
+        error: "Snapshot doesnt exist or doesnt belong to current user",
       });
-
-      if(response.status == 201) {
-        //successful update, redirect to view the updated snapshot
-        res.redirect(`/user/snapshot/view/${id}?edit=1`);
-      } else {
-        //snapshot doesnt exist or doesnt belong to current logged in user, display error
-        res.render("editsnapshot", {
-          snapshot: null,
-          firstName,
-          lastName,
-          error: 'Snapshot doesnt exist or doesnt belong to current user'
-        });
-      }
-    } catch (err) {
-      //server error, handle
-      console.log(err.message);
     }
+  } catch (err) {
+    //server error, handle
+    console.log(err.message);
+  }
 };
 
 exports.getAnalytics = async (req, res) => {
@@ -386,7 +431,7 @@ exports.getAnalytics = async (req, res) => {
     const responseMonthly = await axios.get(endpointMonthly, {
       validateStatus: (status) => {
         return status < 500;
-      }
+      },
     });
     //store the result
     const monthlyData = responseMonthly.data.result;
@@ -409,7 +454,7 @@ exports.getAnalytics = async (req, res) => {
     const responseWeekday = await axios.get(endpointWeekday, {
       validateStatus: (status) => {
         return status < 500;
-      }
+      },
     });
 
     //access the data returned
@@ -425,7 +470,7 @@ exports.getAnalytics = async (req, res) => {
     const requestSnapshots = await axios.get(endpointAllSnapshots, {
       validateStatus: (status) => {
         return status < 500;
-      }
+      },
     });
 
     const snapshotData = requestSnapshots.data.result;
@@ -436,20 +481,18 @@ exports.getAnalytics = async (req, res) => {
       //loop through each emotion inside each snapshot
       snapshot.emotions.forEach((emotion) => {
         //check if the emotion exists in our grouped object
-        if(!groupedEmotionsData[emotion.emotion]) {
+        if (!groupedEmotionsData[emotion.emotion]) {
           //it doesnt exist, create the emotion with an empty array
           groupedEmotionsData[emotion.emotion] = [];
         }
 
         //add the rating to the array for the current emotion
         groupedEmotionsData[emotion.emotion].push(emotion.rating);
-
-      })
+      });
     });
- 
 
     //loop through our data structure containing each emotion, each emotion has an array of ratings
-    Object.keys(groupedEmotionsData).forEach(emotion => {
+    Object.keys(groupedEmotionsData).forEach((emotion) => {
       //calculate the average for each emotion and store it against the emotion, replacing the array
       groupedEmotionsData[emotion] = average(groupedEmotionsData[emotion]);
     });
@@ -460,21 +503,21 @@ exports.getAnalytics = async (req, res) => {
     const emotionAverages = Object.values(groupedEmotionsData);
     //get the max value
     const maxEmotionValue = Math.max(...emotionAverages);
-    
+
     //now obtain all triggers and their counts for this user
     const endpoint = `http://localhost:3001/triggers/analytics/${userid}`;
     const triggersResponse = await axios.get(endpoint, {
       validateStatus: (status) => {
-        return status < 500
-      }
+        return status < 500;
+      },
     });
 
     //store the data in a varialbe
     const triggerCounts = triggersResponse.data.result;
-   
+
     //convert to an array of key value pairs (to allow sorting, wanting to show highest to lowest on graph)
     const triggerCountsArray = Object.entries(triggerCounts);
-    
+
     //sort from highest to lowest
     triggerCountsArray.sort((a, b) => b[1] - a[1]);
     //set up empty arrays to hold the triggers and values (for graph js)
@@ -482,7 +525,7 @@ exports.getAnalytics = async (req, res) => {
     const triggerVals = [];
 
     //loop through and populate the arrays
-    triggerCountsArray.forEach(trigger => {
+    triggerCountsArray.forEach((trigger) => {
       triggers.push(trigger[0]);
       triggerVals.push(`${[trigger[1]]}`);
     });
@@ -494,12 +537,12 @@ exports.getAnalytics = async (req, res) => {
     const emotionEndpoint = `http://localhost:3001/emotions`;
     const emoRequest = await axios.get(emotionEndpoint, {
       validateStatus: (status) => {
-        return status < 500
-      }
+        return status < 500;
+      },
     });
     const emotions = emoRequest.data.result;
 
-    if(!emotion) {
+    if (!emotion) {
       //if there is no emotion in the query string, default it to the first emotion from our emotions table
       emotion = Object.values(emotions)[0].emotion_id;
     }
@@ -508,31 +551,51 @@ exports.getAnalytics = async (req, res) => {
     const emotionSnapshotEndpoint = `http://localhost:3001/snapshot/analytics/emotion/${emotion}`;
     const emotionSnapshotResponse = await axios.get(emotionSnapshotEndpoint, {
       validateStatus: (status) => {
-        return status < 500
-      }, 
-      headers: { userid: `${userid}` }
+        return status < 500;
+      },
+      headers: { userid: `${userid}` },
     });
-    
+
     //store the result set
     const emotionResult = emotionSnapshotResponse.data.result;
-    
+
     //create empty arrays to ghold valuyes
     const emoDateTimes = [];
     const emoRatings = [];
     //get the name of the emotio9n (for the chart title)
-    const emotionName = emotionResult.length > 0 ? emotionResult[0].emotion : null;
+    const emotionName =
+      emotionResult.length > 0 ? emotionResult[0].emotion : null;
 
     //loop through each row and populate the arrays with data
-    emotionResult.forEach(record => {
+    emotionResult.forEach((record) => {
       const dateTime = `${formatDatabaseDate(record.date)} ${record.time}`;
       emoDateTimes.push(dateTime);
       emoRatings.push(record.rating);
     });
 
-    //render the analytics template with the data 
-    res.render('analytics', { dates, monthlyCounts, maxYAxisValueMonthly, weekdays, weekdaycounts, maxWeekdayValue, emotionLabels, emotionAverages, maxEmotionValue, triggers, triggerVals, maxTriggerCount, firstName, lastName, emotions, emotionSelected: emotion, emoDateTimes, emoRatings, emotionName });
-  
-  } catch(err) {
+    //render the analytics template with the data
+    res.render("analytics", {
+      dates,
+      monthlyCounts,
+      maxYAxisValueMonthly,
+      weekdays,
+      weekdaycounts,
+      maxWeekdayValue,
+      emotionLabels,
+      emotionAverages,
+      maxEmotionValue,
+      triggers,
+      triggerVals,
+      maxTriggerCount,
+      firstName,
+      lastName,
+      emotions,
+      emotionSelected: emotion,
+      emoDateTimes,
+      emoRatings,
+      emotionName,
+    });
+  } catch (err) {
     //server error 500
     console.log(err);
   }

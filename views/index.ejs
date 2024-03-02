@@ -1,178 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <link href="style.css" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+    />
+    <link href="style.css" rel="stylesheet" />
 
     <title>MoodBuzz</title>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <%- include('navbar_home') %>
 
-        <!-- Showcase -->
-        <section class="new-background-gradient text-light p-5 pb-xl-0 text-center text-md-start">
-            <div class="container">
-                <div class="d-md-flex align-items-center justify-content-between gap-5">
-                    <div>
-                        <h1>Avoid the 'McCallister' <span class="text-warning">Meltdown!</span></h1>
-                        <h4>Ever found yourself in a Kevin-like whirlwind of emotions?</h4>
-                        <p class="lead mt-4">Now you can gain a better understanding of your emotions with MoodBuzz!</p>
-                        <p>Unleash the power to decipher your feelings and unravel triggers with our Home Alone-inspired
-                            emotion recording tool.
-                            Snap emotional moments and decode the effects of individual triggers on your emotional state
-                            throughout the day or week.</p>
-                        <a href="./register" class="btn btn-primary btn-lg mt-3">Start Recording</a>
-                    </div>
-                    <img class="img-fluid w-35 d-none d-md-block" src="./images/Kevin_McCallister.webp" alt="">
+    <!-- Showcase -->
+    <section
+      class="new-background-gradient text-light p-5 pb-xl-0 text-center text-md-start"
+    >
+      <div class="container">
+        <div class="d-md-flex align-items-center justify-content-between gap-5">
+          <div>
+            <h1>
+              Avoid the 'McCallister'
+              <span class="text-warning">Meltdown!</span>
+            </h1>
+            <h4>Ever found yourself in a Kevin-like whirlwind of emotions?</h4>
+            <p class="lead mt-4">
+              Now you can gain a better understanding of your emotions with
+              MoodBuzz!
+            </p>
+            <p>
+              Unleash the power to decipher your feelings and unravel triggers
+              with our Home Alone-inspired emotion recording tool. Snap
+              emotional moments and decode the effects of individual triggers on
+              your emotional state throughout the day or week.
+            </p>
+            <a href="./register" class="btn btn-primary btn-lg mt-3"
+              >Start Recording</a
+            >
+          </div>
+          <img
+            class="img-fluid w-35 d-none d-md-block"
+            src="./images/Kevin_McCallister.webp"
+            alt=""
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Card's - process outline-->
+    <section class="p-5" id="process">
+      <div class="container">
+        <h2 class="mb-3">3 Step Process</h2>
+        <!-- Cards -->
+        <div class="row row-cols-1 row-cols-md-3 text-center g-3">
+          <div class="col">
+            <div class="card bg-dark text-light h-100">
+              <div class="card-body text-center">
+                <div class="h1 mb-3">
+                  <i class="bi bi-laptop"></i>
                 </div>
+                <h3 class="card-title mb-3">Create an Account</h3>
+                <p class="card-text">
+                  Create an account to be able to take advantage of all
+                  features. Registration takes only 30 seconds and requires
+                  minimal information.
+                </p>
+                <a href="./register" class="btn btn-primary">Create Account</a>
+              </div>
             </div>
-        </section>
-
-        <!-- Card's - process outline-->
-        <section class="p-5" id="process">
-            <div class="container">
-                <h2 class="mb-3">3 Step Process</h2>
-                <!-- Cards -->
-                <div class="row row-cols-1 row-cols-md-3 text-center g-3">
-                    <div class="col">
-                        <div class="card bg-dark text-light h-100">
-                            <div class="card-body text-center">
-                                <div class="h1 mb-3">
-                                    <i class="bi bi-laptop"></i>
-                                </div>
-                                <h3 class="card-title mb-3">
-                                    Create an Account
-                                </h3>
-                                <p class="card-text">
-                                    Create an account to be able to take advantage of all features. Registration takes
-                                    only 30 seconds and requires minimal information.
-                                </p>
-                                <a href="./register" class="btn btn-primary">Create Account</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card bg-secondary text-light h-100">
-                            <div class="card-body text-center">
-                                <div class="h1 mb-3">
-                                    <i class="bi bi-record-circle"></i>
-                                </div>
-                                <h3 class="card-title mb-3">
-                                    Record a Snapshot
-                                </h3>
-                                <p class="card-text">
-                                    Record a level against each of seven recognised emotions. Alongside this, record any
-                                    triggers which influenced the levels recorded.
-                                </p>
-                                <a href="#" class="btn btn-dark">Read More</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card bg-dark text-light">
-                            <div class="card-body text-center">
-                                <div class="h1 mb-3">
-                                    <i class="bi bi-bar-chart-line"></i>
-                                </div>
-                                <h3 class="card-title mb-3">
-                                    Analyse Emotions
-                                </h3>
-                                <p class="card-text">
-                                    Use the built in dashboards to visualise your data. Graphs will show you how your
-                                    emotions change over time to better understand them.
-                                </p>
-                                <a href="#" class="btn btn-primary">Read More</a>
-                            </div>
-                        </div>
-                    </div>
+          </div>
+          <div class="col">
+            <div class="card bg-secondary text-light h-100">
+              <div class="card-body text-center">
+                <div class="h1 mb-3">
+                  <i class="bi bi-record-circle"></i>
                 </div>
+                <h3 class="card-title mb-3">Record a Snapshot</h3>
+                <p class="card-text">
+                  Record a level against each of seven recognised emotions.
+                  Alongside this, record any triggers which influenced the
+                  levels recorded.
+                </p>
+                <a href="#" class="btn btn-dark">Read More</a>
+              </div>
             </div>
-        </section>
-
-        <!-- Benefit section -->
-        <section class="new-background-gradient p-5 text-light text-center text-md-start">
-            <div class="container">
-                <div class="d-md-flex align-items-center justify-content-between gap-5">
-                    <img src="./images/happy_emoji.svg" class="img-fluid w-50 d-none d-md-block">
-                    <div>
-                        <h1>Work on being a happier version of yourself!</h1>
-                        <p class="lead">Just like Kevin's ingenious strategies, our app empowers you to identify
-                            triggers that lead to those less-than-jolly emotions.
-                            Harness this data with our visualisation tools to create a blueprint for elevating your
-                            emotional wellbeing!</p>
-                        <p class="lead">Turn your emotional landscape into a cheerful masterpiece - no paint cans or
-                            tarantulas involved</p>
-                    </div>
+          </div>
+          <div class="col">
+            <div class="card bg-dark text-light">
+              <div class="card-body text-center">
+                <div class="h1 mb-3">
+                  <i class="bi bi-bar-chart-line"></i>
                 </div>
+                <h3 class="card-title mb-3">Analyse Emotions</h3>
+                <p class="card-text">
+                  Use the built in dashboards to visualise your data. Graphs
+                  will show you how your emotions change over time to better
+                  understand them.
+                </p>
+                <a href="#" class="btn btn-primary">Read More</a>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        </section>
+    <!-- Benefit section -->
+    <section
+      class="new-background-gradient p-5 text-light text-center text-md-start"
+    >
+      <div class="container">
+        <div class="d-md-flex align-items-center justify-content-between gap-5">
+          <img
+            src="./images/happy_emoji.svg"
+            class="img-fluid w-50 d-none d-md-block"
+          />
+          <div>
+            <h1>Work on being a happier version of yourself!</h1>
+            <p class="lead">
+              Just like Kevin's ingenious strategies, our app empowers you to
+              identify triggers that lead to those less-than-jolly emotions.
+              Harness this data with our visualisation tools to create a
+              blueprint for elevating your emotional wellbeing!
+            </p>
+            <p class="lead">
+              Turn your emotional landscape into a cheerful masterpiece - no
+              paint cans or tarantulas involved
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <!-- FAQ Accordion Section -->
-        <section id="questions" class="p-5">
-            <div class="container">
-                <h2 class="text-center mb-4">
-                    Frequently Asked Questions
-                </h2>
-                <div class="accordion accordion-flush" id="questions">
-                    <!-- Item 1 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#question-one">
-                                What does it cost?
-                            </button>
-                        </h2>
-                        <div id="question-one" class="accordion-collapse collapse" data-bs-parent="#questions">
-                            <div class="accordion-body">There is no cost, MoodBuzz is totally free to use and has been
-                                developed as part of a University project at Queens University Belfast.</div>
-                        </div>
-                    </div>
-                    <!-- Item 2 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#question-two">
-                                Can I use it on mobile and desktop?
-                            </button>
-                        </h2>
-                        <div id="question-two" class="accordion-collapse collapse" data-bs-parent="#questions">
-                            <div class="accordion-body">MoodBuzz has been designed to be responsive to all devices. You
-                                can access MoodBuzz through a mobile, tablet or desktop device by visiting the web page
-                                on the device. We do not have a native app for Android or iOS.</div>
-                        </div>
-                    </div>
-                    <!-- Item 3 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#question-three">
-                                Who developed MoodBuzz?
-                            </button>
-                        </h2>
-                        <div id="question-three" class="accordion-collapse collapse" data-bs-parent="#questions">
-                            <div class="accordion-body">MoodBuzz has been developed by Gerard Gargan, a MSc student
-                                studying Software Development at Queens University Belfast. This web app has been built
-                                to satisfy the requirements of CSC7084 - Web Development Module.</div>
-                        </div>
-                    </div>
-                </div>
+    <!-- FAQ Accordion Section -->
+    <section id="questions" class="p-5">
+      <div class="container">
+        <h2 class="text-center mb-4">Frequently Asked Questions</h2>
+        <div class="accordion accordion-flush" id="questions">
+          <!-- Item 1 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#question-one"
+              >
+                What does it cost?
+              </button>
+            </h2>
+            <div
+              id="question-one"
+              class="accordion-collapse collapse"
+              data-bs-parent="#questions"
+            >
+              <div class="accordion-body">
+                There is no cost, MoodBuzz is totally free to use and has been
+                developed as part of a University project at Queens University
+                Belfast.
+              </div>
             </div>
-        </section>
+          </div>
+          <!-- Item 2 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#question-two"
+              >
+                Can I use it on mobile and desktop?
+              </button>
+            </h2>
+            <div
+              id="question-two"
+              class="accordion-collapse collapse"
+              data-bs-parent="#questions"
+            >
+              <div class="accordion-body">
+                MoodBuzz has been designed to be responsive to all devices. You
+                can access MoodBuzz through a mobile, tablet or desktop device
+                by visiting the web page on the device. We do not have a native
+                app for Android or iOS.
+              </div>
+            </div>
+          </div>
+          <!-- Item 3 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#question-three"
+              >
+                Who developed MoodBuzz?
+              </button>
+            </h2>
+            <div
+              id="question-three"
+              class="accordion-collapse collapse"
+              data-bs-parent="#questions"
+            >
+              <div class="accordion-body">
+                MoodBuzz has been developed by Gerard Gargan, a MSc student
+                studying Software Development at Queens University Belfast. This
+                web app has been built to satisfy the requirements of CSC7084 -
+                Web Development Module.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <!-- Footer -->
-        <%- include('footer'); %>
+    <!-- Footer -->
+    <%- include('footer'); %>
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-                integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-                crossorigin="anonymous"></script>
-</body>
-
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>

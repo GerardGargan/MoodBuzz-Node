@@ -1,206 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <link href="/style.css" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+    />
+    <link href="/style.css" rel="stylesheet" />
     <title>Record Snapshot</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <!--Navbar-->
     <%- include('user_nav'); %>
 
     <!-- Handle and display any errors -->
     <% if(error) { %>
-        <div class="alert alert-danger" role="alert">
-            <%= error %>
-          </div>
-    <% } else { %>
+    <div class="alert alert-danger" role="alert"><%= error %></div>
+    <% } else { %> <% var triggers = snapshot.triggers; %>
+    <section class="bg-section">
+      <div class="container">
+        <!--Breadcrumbs-->
+        <nav style="--bs-breadcrumb-divider: '>'" aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0 pt-2">
+            <li class="breadcrumb-item"><a href="/user/home">User Home</a></li>
+            <li class="breadcrumb-item">
+              <a href="/user/snapshot/view/<%= snapshot.snapshot_id %>"
+                >View Snapshot</a
+              >
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+              Edit Snapshot
+            </li>
+          </ol>
+        </nav>
 
-    <% var triggers = snapshot.triggers; %>
-        <section class="bg-section">
-            <div class="container">
-
-                <!--Breadcrumbs-->
-                <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0 pt-2">
-                      <li class="breadcrumb-item"><a href="/user/home">User Home</a></li>
-                      <li class="breadcrumb-item"><a href="/user/snapshot/view/<%= snapshot.snapshot_id %>">View Snapshot</a></li>
-                      <li class="breadcrumb-item active" aria-current="page">Edit Snapshot</li>
-                    </ol>
-                  </nav>
-
-                <!--User info section-->
-                <div class="pb-2 pt-0">
-                    <div class="d-flex align-items-center">
-                            <i class="bi bi-person-circle bigger-icon"></i>
-                        <div class="ps-2 pt-3">
-                            <div>
-                                <%= firstName %> <%= lastName %>
-                            </div>
-                            <div>
-                                <span class="small"><%= snapshot.date %> <%= snapshot.time %></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <form method="POST" action="/user/snapshot/update/<%= snapshot.snapshot_id %>">
-                    <div class="row pb-4">
-                        <div class="col-lg-8">
-
-                            <!--Left hand column-->
-                            <div class="row">
-                                <div class="col">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Emotion Ratings
-                                        </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title">Seven universal emotions</h5>
-                                            <p class="card-text">Emotion levels cant be edited, only triggers and notes!</p>
-                                            <div class="row g-4 mt-3" id="insertEmotionRanges">
-                                                <!--Insert a range for each slider-->
-                                                <% const emotionsValues = Object.values(snapshot.emotions); %>
-                                                    <% emotionsValues.forEach(emotion=> { %>
-                                                        <div class="col-xl-6 py-3 m-0">
-                                                            <div class="box-shadow bg-range py-3 px-4 rounded">
-                                                                <div
-                                                                    class="d-flex justify-content-between align-items-center">
-                                                                    <label for="<%= emotion.emotion %>"
-                                                                        class="form-label">
-                                                                        <h4><%= emotion.emotion %>
-                                                                        </h4>
-                                                                        <p id="<%= emotion.emotion_id %>_rating_desc">
-                                                                            <%= emotion.ratings[emotion.rating].short_desc %>
-                                                                        </p>
-                                                                    </label>
-                                                                    <div>
-                                                                        <h3 class="bg-dark text-light p-3 rounded"
-                                                                            id="<%= emotion.emotion %>-val-display"><%= emotion.rating %>
-                                                                        </h3>
-                                                                    </div>
-                                                                </div>
-
-                                                                <input type="range" name="<%= emotion.emotion_id %>"
-                                                                    id="<%= emotion.emotion %>" class="form-range"
-                                                                    min="1" max="10" value="<%= emotion.rating %>" disabled>
-                                                                <div class="graduated-scale">
-                                                                    <% var ratingsArray = Object.values(emotion.ratings);
-                                                                    ratingsArray.forEach(rating=> { 
-                                                                         %>
-                                                                        <span>
-                                                                            <%= rating.rating %>
-                                                                        </span>
-                                                                        <% }) %>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    <% }) %>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!--Right hand column-->
-                        <div class="col-lg-4">
-                            <div class="row pt-4 pt-lg-0">
-                                <div class="col">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Triggers
-                                        </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title">Select triggers</h5>
-                                            <div class="d-flex gap-3 flex-wrap" id="triggers">
-
-                                                <% triggers.forEach(trigger=> { %>
-                                                    <input type="checkbox" class="btn-check" name="trigger"
-                                                        id="<%= trigger.trigger_name %>"
-                                                        value="<%= trigger.trigger_id %>" autocomplete="off" <% if(trigger.selected) { %> checked <% } else { %> unchecked <% } %>>
-                                                    <label class="btn btn-outline-primary"
-                                                        for="<%= trigger.trigger_name %>">
-                                                        <%= trigger.trigger_name %> <i
-                                                                class="bi <%= trigger.icon %>"></i>
-                                                    </label>
-                                                    <% }); %>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row pt-4">
-                                <div class="col">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Notes
-                                        </div>
-                                        <div class="card-body">
-                                            <label for="notes">
-                                                <h5 class="card-title">Add Notes</h5>
-                                            </label>
-                                            <div class="row mx-1">
-                                                <textarea name="notes" id="notes" placeholder="Enter notes"
-                                                    rows="5"><%= snapshot.note %></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row pt-4">
-                                <div class="col">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Update Snapshot
-                                        </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title">Update your snapshot!</h5>
-                                            <input type="Submit" value="Submit Changes"
-                                                class="btn btn-xl btn-success me-2">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+        <!--User info section-->
+        <div class="pb-2 pt-0">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-person-circle bigger-icon"></i>
+            <div class="ps-2 pt-3">
+              <div><%= firstName %> <%= lastName %></div>
+              <div>
+                <span class="small"
+                  ><%= snapshot.date %> <%= snapshot.time %></span
+                >
+              </div>
             </div>
-        </section>
-        <% } %>
-        <!--Footer-->
-        <%- include('footer'); %>
-            <script>
-                document.addEventListener('DOMContentLoaded', () => {
+          </div>
+        </div>
+        <form
+          method="POST"
+          action="/user/snapshot/update/<%= snapshot.snapshot_id %>"
+        >
+          <div class="row pb-4">
+            <div class="col-lg-8">
+              <!--Left hand column-->
+              <div class="row">
+                <div class="col">
+                  <div class="card">
+                    <div class="card-header">Emotion Ratings</div>
+                    <div class="card-body">
+                      <h5 class="card-title">Seven universal emotions</h5>
+                      <p class="card-text">
+                        Emotion levels cant be edited, only triggers and notes!
+                      </p>
+                      <div class="row g-4 mt-3" id="insertEmotionRanges">
+                        <!--Insert a range for each slider-->
+                        <% const emotionsValues =
+                        Object.values(snapshot.emotions); %> <%
+                        emotionsValues.forEach(emotion=> { %>
+                        <div class="col-xl-6 py-3 m-0">
+                          <div class="box-shadow bg-range py-3 px-4 rounded">
+                            <div
+                              class="d-flex justify-content-between align-items-center"
+                            >
+                              <label
+                                for="<%= emotion.emotion %>"
+                                class="form-label"
+                              >
+                                <h4><%= emotion.emotion %></h4>
+                                <p id="<%= emotion.emotion_id %>_rating_desc">
+                                  <%= emotion.ratings[emotion.rating].short_desc
+                                  %>
+                                </p>
+                              </label>
+                              <div>
+                                <h3
+                                  class="bg-dark text-light p-3 rounded"
+                                  id="<%= emotion.emotion %>-val-display"
+                                >
+                                  <%= emotion.rating %>
+                                </h3>
+                              </div>
+                            </div>
 
-                    const snapshotStringified = `<%- JSON.stringify(snapshot) %>`;
-                    const snapshot = JSON.parse(snapshotStringified);
+                            <input
+                              type="range"
+                              name="<%= emotion.emotion_id %>"
+                              id="<%= emotion.emotion %>"
+                              class="form-range"
+                              min="1"
+                              max="10"
+                              value="<%= emotion.rating %>"
+                              disabled
+                            />
+                            <div class="graduated-scale">
+                              <% var ratingsArray =
+                              Object.values(emotion.ratings);
+                              ratingsArray.forEach(rating=> { %>
+                              <span> <%= rating.rating %> </span>
+                              <% }) %>
+                            </div>
+                          </div>
+                        </div>
+                        <% }) %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                    //get all range elements on the page
-                    const rangeItems2 = document.querySelectorAll('input[type="range"]');
-                    //loop through each range element, add an input event listener so that when the slider is moved, we update the div showing the current number selected
-                    rangeItems2.forEach((range) => {
-                        range.addEventListener('input', (event) => {
-                            let displayVal = document.getElementById(`${range.id}-val-display`);
-                            displayVal.textContent = `${range.value}`;
-                            let emotion_id = range.getAttribute('name');
-                            let rating_desc_div = document.getElementById(`${emotion_id}_rating_desc`);
-                            rating_desc_div.innerText = snapshot.emotions[emotion_id].ratings[range.value].short_desc;
-                            //rating_desc_div.innerText = snapshot[emotion_id].rating[range.value - 1].shortdesc;
+            <!--Right hand column-->
+            <div class="col-lg-4">
+              <div class="row pt-4 pt-lg-0">
+                <div class="col">
+                  <div class="card">
+                    <div class="card-header">Triggers</div>
+                    <div class="card-body">
+                      <h5 class="card-title">Select triggers</h5>
+                      <div class="d-flex gap-3 flex-wrap" id="triggers">
+                        <% triggers.forEach(trigger=> { %>
+                        <input
+                          type="checkbox"
+                          class="btn-check"
+                          name="trigger"
+                          id="<%= trigger.trigger_name %>"
+                          value="<%= trigger.trigger_id %>"
+                          autocomplete="off"
+                          <%
+                          if(trigger.selected)
+                          {
+                          %
+                        />
+                        checked <% } else { %> unchecked <% } %>>
+                        <label
+                          class="btn btn-outline-primary"
+                          for="<%= trigger.trigger_name %>"
+                        >
+                          <%= trigger.trigger_name %>
+                          <i class="bi <%= trigger.icon %>"></i>
+                        </label>
+                        <% }); %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row pt-4">
+                <div class="col">
+                  <div class="card">
+                    <div class="card-header">Notes</div>
+                    <div class="card-body">
+                      <label for="notes">
+                        <h5 class="card-title">Add Notes</h5>
+                      </label>
+                      <div class="row mx-1">
+                        <textarea
+                          name="notes"
+                          id="notes"
+                          placeholder="Enter notes"
+                          rows="5"
+                        >
+                        <%= snapshot.note %>
+                        </textarea
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row pt-4">
+                <div class="col">
+                  <div class="card">
+                    <div class="card-header">Update Snapshot</div>
+                    <div class="card-body">
+                      <h5 class="card-title">Update your snapshot!</h5>
+                      <input
+                        type="Submit"
+                        value="Submit Changes"
+                        class="btn btn-xl btn-success me-2"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+    <% } %>
+    <!--Footer-->
+    <%- include('footer'); %>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const snapshotStringified = `<%- JSON.stringify(snapshot) %>`;
+        const snapshot = JSON.parse(snapshotStringified);
 
-                        });
-                    });
-                });
-            </script>
+        //get all range elements on the page
+        const rangeItems2 = document.querySelectorAll('input[type="range"]');
+        //loop through each range element, add an input event listener so that when the slider is moved, we update the div showing the current number selected
+        rangeItems2.forEach((range) => {
+          range.addEventListener("input", (event) => {
+            let displayVal = document.getElementById(`${range.id}-val-display`);
+            displayVal.textContent = `${range.value}`;
+            let emotion_id = range.getAttribute("name");
+            let rating_desc_div = document.getElementById(
+              `${emotion_id}_rating_desc`
+            );
+            rating_desc_div.innerText =
+              snapshot.emotions[emotion_id].ratings[range.value].short_desc;
+            //rating_desc_div.innerText = snapshot[emotion_id].rating[range.value - 1].shortdesc;
+          });
+        });
+      });
+    </script>
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-                integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-                crossorigin="anonymous"></script>
-</body>
-
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>

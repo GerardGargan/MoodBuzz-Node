@@ -42,8 +42,8 @@ npm install
 ```plaintext
 PORT = 3000
 ```
-Change the port to suit your requirements
 
+Change the port to suit your requirements
 
 ## Usage
 
@@ -52,6 +52,7 @@ npm start
 ```
 
 ## Features
+
 - User registration
 - Login
 - Record an emotive snapshot
