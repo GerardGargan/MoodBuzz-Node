@@ -77,19 +77,19 @@
         <div>
           <h3 class="pb-2">Snapshots</h3>
           <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
-            <% if(numberOfSnapshots > 0) { //check if we have more than one
-            snapshot, if so loop through each one
-            groupedDataSorted.forEach(snapshot => { //check the length of the
-            note, shorten to 30 chars if needed let note = snapshot.note.length
-            > 30 ? `${snapshot.note.substring(0,30)}...` : snapshot.note; //if
-            notes are empty, display an appropriate message note = note == "" ?
-            "No notes" : note; //format the date let parts =
-            snapshot.date.split("/"); let day = parseInt(parts[0], 10); let
-            month = parseInt(parts[1], 10) - 1; // Months are zero-based let
-            year = parseInt(parts[2], 10); let date = new Date(year, month,
-            day); let options = { weekday: 'long', year: 'numeric', month:
-            'long', day: 'numeric' }; let formattedDate =
-            date.toLocaleDateString('en-GB', options); %>
+            <% if(numberOfSnapshots > 0) { 
+              //check if we have more than one snapshot, if so loop through each one
+            groupedDataSorted.forEach(snapshot => { 
+              //check the length of the note, shorten to 30 chars if needed 
+            let note = snapshot.note.length > 30 ? `${snapshot.note.substring(0,30)}...` : snapshot.note; 
+            //if notes are empty, display an appropriate message 
+            note = note == "" ? "No notes" : note; //format the date 
+            let parts = snapshot.date.split("/"); 
+            let day = parseInt(parts[0], 10); 
+            let month = parseInt(parts[1], 10) - 1; // Months are zero-based 
+            let year = parseInt(parts[2], 10); let date = new Date(year, month, day); 
+            let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }; let formattedDate = date.toLocaleDateString('en-GB', options); 
+            %>
 
             <div class="col">
               <a

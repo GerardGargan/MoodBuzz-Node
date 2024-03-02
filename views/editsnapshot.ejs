@@ -75,7 +75,7 @@
                       <div class="row g-4 mt-3" id="insertEmotionRanges">
                         <!--Insert a range for each slider-->
                         <% const emotionsValues =
-                        Object.values(snapshot.emotions); %> <%
+                        Object.values(snapshot.emotions); 
                         emotionsValues.forEach(emotion=> { %>
                         <div class="col-xl-6 py-3 m-0">
                           <div class="box-shadow bg-range py-3 px-4 rounded">
@@ -149,8 +149,7 @@
                           <%
                           if(trigger.selected)
                           {
-                          %
-                        />
+                          %>
                         checked <% } else { %> unchecked <% } %>>
                         <label
                           class="btn btn-outline-primary"
@@ -179,8 +178,7 @@
                           id="notes"
                           placeholder="Enter notes"
                           rows="5"
-                        >
-                        <%= snapshot.note %>
+                        ><%= snapshot.note %>
                         </textarea
                         >
                       </div>
