@@ -112,13 +112,13 @@
           </div>
         </div>
         <!--New row-->
-        <div class="row row-cols-1 mb-5">
+        <div class="row row-cols-1 mb-5" id="emotions_section">
           <!--First card-->
           <div class="col">
             <div class="card bg-light d-flex h-100">
               <h5 class="card-header">Emotions over time</h5>
               <div class="card-body" id="emotion_values">
-                <form action="/user/analytics" method="GET">
+                <form action="/user/analytics#emotions_section" method="GET">
                   <div class="d-flex gap-2 pb-3">
                     <div>
                       <select class="form-select" aria-label="Select Emotion" name="emotion" id="emotion_dropdown">
