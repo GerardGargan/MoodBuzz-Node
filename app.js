@@ -23,4 +23,5 @@ app.use(morgan("tiny"));
 //mount the router to the root path
 app.use("/", router);
 
+//export app
 module.exports = app;

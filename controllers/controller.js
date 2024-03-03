@@ -38,7 +38,9 @@ exports.postLogin = async (req, res) => {
   let { email, password } = req.body;
 
   try {
+    //API endpoint for post
     const endpoint = "http://localhost:3001/user/login";
+    //values to be posted
     const vals = { email, password };
     //post the form data to the api post route
     const response = await axios.post(endpoint, vals, {
@@ -46,23 +48,25 @@ exports.postLogin = async (req, res) => {
         return status < 500;
       },
     });
-    //if email and password are a match
+    //check if email and password are a match
     if (response.status == 200) {
       //success, set up session and redirect
       //get the user data returned from the api
       const userData = response.data.result;
-      //set up a session
+      //set up a session for authentication
       const session = req.session;
       session.isLoggedIn = true;
       session.userid = userData[0].user_id;
       session.firstName = userData[0].first_name;
       session.lastName = userData[0].last_name;
+      //if the user was redirected from another protected page, get the url
       const orig_route = session.route;
 
-      //redirect to appropriate page
+      //if there was no url (i.e. they accessed /login directly), redirect to user home
       if (!orig_route) {
         res.redirect("/user/home");
       } else {
+        //redirect to the url they were trying to access
         res.redirect(`${orig_route}`);
       }
     } else {
@@ -89,6 +93,7 @@ exports.getRegister = (req, res) => {
 exports.postRegister = async (req, res) => {
   const { isLoggedIn } = req.session;
 
+  //destructure the values from the form in the request body
   let { firstname, surname, email, password } = req.body;
 
   //sanitise user input, remove any leading or trailing whitespace, force to be lowercase
@@ -99,7 +104,8 @@ exports.postRegister = async (req, res) => {
   //capitalise first letter of firstname and surname
   firstname = firstname.charAt(0).toUpperCase() + firstname.slice(1);
   surname = surname.charAt(0).toUpperCase() + surname.slice(1);
-
+  
+  //store the values for the axios post
   const vals = { firstname, surname, email, password };
 
   //perform validation checks on data, render an error message for each scenario
@@ -152,13 +158,14 @@ exports.postRegister = async (req, res) => {
       });
     }
   } catch (err) {
+    //API Server error, log out
     console.log(err);
   }
 };
 
 exports.getUserHomePage = async (req, res) => {
   const { userid, firstName, lastName } = req.session;
-  //check if a deletion occured, so we can display a success message to the user
+  //check if a deletion occured - will be in the url query - so we can display a success message to the user
   const deletedMessage = req.query.deleted ? "Snapshot deleted" : null;
 
   try {
@@ -169,6 +176,7 @@ exports.getUserHomePage = async (req, res) => {
         return status < 500;
       },
     });
+    //store the result
     const snapshots = snapshotRequest.data.result;
 
     //get the number of snapshots returned
@@ -176,13 +184,14 @@ exports.getUserHomePage = async (req, res) => {
 
     //count the number of snapshots recorded today
     const countToday = countTodaysSnapshots(snapshots);
-    //pass this in to get todays message to display to the user
+    //pass this in to custom function to get todays message to display to the user
     const todaysSnapMessage = todaysSnapshotMessage(countToday);
 
     const currentDateTime = `${formatDatabaseDate(
       getCurrentDate()
     )} ${getCurrentTime()}`;
 
+    //render the page
     res.render("userhome", {
       groupedDataSorted: snapshots,
       numberOfSnapshots,
@@ -193,14 +202,16 @@ exports.getUserHomePage = async (req, res) => {
       deletedMessage,
     });
   } catch (err) {
-    //handle error
+    //log out API server error
     console.log(err);
   }
 };
 
 exports.getNewSnapshotPage = async (req, res) => {
+  //destructure values from session
   const { firstName, userid, lastName } = req.session;
 
+  //sent API request to get all emotions and triggers for rendering on the page
   try {
     const endpointEmotions = `http://localhost:3001/emotions`;
     const emotions = await axios.get(endpointEmotions, {
@@ -208,19 +219,23 @@ exports.getNewSnapshotPage = async (req, res) => {
         return status < 500;
       },
     });
+    //store the result coming from the API
     const groupedData = emotions.data.result;
 
+    //get the triggers from the API endpoint
     const endpointTriggers = `http://localhost:3001/triggers`;
     const triggers = await axios.get(endpointTriggers, {
       validateStatus: (status) => {
         return status < 500;
       },
     });
+    //store the result
     const triggerData = triggers.data.result;
 
+    //get current date (formatted) and format date time
     const currentDate = formatDatabaseDate(getCurrentDate());
     const dateTime = `${currentDate} ${getCurrentTime()}`;
-
+    //render the snapshot page
     res.render("snapshot", {
       groupedData,
       triggerData,
@@ -235,11 +250,13 @@ exports.getNewSnapshotPage = async (req, res) => {
 };
 
 exports.processNewSnapshot = async (req, res) => {
-  const { firstName, userid } = req.session;
+  //get the userid from the session
+  const { userid } = req.session;
 
   //Extract data from the request body
   const formData = req.body;
 
+  //post the form data to the API endpoint, userid sent in the headers of the post request
   try {
     const endpoint = "http://localhost:3001/snapshot";
     const response = await axios.post(endpoint, formData, {
@@ -248,7 +265,9 @@ exports.processNewSnapshot = async (req, res) => {
       },
       headers: { userid: `${userid}` },
     });
+    //get the snapshot id
     const snapshotId = response.data.id;
+    //render the view snapshot page with the id of the snapshot and a success message
     res.redirect(`/user/snapshot/view/${snapshotId}?success=1`);
   } catch (err) {
     //Server error, status 500 - log out
@@ -257,15 +276,19 @@ exports.processNewSnapshot = async (req, res) => {
 };
 
 exports.getViewSnapshot = async (req, res) => {
+  //destructure user info from session
   const { userid, firstName, lastName } = req.session;
+  //get the snapshot id from the params
   const { id } = req.params;
 
-  //check if a snapshot was successfully just added
+  //check if a snapshot was successfully just added, if so display a success message
   const newSnapshotMessage = req.query.success
     ? "Snapshot successfully recorded"
     : null;
+  //check if a snapshot was successfully just edited, if so display a success message
   const editSnapshotMessage = req.query.edit ? "Snapshot updated" : null;
 
+  //send a get request to get the snapshot data
   try {
     const response = await axios.get(`http://localhost:3001/snapshot/${id}`, {
       validateStatus: (status) => {
@@ -274,8 +297,9 @@ exports.getViewSnapshot = async (req, res) => {
       headers: { userid: `${userid}` },
     });
 
+    //check if a 200 status was recieved (snapshot exists and belongs to user)
     if (response.status == 200) {
-      //successfully retrieved a snapshot, render
+      //successfully retrieved a snapshot, render it to the client
 
       res.render("viewsnapshot", {
         snapshot: response.data.result,
@@ -308,6 +332,7 @@ exports.deleteSnapshot = async (req, res) => {
   //get session details
   const { userid, firstName, lastName } = req.session;
 
+  //sent a delete request to the API endpoint
   try {
     const response = await axios.delete(
       `http://localhost:3001/snapshot/${id}`,
@@ -343,15 +368,19 @@ exports.deleteSnapshot = async (req, res) => {
 };
 
 exports.getLogout = (req, res) => {
+  //destroy the session and redirect to home page
   req.session.destroy(() => {
     res.redirect("/");
   });
 };
 
 exports.getEdit = async (req, res) => {
+  //get the id of the snapshot
   const { id } = req.params;
+  //get the user info from the session
   const { userid, firstName, lastName } = req.session;
 
+  //send get request to API endpoint for the snapshot
   try {
     const response = await axios.get(`http://localhost:3001/snapshot/${id}`, {
       validateStatus: (status) => {
@@ -361,7 +390,7 @@ exports.getEdit = async (req, res) => {
     });
 
     if (response.status == 200) {
-      //success, render snapshot
+      //success, snapshot exists and belongs to user - render snapshot
       res.render("editsnapshot", {
         snapshot: response.data.result,
         firstName,
@@ -369,7 +398,7 @@ exports.getEdit = async (req, res) => {
         error: false,
       });
     } else {
-      //unsuccessful, snapshot doesnt exist or doesnt belong to user
+      //unsuccessful, snapshot doesnt exist or doesnt belong to user - display error message
       res.render("editsnapshot", {
         snapshot: null,
         firstName,
@@ -378,6 +407,7 @@ exports.getEdit = async (req, res) => {
       });
     }
   } catch (err) {
+    //API server error
     console.log(err);
   }
 };
@@ -426,7 +456,7 @@ exports.getAnalytics = async (req, res) => {
   let { emotion } = req.query;
 
   try {
-    //API endpoint for data retrieval for snapshots by month (month: count)
+    //API endpoint for data retrieval for snapshots by month {month: count}
     const endpointMonthly = `http://localhost:3001/snapshot/analytics/snapshotspermonth/${userid}`;
     const responseMonthly = await axios.get(endpointMonthly, {
       validateStatus: (status) => {
@@ -439,11 +469,11 @@ exports.getAnalytics = async (req, res) => {
     //get the maximum count that was returned from the dataset (used for setting max y-axis value on chart)
     const maxYAxisValueMonthly = Math.max(...Object.values(monthlyData));
 
-    //set up empty arrays to hold dates and counts (chart.js requires arrays)
+    //set up empty arrays to hold dates and counts (chart.js requires arrays for y-axis and xlabels)
     const dates = [];
     const monthlyCounts = [];
 
-    //loop through the result set and populate the arrays using destructuring
+    //loop through the result set and populate the arrays
     for (const [date, count] of Object.entries(monthlyData)) {
       dates.push(date);
       monthlyCounts.push(count);
@@ -463,17 +493,19 @@ exports.getAnalytics = async (req, res) => {
     //set up arrays to hold weekdays and counts
     const weekdays = Object.keys(weekdayData);
     const weekdaycounts = Object.values(weekdayData);
+    //get max value for setting max y-axis
     const maxWeekdayValue = Math.max(...weekdaycounts);
 
-    //now get all snapshots, so we can chart emotion levels
+    //now get all snapshots, so we can chart average emotion levels on a radar chart
     const endpointAllSnapshots = `http://localhost:3001/snapshot/user/${userid}`;
     const requestSnapshots = await axios.get(endpointAllSnapshots, {
       validateStatus: (status) => {
         return status < 500;
       },
     });
-
+    //store the result
     const snapshotData = requestSnapshots.data.result;
+    //set up an empty object so we can parse data into a suitable structure
     const groupedEmotionsData = {};
 
     //loop through each snapshot, then each emotion. Check if it exists already, if not add it to the object
@@ -490,21 +522,21 @@ exports.getAnalytics = async (req, res) => {
         groupedEmotionsData[emotion.emotion].push(emotion.rating);
       });
     });
-
-    //loop through our data structure containing each emotion, each emotion has an array of ratings
+    //now that we have a data structure containing each emotion, and an array of ratings for each -
+    //loop through the data structure and work out the average rating for each emotion.
     Object.keys(groupedEmotionsData).forEach((emotion) => {
       //calculate the average for each emotion and store it against the emotion, replacing the array
       groupedEmotionsData[emotion] = average(groupedEmotionsData[emotion]);
     });
-    //console.log(groupedEmotionsData);
-    //get an array of the emotions (keys) for chart js
+
+    //get an array of the emotions (keys) for chart js labels
     const emotionLabels = Object.keys(groupedEmotionsData);
-    //get an array of the average ratings (values) for chart js
+    //get an array of the average ratings (values) for chart js values
     const emotionAverages = Object.values(groupedEmotionsData);
-    //get the max value
+    //get the max value for max axis
     const maxEmotionValue = Math.max(...emotionAverages);
 
-    //now obtain all triggers and their counts for this user
+    //now obtain all triggers and their counts for this user, for working out most common triggers
     const endpoint = `http://localhost:3001/triggers/analytics/${userid}`;
     const triggersResponse = await axios.get(endpoint, {
       validateStatus: (status) => {
@@ -512,7 +544,7 @@ exports.getAnalytics = async (req, res) => {
       },
     });
 
-    //store the data in a varialbe
+    //store the data in a variable
     const triggerCounts = triggersResponse.data.result;
 
     //convert to an array of key value pairs (to allow sorting, wanting to show highest to lowest on graph)
@@ -526,22 +558,26 @@ exports.getAnalytics = async (req, res) => {
 
     //loop through and populate the arrays
     triggerCountsArray.forEach((trigger) => {
+      //add the trigger name
       triggers.push(trigger[0]);
+      //add the trigger value
       triggerVals.push(`${[trigger[1]]}`);
     });
 
     //get the max value to use for the maximum y axis on the chart
     const maxTriggerCount = Math.max(...triggerVals);
 
-    //get a list of emotions and ids for the dropdown filter
+    //get a list of emotions and ids for the dropdown filter on the emotion chart
     const emotionEndpoint = `http://localhost:3001/emotions`;
     const emoRequest = await axios.get(emotionEndpoint, {
       validateStatus: (status) => {
         return status < 500;
       },
     });
+    //store the result
     const emotions = emoRequest.data.result;
 
+    //check if a user has made a selection on the dropdown (will be in the url query string)
     if (!emotion) {
       //if there is no emotion in the query string, default it to the first emotion from our emotions table
       emotion = Object.values(emotions)[0].emotion_id;
@@ -559,15 +595,16 @@ exports.getAnalytics = async (req, res) => {
     //store the result set
     const emotionResult = emotionSnapshotResponse.data.result;
 
-    //create empty arrays to ghold valuyes
+    //create empty arrays to hold emotion date/time and ratings
     const emoDateTimes = [];
     const emoRatings = [];
-    //get the name of the emotio9n (for the chart title)
+    //get the name of the emotion (for the chart title)
     const emotionName =
       emotionResult.length > 0 ? emotionResult[0].emotion : null;
 
     //loop through each row and populate the arrays with data
     emotionResult.forEach((record) => {
+      //format the date and time
       const dateTime = `${formatDatabaseDate(record.date)} ${record.time}`;
       emoDateTimes.push(dateTime);
       emoRatings.push(record.rating);
@@ -596,12 +633,12 @@ exports.getAnalytics = async (req, res) => {
       emotionName,
     });
   } catch (err) {
-    //server error 500
+    //API server error 500
     console.log(err);
   }
 };
 
 exports.getNotFound = (req, res) => {
   //render page not found
-  res.status(404).send("<h1>404: Page Not Found</h1>");
+  res.status(404).send(`<h1>404: Page Not Found</h1> <img src="/images/Kevin_McCallister.webp" style="height: 400px">`);
 };

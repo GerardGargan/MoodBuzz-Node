@@ -18,16 +18,16 @@
   </head>
 
   <body>
-    <!--Navbar-->
+    <!--Navbar component-->
     <%- include('user_nav'); %>
 
-    <!-- Handle and display any errors -->
+    <!-- Handle and display any errors if present -->
     <% if(error) { %>
     <div class="alert alert-danger" role="alert"><%= error %></div>
     <% } else { %> <% var triggers = snapshot.triggers; %>
     <section class="bg-section">
       <div class="container">
-        <!--Breadcrumbs-->
+        <!--Breadcrumb links-->
         <nav style="--bs-breadcrumb-divider: '>'" aria-label="breadcrumb">
           <ol class="breadcrumb mb-0 pt-2">
             <li class="breadcrumb-item"><a href="/user/home">User Home</a></li>
@@ -73,7 +73,7 @@
                         Emotion levels cant be edited, only triggers and notes!
                       </p>
                       <div class="row g-4 mt-3" id="insertEmotionRanges">
-                        <!--Insert a range for each slider-->
+                        <!--Insert a range input for each emotion in the database-->
                         <% const emotionsValues =
                         Object.values(snapshot.emotions); 
                         emotionsValues.forEach(emotion=> { %>
@@ -207,7 +207,7 @@
       </div>
     </section>
     <% } %>
-    <!--Footer-->
+    <!--Footer component-->
     <%- include('footer'); %>
     <script>
       document.addEventListener("DOMContentLoaded", () => {

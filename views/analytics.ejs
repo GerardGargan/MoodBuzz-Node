@@ -23,12 +23,13 @@
     <title>Analytics</title>
   </head>
   <body>
+    <!--Include user nav component-->
     <%- include('user_nav'); %>
 
     <!--Main section-->
     <section class="px-3 px-sm-5 bg-section">
       <div class="container pb-5">
-        <!--Breadcrumbs-->
+        <!--Breadcrumb links-->
         <nav style="--bs-breadcrumb-divider: '>'" aria-label="breadcrumb">
           <ol class="breadcrumb mb-0 pt-2">
             <li class="breadcrumb-item"><a href="/user/home">User Home</a></li>
@@ -153,6 +154,7 @@
 
     <%- include('footer'); %>
 
+    <!--Script needs to stay in the file to recieve EJS templated data-->
     <script>
       //store the data passed in from the render function
 
@@ -337,7 +339,7 @@
             },
           },
         };
-
+        //create the chart
         const emoAvgChart = new Chart("emotion_avg", emoAvgConfig);
       } else {
         //show appropriate message to user in the div

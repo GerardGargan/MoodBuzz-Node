@@ -1,4 +1,6 @@
+//check all content has loaded first
 document.addEventListener("DOMContentLoaded", (event) => {
+  //access all elements needed on the page that we need to use
   const passwordInput = document.getElementById("password");
   const passwordVerify = document.getElementById("password-verify");
   const verify_icon = document.getElementById("verify-icon");
@@ -6,42 +8,58 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const visibilityButton = document.getElementById("visibility");
   let verifyActivated = false;
 
+  //add a keyup event listener on the password input
   passwordInput.addEventListener("keyup", (event) => {
+    //if the user has already typed into the password verify input, check if passwords match.
+    //this stops the verification process from running until the user starts typing into the password verification box
     if (verifyActivated) {
       updateVerification();
     }
   });
 
+  //listen for a keyup event on the password verify input
   passwordVerify.addEventListener("keyup", (event) => {
+    //set the verifyActivated to true, as user has started to type in the password to the verification input
     verifyActivated = true;
+    //check if passwords match and update DOM elements
     updateVerification();
   });
 
+  //function to check if the two password fields match
   function updateVerification() {
+    //first check if both input boxes are empty
     if (passwordVerify.value == "" && passwordInput.value == "") {
+      //remove any success or red backgrounds and update the icon
       passwordVerify.classList.remove("bg-danger");
       passwordVerify.classList.remove("bg-success");
       verify_icon.innerHTML = '<i class="bi bi-dash"></i>';
     } else if (passwordVerify.value == passwordInput.value) {
+      //both passwords match, update icon to thumbs up. Remove red background and add green success background
       verify_icon.innerHTML = '<i class="bi bi-hand-thumbs-up"></i>';
       passwordVerify.classList.remove("bg-danger");
       passwordVerify.classList.add("bg-success");
+      //enable the submit button
       submitButton.disabled = false;
     } else {
+      //both passwords dont match, update icon to thumbs down. Remove success background and add danger/red background
       verify_icon.innerHTML = '<i class="bi bi-hand-thumbs-down"></i>';
       passwordVerify.classList.remove("bg-success");
       passwordVerify.classList.add("bg-danger");
+      //disable the submit button as passwords dont match
       submitButton.disabled = true;
     }
   }
 
   //Logic for switching password between visible and invisible
   visibilityButton.addEventListener("click", (event) => {
+    //prevent the form from being submitted
     event.preventDefault();
+    //check if input type is password, if so switch to text and change icon
     if (passwordInput.type == "password") {
       passwordInput.type = "text";
       visibilityButton.innerHTML = '<i class="bi bi-eye-slash"></i>';
     } else {
+      //change input type to password, update icon
       passwordInput.type = "password";
       visibilityButton.innerHTML = '<i class="bi bi-eye"></i>';
     }
@@ -57,11 +75,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     //get the div where we will display the error
     const errorDiv = document.getElementById("error");
-    //set up error text variable and set errors to false
+    //set up error text variable and set errors to false initially, if all validation checks pass error will remain false
     let errorText = ``;
     let error = false;
 
-    //perform validation checks, add any error text to the above variable and if an error exists set the error var to true
+    //perform validation checks, add any error text to the above variable and if an error exists set error to true
     if (!validateName(firstname) || !validateName(surname)) {
       errorText += "<li>Invalid name, must be 2-50 characters</li>";
       error = true;

@@ -1,11 +1,14 @@
 //Function to get the average of an array of numbers, average is returned to 1 decimal place
 function average(numbers) {
+  //initialise total and count to 0
   let total = 0;
   let count = 0;
+  //loop through each number, add to the total and increment count by 1
   numbers.forEach((number) => {
     total += number;
     count++;
   });
+  //return the average to 1 decimal place
   return (total / count).toFixed(1);
 }
 
@@ -36,6 +39,7 @@ function validateEmail(email) {
   }
 }
 
+//logic to validate a users name - must be at least 2 chars and max 50. No special characters or numbers
 function validateName(name) {
   const minLength = 2;
   const maxLength = 50;
@@ -61,6 +65,7 @@ function getCurrentDate() {
   let month = currentDate.getMonth() + 1; //zero indexed
   let date = currentDate.getDate();
 
+  //format the date
   let formattedDate = `${year}/${month}/${date}`;
 
   return `${formattedDate}`;
@@ -74,11 +79,12 @@ function getCurrentTime() {
   let minutes = currentDate.getMinutes();
   let seconds = currentDate.getSeconds();
 
+  //format the time
   let formattedTime = `${hours}:${minutes}:${seconds}`;
   return formattedTime;
 }
 
-//parse the long version of the data from the database to the format DD/MM/YYYY
+//parse the long version of the date returned from the database to the format DD/MM/YYYY
 function formatDatabaseDate(date) {
   const databaseDate = new Date(date);
   const year = databaseDate.getFullYear();
@@ -88,6 +94,7 @@ function formatDatabaseDate(date) {
   return `${day}/${month}/${year}`;
 }
 
+//loops through snapshots and checks if they were recorded today. Returns a count for todays snapshots
 function countTodaysSnapshots(snapshots) {
   let countToday = 0;
   let currentDate = formatDatabaseDate(getCurrentDate());
@@ -100,6 +107,7 @@ function countTodaysSnapshots(snapshots) {
   return countToday;
 }
 
+//returns an appropriate message dependant on the number of snapshots recorded today
 function todaysSnapshotMessage(number_of_snapshots) {
   let todaysSnapMessage = null;
   //check if there have been snapshots today and display an appropriate message
@@ -115,6 +123,7 @@ function todaysSnapshotMessage(number_of_snapshots) {
   return todaysSnapMessage;
 }
 
+//export helper functions for use
 module.exports = {
   average,
   validatePassword,
