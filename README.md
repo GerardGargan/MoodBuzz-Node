@@ -4,7 +4,7 @@ This web app was developed as part of the CSC7082 Web Development Module at Quee
 
 The App itself is an emotion recording app. For fun, it was themed around my favorite christmas movie, home alone.
 
-URL for locally hosted server: http://localhost:3001
+URL for locally hosted server: http://localhost:3000
 
 ## Table of Contents
 
