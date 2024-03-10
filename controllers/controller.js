@@ -453,7 +453,7 @@ exports.postEditUpdate = async (req, res) => {
 exports.getAnalytics = async (req, res) => {
   //get the userid from the session
   const { userid, firstName, lastName } = req.session;
-  let { emotion } = req.query;
+
 
   try {
     //API endpoint for data retrieval for snapshots by month {month: count}
@@ -576,6 +576,9 @@ exports.getAnalytics = async (req, res) => {
     });
     //store the result
     const emotions = emoRequest.data.result;
+
+    //get the emotion selected by the dropdown from the request query string
+    let { emotion } = req.query;
 
     //check if a user has made a selection on the dropdown (will be in the url query string)
     if (!emotion) {
